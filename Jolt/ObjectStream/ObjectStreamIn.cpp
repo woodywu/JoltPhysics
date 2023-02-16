@@ -317,16 +317,6 @@ bool ObjectStreamIn::ReadRTTI()
 					// No conversion needed
 					attribute.mDestinationType = attribute.mSourceType;
 				}
-				else if (attribute.mArrayDepth == 0 && attribute.mClassName.empty())
-				{
-					// Try to apply type conversions
-					if (attribute.mSourceType == EOSDataType::T_Vec3 && attr.IsType(0, EOSDataType::T_DVec3, ""))
-						attribute.mDestinationType = EOSDataType::T_DVec3;
-					else if (attribute.mSourceType == EOSDataType::T_DVec3 && attr.IsType(0, EOSDataType::T_Vec3, ""))
-						attribute.mDestinationType = EOSDataType::T_Vec3;
-					else
-						attribute.mIndex = -1;
-				}
 				else
 				{
 					// No conversion exists
@@ -366,22 +356,6 @@ bool ObjectStreamIn::ReadClassData(const ClassDescription &inClassDesc, void *in
 			if (attr_desc.mSourceType ==  attr_desc.mDestinationType)
 			{
 				continue_reading = attr.ReadData(*this, inInstance);
-			}
-			else if (attr_desc.mSourceType == EOSDataType::T_Vec3 && attr_desc.mDestinationType == EOSDataType::T_DVec3)
-			{
-				// Vec3 to DVec3
-				Vec3 tmp;
-				continue_reading = ReadPrimitiveData(tmp);
-				if (continue_reading)
-					*attr.GetMemberPointer<DVec3>(inInstance) = DVec3(tmp);
-			}
-			else if (attr_desc.mSourceType == EOSDataType::T_DVec3 && attr_desc.mDestinationType == EOSDataType::T_Vec3)
-			{
-				// DVec3 to Vec3
-				DVec3 tmp;
-				continue_reading = ReadPrimitiveData(tmp);
-				if (continue_reading)
-					*attr.GetMemberPointer<Vec3>(inInstance) = Vec3(tmp);
 			}
 			else
 			{
@@ -548,23 +522,9 @@ bool ObjectStreamIn::SkipAttributeData(int inArrayDepth, EOSDataType inDataType,
 						break;
 					}
 
-				case EOSDataType::T_Double3:
-					{	
-						Double3 temporary;
-						continue_reading = ReadPrimitiveData(temporary);
-						break;
-					}
-
 				case EOSDataType::T_Vec3:
 					{	
 						Vec3 temporary;
-						continue_reading = ReadPrimitiveData(temporary);
-						break;
-					}
-
-				case EOSDataType::T_DVec3:
-					{	
-						DVec3 temporary;
 						continue_reading = ReadPrimitiveData(temporary);
 						break;
 					}
@@ -586,13 +546,6 @@ bool ObjectStreamIn::SkipAttributeData(int inArrayDepth, EOSDataType inDataType,
 				case EOSDataType::T_Mat44:
 					{	
 						Mat44 temporary;
-						continue_reading = ReadPrimitiveData(temporary);
-						break;
-					}
-
-				case EOSDataType::T_DMat44:
-					{	
-						DMat44 temporary;
 						continue_reading = ReadPrimitiveData(temporary);
 						break;
 					}

@@ -51,22 +51,6 @@ public:
 	{
 		WriteBytes(&inVec, 3 * sizeof(float));
 	}
-
-	/// Write a DVec3 (don't write W)
-	void				Write(const DVec3 &inVec)
-	{
-		WriteBytes(&inVec, 3 * sizeof(double));
-	}
-
-	/// Write a DMat44 (don't write W component of translation)
-	void				Write(const DMat44 &inVec)
-	{
-		Write(inVec.GetColumn4(0));
-		Write(inVec.GetColumn4(1));
-		Write(inVec.GetColumn4(2));
-
-		Write(inVec.GetTranslation());
-	}
 };
 
 JPH_NAMESPACE_END

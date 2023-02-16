@@ -33,13 +33,10 @@ void ObjectStreamTextOut::WriteDataType(EOSDataType inType)
 	case EOSDataType::T_bool:		WriteWord("bool");			break;
 	case EOSDataType::T_String:		WriteWord("string");		break;
 	case EOSDataType::T_Float3:		WriteWord("float3");		break;
-	case EOSDataType::T_Double3:	WriteWord("double3");		break;
 	case EOSDataType::T_Vec3:		WriteWord("vec3");			break;
-	case EOSDataType::T_DVec3:		WriteWord("dvec3");			break;
 	case EOSDataType::T_Vec4:		WriteWord("vec4");			break;
 	case EOSDataType::T_Quat:		WriteWord("quat");			break;
 	case EOSDataType::T_Mat44:		WriteWord("mat44");			break;
-	case EOSDataType::T_DMat44:		WriteWord("dmat44");		break;
 	case EOSDataType::Invalid:
 	default:						JPH_ASSERT(false);			break;
 	}
@@ -115,25 +112,7 @@ void ObjectStreamTextOut::WritePrimitiveData(const Float3 &inPrimitive)
 	WritePrimitiveData(inPrimitive.z);
 }
 
-void ObjectStreamTextOut::WritePrimitiveData(const Double3 &inPrimitive)
-{
-	WritePrimitiveData(inPrimitive.x);
-	WriteChar(' ');
-	WritePrimitiveData(inPrimitive.y);
-	WriteChar(' ');
-	WritePrimitiveData(inPrimitive.z);
-}
-
 void ObjectStreamTextOut::WritePrimitiveData(const Vec3 &inPrimitive)
-{
-	WritePrimitiveData(inPrimitive.GetX());
-	WriteChar(' ');
-	WritePrimitiveData(inPrimitive.GetY());
-	WriteChar(' ');
-	WritePrimitiveData(inPrimitive.GetZ());
-}
-
-void ObjectStreamTextOut::WritePrimitiveData(const DVec3 &inPrimitive)
 {
 	WritePrimitiveData(inPrimitive.GetX());
 	WriteChar(' ');
@@ -173,17 +152,6 @@ void ObjectStreamTextOut::WritePrimitiveData(const Mat44 &inPrimitive)
 	WritePrimitiveData(inPrimitive.GetColumn4(2));
 	WriteChar(' ');
 	WritePrimitiveData(inPrimitive.GetColumn4(3));
-}
-
-void ObjectStreamTextOut::WritePrimitiveData(const DMat44 &inPrimitive)
-{
-	WritePrimitiveData(inPrimitive.GetColumn4(0));
-	WriteChar(' ');
-	WritePrimitiveData(inPrimitive.GetColumn4(1));
-	WriteChar(' ');
-	WritePrimitiveData(inPrimitive.GetColumn4(2));
-	WriteChar(' ');
-	WritePrimitiveData(inPrimitive.GetTranslation());
 }
 
 void ObjectStreamTextOut::WritePrimitiveData(const String &inPrimitive)
