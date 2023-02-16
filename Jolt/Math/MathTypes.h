@@ -7,6 +7,7 @@ JPH_NAMESPACE_BEGIN
 
 class Vec3;
 class DVec3;
+class FixedVec3;
 class Vec4;
 class UVec4;
 class Vec8;
@@ -14,6 +15,7 @@ class UVec8;
 class Quat;
 class Mat44;
 class DMat44;
+class FixedMat44;
 
 // Types to use for passing arguments to functions
 using Vec3Arg = Vec3;
@@ -22,6 +24,7 @@ using Vec3Arg = Vec3;
 #else
 	using DVec3Arg = const DVec3 &;
 #endif
+using FixedVec3Arg = FixedVec3;
 using Vec4Arg = Vec4;
 using UVec4Arg = UVec4;
 using Vec8Arg = Vec8;
@@ -29,5 +32,6 @@ using UVec8Arg = UVec8;
 using QuatArg = Quat;
 using Mat44Arg = const Mat44 &;
 using DMat44Arg = const DMat44 &;
+using FixedMat44Arg = const FixedMat44Arg &;
 
 JPH_NAMESPACE_END
