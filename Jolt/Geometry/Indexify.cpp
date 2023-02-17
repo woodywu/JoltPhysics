@@ -8,9 +8,9 @@
 
 JPH_NAMESPACE_BEGIN
 
-void Indexify(const TriangleList &inTriangles, VertexList &outVertices, IndexedTriangleList &outTriangles, float inVertexWeldDistance)
+void Indexify(const TriangleList &inTriangles, VertexList &outVertices, IndexedTriangleList &outTriangles, decimal inVertexWeldDistance)
 {
-	float weld_dist_sq = Square(inVertexWeldDistance);
+	decimal weld_dist_sq = Square(inVertexWeldDistance);
 
 	// Ensure that output vertices are empty before we begin
 	outVertices.clear();

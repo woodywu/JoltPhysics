@@ -15,21 +15,21 @@ JPH_NAMESPACE_BEGIN
 /// @param inRayOrigin Origin of the ray. If the ray starts inside the capsule, the returned fraction will be 0.
 /// @param inCapsuleHalfHeight Distance from the origin to the center of the top sphere (or that of the bottom)
 /// @param inCapsuleRadius Radius of the top/bottom sphere
-JPH_INLINE float RayCapsule(Vec3Arg inRayOrigin, Vec3Arg inRayDirection, float inCapsuleHalfHeight, float inCapsuleRadius)
+JPH_INLINE decimal RayCapsule(Vec3Arg inRayOrigin, Vec3Arg inRayDirection, decimal inCapsuleHalfHeight, decimal inCapsuleRadius)
 {
 	// Test infinite cylinder
-	float cylinder = RayCylinder(inRayOrigin, inRayDirection, inCapsuleRadius);
-	if (cylinder == FLT_MAX)
-		return FLT_MAX;
+	decimal cylinder = RayCylinder(inRayOrigin, inRayDirection, inCapsuleRadius);
+	if (cylinder == FIX_MAX)
+		return FIX_MAX;
 
 	// If this hit is in the finite cylinder we have our fraction
 	if (abs(inRayOrigin.GetY() + cylinder * inRayDirection.GetY()) <= inCapsuleHalfHeight)
 		return cylinder;
 
 	// Test upper and lower sphere
-	Vec3 sphere_center(0, inCapsuleHalfHeight, 0);
-	float upper = RaySphere(inRayOrigin, inRayDirection, sphere_center, inCapsuleRadius);
-	float lower = RaySphere(inRayOrigin, inRayDirection, -sphere_center, inCapsuleRadius);
+	Vec3 sphere_center(C0, inCapsuleHalfHeight, C0);
+	decimal upper = RaySphere(inRayOrigin, inRayDirection, sphere_center, inCapsuleRadius);
+	decimal lower = RaySphere(inRayOrigin, inRayDirection, -sphere_center, inCapsuleRadius);
 	return min(upper, lower);
 }
 

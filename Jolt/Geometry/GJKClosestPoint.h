@@ -33,7 +33,7 @@ private:
 	/// @return True if new closest point was found.
 	/// False if the function failed, in this case the output variables are not modified
 	template <bool LastPointPartOfClosestFeature>
-	bool		GetClosest(float inPrevVLenSq, Vec3 &outV, float &outVLenSq, uint32 &outSet) const
+	bool		GetClosest(decimal inPrevVLenSq, Vec3 &outV, decimal &outVLenSq, uint32 &outSet) const
 	{
 #ifdef JPH_GJK_DEBUG
 		for (int i = 0; i < mNumPoints; ++i)
@@ -75,7 +75,7 @@ private:
  		Trace("GetClosest: set = 0b%s, v = [%s], |v| = %g", NibbleToBinary(set), ConvertToString(v).c_str(), (double)v.Length());
 #endif
 
-		float v_len_sq = v.LengthSq();
+		decimal v_len_sq = v.LengthSq();
 		if (v_len_sq < inPrevVLenSq) // Note, comparison order important: If v_len_sq is NaN then this expression will be false so we will return false
 		{
 			// Return closest point
@@ -93,9 +93,9 @@ private:
 	}
 
 	// Get max(|Y_0|^2 .. |Y_n|^2)
-	float		GetMaxYLengthSq() const
+	decimal		GetMaxYLengthSq() const
 	{
-		float y_len_sq = mY[0].LengthSq();
+		decimal y_len_sq = mY[0].LengthSq();
 		for (int i = 1; i < mNumPoints; ++i)
 			y_len_sq = max(y_len_sq, mY[i].LengthSq());
 		return y_len_sq;
@@ -174,7 +174,7 @@ private:
 
 		case 2:
 			{
-				float u, v;
+				decimal u, v;
 				ClosestPoint::GetBaryCentricCoordinates(mY[0], mY[1], u, v);
 				outPointA = u * mP[0] + v * mP[1];
 				outPointB = u * mQ[0] + v * mQ[1];
@@ -183,7 +183,7 @@ private:
 
 		case 3:
 			{
-				float u, v, w;
+				decimal u, v, w;
 				ClosestPoint::GetBaryCentricCoordinates(mY[0], mY[1], mY[2], u, v, w);
 				outPointA = u * mP[0] + v * mP[1] + w * mP[2];
 				outPointB = u * mQ[0] + v * mQ[1] + w * mQ[2];
@@ -210,9 +210,9 @@ public:
 	///	@return True if they intersect (in which case ioV = (0, 0, 0)).
 	///	False if they don't intersect in which case ioV is a separating axis in the direction from A to B (magnitude is meaningless)
 	template <typename A, typename B>
-	bool		Intersects(const A &inA, const B &inB, float inTolerance, Vec3 &ioV)
+	bool		Intersects(const A &inA, const B &inB, decimal inTolerance, Vec3 &ioV)
 	{
-		float tolerance_sq = Square(inTolerance);
+		decimal tolerance_sq = Square(inTolerance);
 
 		// Reset state
 		mNumPoints = 0;
@@ -223,7 +223,7 @@ public:
 #endif
 
 		// Previous length^2 of v
-		float prev_v_len_sq = FLT_MAX;
+		decimal prev_v_len_sq = FLT_MAX;
 
 		for (;;)
 		{
@@ -257,7 +257,7 @@ public:
 #endif
 
 			// Determine the new closest point
-			float v_len_sq;			// Length^2 of v
+			decimal v_len_sq;			// Length^2 of v
 			uint32 set;				// Set of points that form the new simplex
 			if (!GetClosest<true>(prev_v_len_sq, ioV, v_len_sq, set))
 				return false;
@@ -330,9 +330,9 @@ public:
 	///
 	///	@return The squared distance between A and B or FLT_MAX when they are further away than inMaxDistSq.
 	template <typename A, typename B>
-	float		GetClosestPoints(const A &inA, const B &inB, float inTolerance, float inMaxDistSq, Vec3 &ioV, Vec3 &outPointA, Vec3 &outPointB)
+	decimal		GetClosestPoints(const A &inA, const B &inB, decimal inTolerance, decimal inMaxDistSq, Vec3 &ioV, Vec3 &outPointA, Vec3 &outPointB)
 	{
-		float tolerance_sq = Square(inTolerance);
+		decimal tolerance_sq = Square(inTolerance);
 
 		// Reset state
 		mNumPoints = 0;
@@ -351,10 +351,10 @@ public:
 #endif
 
 		// Length^2 of v
-		float v_len_sq = ioV.LengthSq();
+		decimal v_len_sq = ioV.LengthSq();
 
 		// Previous length^2 of v
-		float prev_v_len_sq = FLT_MAX;
+		decimal prev_v_len_sq = FLT_MAX;
 
 		for (;;)
 		{
@@ -369,7 +369,7 @@ public:
 			// Get support point of the minkowski sum A - B of v
 			Vec3 w = p - q;
 
-			float dot = ioV.Dot(w);
+			decimal dot = ioV.Dot(w);
 
 #ifdef JPH_GJK_DEBUG
 			// Draw -ioV to show the closest point to the origin from the previous simplex
@@ -519,17 +519,17 @@ public:
 	/// 
 	///	@return true if a hit was found, ioLambda is the solution for lambda.
 	template <typename A>
-	bool		CastRay(Vec3Arg inRayOrigin, Vec3Arg inRayDirection, float inTolerance, const A &inA, float &ioLambda)
+	bool		CastRay(Vec3Arg inRayOrigin, Vec3Arg inRayDirection, decimal inTolerance, const A &inA, decimal &ioLambda)
 	{
-		float tolerance_sq = Square(inTolerance);
+		decimal tolerance_sq = Square(inTolerance);
 
 		// Reset state
 		mNumPoints = 0;
 
-		float lambda = 0.0f;
+		decimal lambda = 0.0f;
 		Vec3 x = inRayOrigin;
 		Vec3 v = x - inA.GetSupport(Vec3::sZero());
-		float v_len_sq = FLT_MAX;
+		decimal v_len_sq = FLT_MAX;
 		bool allow_restart = false;
 				
 		for (;;)
@@ -546,14 +546,14 @@ public:
 			Trace("w = [%s]", ConvertToString(w).c_str());
 #endif
 
-			float v_dot_w = v.Dot(w);
+			decimal v_dot_w = v.Dot(w);
 #ifdef JPH_GJK_DEBUG
 			Trace("v . w = %g", (double)v_dot_w);
 #endif
 			if (v_dot_w > 0.0f)
 			{
 				// If ray and normal are in the same direction, we've passed A and there's no collision
-				float v_dot_r = v.Dot(inRayDirection);
+				decimal v_dot_r = v.Dot(inRayDirection);
 #ifdef JPH_GJK_DEBUG
 				Trace("v . r = %g", (double)v_dot_r);
 #endif
@@ -561,8 +561,8 @@ public:
 					return false;
 
 				// Update the lower bound for lambda
-				float delta = v_dot_w / v_dot_r;
-				float old_lambda = lambda;
+				decimal delta = v_dot_w / v_dot_r;
+				decimal old_lambda = lambda;
 				lambda -= delta;
 #ifdef JPH_GJK_DEBUG
 				Trace("lambda = %g, delta = %g", (double)lambda, (double)delta);
@@ -672,7 +672,7 @@ public:
 	///
 	/// @return true if a hit was found, ioLambda is the solution for lambda.
 	template <typename A, typename B>
-	bool		CastShape(Mat44Arg inStart, Vec3Arg inDirection, float inTolerance, const A &inA, const B &inB, float &ioLambda)
+	bool		CastShape(Mat44Arg inStart, Vec3Arg inDirection, decimal inTolerance, const A &inA, const B &inB, decimal &ioLambda)
 	{
 		// Transform the shape to be cast to the starting position
 		TransformedConvexObject transformed_a(inStart, inA);
@@ -703,12 +703,12 @@ public:
 	///
 	///	@return true if a hit was found, ioLambda is the solution for lambda and outPoint and outSeparatingAxis are valid.
 	template <typename A, typename B>
-	bool		CastShape(Mat44Arg inStart, Vec3Arg inDirection, float inTolerance, const A &inA, const B &inB, float inConvexRadiusA, float inConvexRadiusB, float &ioLambda, Vec3 &outPointA, Vec3 &outPointB, Vec3 &outSeparatingAxis)
+	bool		CastShape(Mat44Arg inStart, Vec3Arg inDirection, decimal inTolerance, const A &inA, const B &inB, decimal inConvexRadiusA, decimal inConvexRadiusB, decimal &ioLambda, Vec3 &outPointA, Vec3 &outPointB, Vec3 &outSeparatingAxis)
 	{
-		float tolerance_sq = Square(inTolerance);
+		decimal tolerance_sq = Square(inTolerance);
 
 		// Calculate how close A and B (without their convex radius) need to be to eachother in order for us to consider this a collision
-		float sum_convex_radius = inConvexRadiusA + inConvexRadiusB;
+		decimal sum_convex_radius = inConvexRadiusA + inConvexRadiusB;
 
 		// Transform the shape to be cast to the starting position
 		TransformedConvexObject transformed_a(inStart, inA);
@@ -716,10 +716,10 @@ public:
 		// Reset state
 		mNumPoints = 0;
 
-		float lambda = 0.0f;
+		decimal lambda = 0.0f;
 		Vec3 x = Vec3::sZero(); // Since A is already transformed we can start the cast from zero
 		Vec3 v = -inB.GetSupport(Vec3::sZero()) + transformed_a.GetSupport(Vec3::sZero()); // See CastRay: v = x - inA.GetSupport(Vec3::sZero()) where inA is the Minkowski difference inB - transformed_a (see CastShape above) and x is zero
-		float v_len_sq = FLT_MAX;
+		decimal v_len_sq = FLT_MAX;
 		bool allow_restart = false;
 
 		// Keeps track of separating axis of the previous iteration.
@@ -750,14 +750,14 @@ public:
 			// To q we have to add: inConvexRadiusB * v / |v|
 			// This means that to w we have to add: -(inConvexRadiusA + inConvexRadiusB) * v / |v|
 			// So to v . w we have to add: v . (-(inConvexRadiusA + inConvexRadiusB) * v / |v|) = -(inConvexRadiusA + inConvexRadiusB) * |v|
-			float v_dot_w = v.Dot(w) - sum_convex_radius * v.Length();
+			decimal v_dot_w = v.Dot(w) - sum_convex_radius * v.Length();
 #ifdef JPH_GJK_DEBUG
 			Trace("v . w = %g", (double)v_dot_w);
 #endif
 			if (v_dot_w > 0.0f)
 			{
 				// If ray and normal are in the same direction, we've passed A and there's no collision
-				float v_dot_r = v.Dot(inDirection);
+				decimal v_dot_r = v.Dot(inDirection);
 #ifdef JPH_GJK_DEBUG
 				Trace("v . r = %g", (double)v_dot_r);
 #endif
@@ -765,8 +765,8 @@ public:
 					return false;
 
 				// Update the lower bound for lambda
-				float delta = v_dot_w / v_dot_r;
-				float old_lambda = lambda;
+				decimal delta = v_dot_w / v_dot_r;
+				decimal old_lambda = lambda;
 				lambda -= delta;
 #ifdef JPH_GJK_DEBUG
 				Trace("lambda = %g, delta = %g", (double)lambda, (double)delta);
@@ -889,7 +889,7 @@ public:
 
 		case 2:
 			{
-				float bu, bv;
+				decimal bu, bv;
 				ClosestPoint::GetBaryCentricCoordinates(mY[0], mY[1], bu, bv);
 				outPointB = bu * mQ[0] + bv * mQ[1] + convex_radius_b;
 				outPointA = lambda > 0.0f? outPointB : bu * mP[0] + bv * mP[1] - convex_radius_a;
@@ -899,7 +899,7 @@ public:
 		case 3:
 		case 4: // A full simplex, we can't properly determine a contact point! As contact point we take the closest point of the previous iteration.
 			{
-				float bu, bv, bw;
+				decimal bu, bv, bw;
 				ClosestPoint::GetBaryCentricCoordinates(mY[0], mY[1], mY[2], bu, bv, bw);
 				outPointB = bu * mQ[0] + bv * mQ[1] + bw * mQ[2] + convex_radius_b;
 				outPointA = lambda > 0.0f? outPointB : bu * mP[0] + bv * mP[1] + bw * mP[2] - convex_radius_a;

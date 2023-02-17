@@ -14,19 +14,19 @@ public:
 
 	/// Constructor
 	inline				Sphere() = default;
-	inline				Sphere(const Float3 &inCenter, float inRadius)			: mCenter(inCenter), mRadius(inRadius) { }
-	inline				Sphere(Vec3Arg inCenter, float inRadius)				: mRadius(inRadius) { inCenter.StoreFloat3(&mCenter); }
+	inline				Sphere(const Float3 &inCenter, decimal inRadius)			: mCenter(inCenter), mRadius(inRadius) { }
+	inline				Sphere(Vec3Arg inCenter, decimal inRadius)				: mRadius(inRadius) { inCenter.StoreFloat3(&mCenter); }
 
 	/// Calculate the support vector for this convex shape.
 	inline Vec3			GetSupport(Vec3Arg inDirection) const
 	{
-		float length = inDirection.Length();
-		return length > 0.0f ? Vec3::sLoadFloat3Unsafe(mCenter) + (mRadius/ length) * inDirection : Vec3::sLoadFloat3Unsafe(mCenter);
+		decimal length = inDirection.Length();
+		return length > C0 ? Vec3::sLoadFloat3Unsafe(mCenter) + (mRadius/ length) * inDirection : Vec3::sLoadFloat3Unsafe(mCenter);
 	}
 
 	// Properties
 	inline Vec3 		GetCenter() const										{ return Vec3::sLoadFloat3Unsafe(mCenter); }
-	inline float		GetRadius() const										{ return mRadius; }
+	inline decimal		GetRadius() const										{ return mRadius; }
 
 	/// Test if two spheres overlap
 	inline bool			Overlaps(const Sphere &inB) const						
@@ -46,13 +46,13 @@ public:
 		// Calculate distance between point and center
 		Vec3 center = GetCenter();
 		Vec3 d_vec = inPoint - center;
-		float d_sq = d_vec.LengthSq();
+		decimal d_sq = d_vec.LengthSq();
 		if (d_sq > Square(mRadius))
 		{
 			// It is further away than radius, we need to widen the sphere
 			// The diameter of the new sphere is radius + d, so the new radius is half of that
-			float d = sqrt(d_sq);
-			float radius = 0.5f * (mRadius + d);
+			decimal d = sqrt(d_sq);
+			decimal radius = C0P5 * (mRadius + d);
 
 			// The center needs to shift by new radius - old radius in the direction of d
 			center += (radius - mRadius) / d * d_vec;
@@ -65,7 +65,7 @@ public:
 
 private:
 	Float3				mCenter;
-	float				mRadius;
+	decimal				mRadius;
 };
 
 JPH_NAMESPACE_END

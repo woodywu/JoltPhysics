@@ -37,7 +37,7 @@ public:
 	/// @param inTolerance Max distance that a point is allowed to be outside of the hull
 	/// @param outEdges On success this will contain the list of indices that form the hull (counter clockwise)
 	/// @return Status code that reports if the hull was created or not
-	EResult				Initialize(int inIdx1, int inIdx2, int inIdx3, int inMaxVertices, float inTolerance, Edges &outEdges);
+	EResult				Initialize(int inIdx1, int inIdx2, int inIdx3, int inMaxVertices, decimal inTolerance, Edges &outEdges);
 
 private:
 #ifdef JPH_CONVEX_BUILDER_2D_DEBUG
@@ -80,7 +80,7 @@ private:
 		void			CalculateNormalAndCenter(const Vec3 *inPositions);
 
 		/// Check if this edge is facing inPosition
-		inline bool		IsFacing(Vec3Arg inPosition) const			{ return mNormal.Dot(inPosition - mCenter) > 0.0f; }
+		inline bool		IsFacing(Vec3Arg inPosition) const			{ return mNormal.Dot(inPosition - mCenter) > C0; }
 
 		Vec3			mNormal;									///< Normal of the edge (not normalized)
 		Vec3			mCenter;									///< Center of the edge
@@ -88,7 +88,7 @@ private:
 		Edge *			mPrevEdge = nullptr;						///< Previous edge in cicular list
 		Edge *			mNextEdge = nullptr;						///< Next edge in circular list
 		int				mStartIdx;									///< Position index of start of this edge
-		float			mFurthestPointDistanceSq = 0.0f;			///< Squared distance of furtest point from the conflict list to the edge
+		decimal			mFurthestPointDistanceSq = C0;			///< Squared distance of furtest point from the conflict list to the edge
 	};
 
 	const Positions &	mPositions;									///< List of positions (some of them are part of the hull)

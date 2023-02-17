@@ -93,7 +93,7 @@ public:
 	/// @param outPointB Position on B that has the least amount of penetration. 
 	/// Use |outPointB - outPointA| to get the distance of penetration.
 	template <typename AE, typename BE>
-	EStatus				GetPenetrationDepthStepGJK(const AE &inAExcludingConvexRadius, float inConvexRadiusA, const BE &inBExcludingConvexRadius, float inConvexRadiusB, float inTolerance, Vec3 &ioV, Vec3 &outPointA, Vec3 &outPointB)
+	EStatus				GetPenetrationDepthStepGJK(const AE &inAExcludingConvexRadius, decimal inConvexRadiusA, const BE &inBExcludingConvexRadius, decimal inConvexRadiusB, decimal inTolerance, Vec3 &ioV, Vec3 &outPointA, Vec3 &outPointB)
 	{
 		JPH_PROFILE_FUNCTION();
 
@@ -101,9 +101,9 @@ public:
 		JPH_ASSERT(!ioV.IsNearZero());
 
 		// Get closest points
-		float combined_radius = inConvexRadiusA + inConvexRadiusB;
-		float combined_radius_sq = combined_radius * combined_radius;
-		float closest_points_dist_sq = mGJK.GetClosestPoints(inAExcludingConvexRadius, inBExcludingConvexRadius, inTolerance, combined_radius_sq, ioV, outPointA, outPointB);
+		decimal combined_radius = inConvexRadiusA + inConvexRadiusB;
+		decimal combined_radius_sq = combined_radius * combined_radius;
+		decimal closest_points_dist_sq = mGJK.GetClosestPoints(inAExcludingConvexRadius, inBExcludingConvexRadius, inTolerance, combined_radius_sq, ioV, outPointA, outPointB);
 		if (closest_points_dist_sq > combined_radius_sq)
 		{
 			// No collision
@@ -112,7 +112,7 @@ public:
 		if (closest_points_dist_sq > 0.0f)
 		{
 			// Collision within convex radius, adjust points for convex radius
-			float v_len = sqrt(closest_points_dist_sq); // GetClosestPoints function returns |ioV|^2 when return value < FLT_MAX
+			decimal v_len = sqrt(closest_points_dist_sq); // GetClosestPoints function returns |ioV|^2 when return value < FLT_MAX
 			outPointA += ioV * (inConvexRadiusA / v_len);
 			outPointB -= ioV * (inConvexRadiusB / v_len);
 			return EStatus::Colliding;
@@ -134,7 +134,7 @@ public:
 	/// @return False if the objects don't collide, in this case outPointA/outPointB are invalid.
 	/// True if the objects penetrate
 	template <typename AI, typename BI>
-	bool				GetPenetrationDepthStepEPA(const AI &inAIncludingConvexRadius, const BI &inBIncludingConvexRadius, float inTolerance, Vec3 &outV, Vec3 &outPointA, Vec3 &outPointB)
+	bool				GetPenetrationDepthStepEPA(const AI &inAIncludingConvexRadius, const BI &inBIncludingConvexRadius, decimal inTolerance, Vec3 &outV, Vec3 &outPointA, Vec3 &outPointB)
 	{
 		JPH_PROFILE_FUNCTION();
 
@@ -197,7 +197,7 @@ public:
 		hull.Initialize(0, 1, 2);
 		for (typename Points::size_type i = 3; i < support_points.mY.size(); ++i)
 		{
-			float dist_sq;
+			decimal dist_sq;
 			Triangle *t = hull.FindFacingTriangle(support_points.mY[i], dist_sq);
 			if (t != nullptr)
 			{
@@ -263,7 +263,7 @@ public:
 		}
 
 		// Current closest distance to origin
-		float closest_dist_sq = FLT_MAX;
+		decimal closest_dist_sq = FLT_MAX;
 
 		// Remember last good triangle
 		Triangle *last = nullptr;
@@ -297,7 +297,7 @@ public:
 			Vec3 w = support_points.Add(inAIncludingConvexRadius, inBIncludingConvexRadius, t->mNormal, new_index);
 			
 			// Project w onto the triangle normal
-			float dot = t->mNormal.Dot(w);
+			decimal dot = t->mNormal.Dot(w);
 
 			// Check if we just found a separating axis. This can happen if the shape shrunk by convex radius and then expanded by
 			// convex radius is bigger then the original shape due to inaccuracies in the shrinking process.
@@ -305,7 +305,7 @@ public:
 				return false;
 
 			// Get the distance squared (along normal) to the support point
-			float dist_sq = dot * dot / t->mNormal.LengthSq();
+			decimal dist_sq = dot * dot / t->mNormal.LengthSq();
 
 #ifdef JPH_EPA_CONVEX_BUILDER_DRAW
 			// Draw the point that we're adding
@@ -387,7 +387,7 @@ public:
 	/// Note: less performant since you're providing all support functions in one go
 	/// Note 2: You need to initialize ioV, see documentation at GetPenetrationDepthStepGJK!
 	template <typename AE, typename AI, typename BE, typename BI>
-	bool				GetPenetrationDepth(const AE &inAExcludingConvexRadius, const AI &inAIncludingConvexRadius, float inConvexRadiusA, const BE &inBExcludingConvexRadius, const BI &inBIncludingConvexRadius, float inConvexRadiusB, float inCollisionToleranceSq, float inPenetrationTolerance, Vec3 &ioV, Vec3 &outPointA, Vec3 &outPointB)
+	bool				GetPenetrationDepth(const AE &inAExcludingConvexRadius, const AI &inAIncludingConvexRadius, decimal inConvexRadiusA, const BE &inBExcludingConvexRadius, const BI &inBIncludingConvexRadius, decimal inConvexRadiusB, decimal inCollisionToleranceSq, decimal inPenetrationTolerance, Vec3 &ioV, Vec3 &outPointA, Vec3 &outPointB)
 	{
 		// Check result of collision detection
 		switch (GetPenetrationDepthStepGJK(inAExcludingConvexRadius, inConvexRadiusA, inBExcludingConvexRadius, inConvexRadiusB, inCollisionToleranceSq, ioV, outPointA, outPointB))
@@ -424,7 +424,7 @@ public:
 	/// 
 	/// @return true if the a hit was found, in which case ioLambda, outPointA, outPointB and outSurfaceNormal are updated.
 	template <typename A, typename B>
-	bool				CastShape(Mat44Arg inStart, Vec3Arg inDirection, float inCollisionTolerance, float inPenetrationTolerance, const A &inA, const B &inB, float inConvexRadiusA, float inConvexRadiusB, bool inReturnDeepestPoint, float &ioLambda, Vec3 &outPointA, Vec3 &outPointB, Vec3 &outContactNormal)
+	bool				CastShape(Mat44Arg inStart, Vec3Arg inDirection, decimal inCollisionTolerance, decimal inPenetrationTolerance, const A &inA, const B &inB, decimal inConvexRadiusA, decimal inConvexRadiusB, bool inReturnDeepestPoint, decimal &ioLambda, Vec3 &outPointA, Vec3 &outPointB, Vec3 &outContactNormal)
 	{
 		// First determine if there's a collision at all
 		if (!mGJK.CastShape(inStart, inDirection, inCollisionTolerance, inA, inB, inConvexRadiusA, inConvexRadiusB, ioLambda, outPointA, outPointB, outContactNormal))

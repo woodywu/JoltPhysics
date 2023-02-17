@@ -15,12 +15,12 @@ public:
 	JPH_OVERRIDE_NEW_DELETE
 
 	/// Construct ellipse with radius A along the X-axis and B along the Y-axis
-					Ellipse(float inA, float inB) : mA(inA), mB(inB) { JPH_ASSERT(inA > 0.0f); JPH_ASSERT(inB > 0.0f); }
+					Ellipse(decimal inA, decimal inB) : mA(inA), mB(inB) { JPH_ASSERT(inA > C0); JPH_ASSERT(inB > C0); }
 
 	/// Check if inPoint is inside the ellipsse
 	bool			IsInside(const Float2 &inPoint) const
 	{
-		return Square(inPoint.x / mA) + Square(inPoint.y / mB) <= 1.0f;
+		return Square(inPoint.x / mA) + Square(inPoint.y / mB) <= C1;
 	}
 
 	/// Get the closest point on the ellipse to inPoint
@@ -28,8 +28,8 @@ public:
 	/// @see Rotation Joint Limits in Quaterion Space by Gino van den Bergen, section 10.1 in Game Engine Gems 3.
 	Float2			GetClosestPoint(const Float2 &inPoint) const
 	{
-		float a_sq = Square(mA);
-		float b_sq = Square(mB);
+		decimal a_sq = Square(mA);
+		decimal b_sq = Square(mB);
 
 		// Equation of ellipse: f(x, y) = (x/a)^2 + (y/b)^2 - 1 = 0											[1]
 		// Normal on surface: (df/dx, df/dy) = (2 x / a^2, 2 y / b^2)
@@ -38,25 +38,25 @@ public:
 		// Requiring point to be on ellipse (substituting into [1]): g(t) = (a x / (t + a^2))^2 + (b y / (t + b^2))^2 - 1 = 0
 
 		// Newton raphson iteration, starting at t = 0
-		float t = 0.0f;
+		decimal t = C0;
 		for (;;)
 		{
 			// Calculate g(t)
-			float t_plus_a_sq = t + a_sq;
-			float t_plus_b_sq = t + b_sq;
-			float gt = Square(mA * inPoint.x / t_plus_a_sq) + Square(mB * inPoint.y / t_plus_b_sq) - 1.0f;
+			decimal t_plus_a_sq = t + a_sq;
+			decimal t_plus_b_sq = t + b_sq;
+			decimal gt = Square(mA * inPoint.x / t_plus_a_sq) + Square(mB * inPoint.y / t_plus_b_sq) - C1;
 
 			// Check if g(t) it is close enough to zero
-			if (abs(gt) < 1.0e-6f)
+			if (abs(gt) < decimal(1.0e-6f))
 				return Float2(a_sq * inPoint.x / t_plus_a_sq, b_sq * inPoint.y / t_plus_b_sq);
 
 			// Get derivative dg/dt = g'(t) = -2 (b^2 y^2 / (t + b^2)^3 + a^2 x^2 / (t + a^2)^3)
-			float gt_accent = -2.0f * 
+			decimal gt_accent = -C2 * 
 				(a_sq * Square(inPoint.x) / Cubed(t_plus_a_sq) 
 				+ b_sq * Square(inPoint.y) / Cubed(t_plus_b_sq));
 
 			// Calculate t for next iteration: tn+1 = tn - g(t) / g'(t)
-			float tn = t - gt / gt_accent;
+			decimal tn = t - gt / gt_accent;
 			t = tn;			
 		}
 	}
@@ -69,8 +69,8 @@ public:
 	}
 
 private:
-	float			mA;				///< Radius along X-axis
-	float			mB;				///< Radius along Y-axis
+	decimal			mA;				///< Radius along X-axis
+	decimal			mB;				///< Radius along Y-axis
 };
 
 JPH_NAMESPACE_END

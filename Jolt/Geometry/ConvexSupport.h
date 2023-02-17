@@ -43,7 +43,7 @@ struct TransformedConvexObject
 template <typename ConvexObject>
 struct AddConvexRadius
 {
-	AddConvexRadius(const ConvexObject &inObject, float inRadius) :
+	AddConvexRadius(const ConvexObject &inObject, decimal inRadius) :
 		mObject(inObject),
 		mRadius(inRadius)
 	{
@@ -52,12 +52,12 @@ struct AddConvexRadius
 	/// Calculate the support vector for this convex shape. 
 	Vec3					GetSupport(Vec3Arg inDirection) const
 	{
-		float length = inDirection.Length();
+		decimal length = inDirection.Length();
 		return length > 0.0f ? mObject.GetSupport(inDirection) + (mRadius / length) * inDirection : mObject.GetSupport(inDirection);
 	}
 
 	const ConvexObject &	mObject;
-	float					mRadius;
+	decimal					mRadius;
 };
 
 /// Structure that performs a Minkowski difference A - B
@@ -107,9 +107,9 @@ struct TriangleConvexSupport
 	Vec3					GetSupport(Vec3Arg inDirection) const
 	{
 		// Project vertices on inDirection
-		float d1 = mV1.Dot(inDirection);
-		float d2 = mV2.Dot(inDirection);
-		float d3 = mV3.Dot(inDirection);
+		decimal d1 = mV1.Dot(inDirection);
+		decimal d2 = mV2.Dot(inDirection);
+		decimal d3 = mV3.Dot(inDirection);
 
 		// Return vertex with biggest projection
 		if (d1 > d2)
@@ -157,11 +157,11 @@ struct PolygonConvexSupport
 	Vec3					GetSupport(Vec3Arg inDirection) const
 	{
 		Vec3 support_point = mVertices[0];
-		float best_dot = mVertices[0].Dot(inDirection);
+		decimal best_dot = mVertices[0].Dot(inDirection);
 		
 		for (typename VERTEX_ARRAY::const_iterator v = mVertices.begin() + 1; v < mVertices.end(); ++v)
 		{
-			float dot = v->Dot(inDirection);
+			decimal dot = v->Dot(inDirection);
 			if (dot > best_dot)
 			{
 				best_dot = dot;

@@ -36,8 +36,8 @@ public:
 
 	// Constants
 	static constexpr int cMaxEdgeLength = 128;				///< Max number of edges in FindEdge
-	static constexpr float cMinTriangleArea = 1.0e-10f;		///< Minimum area of a triangle before, if smaller than this it will not be added to the priority queue
-	static constexpr float cBarycentricEpsilon = 1.0e-3f;	///< Epsilon value used to determine if a point is in the interior of a triangle 
+	static constexpr decimal cMinTriangleArea = decimal(1.0e-10f);		///< Minimum area of a triangle before, if smaller than this it will not be added to the priority queue
+	static constexpr decimal cBarycentricEpsilon = decimal(1.0e-3f);	///< Epsilon value used to determine if a point is in the interior of a triangle 
 
 	// Forward declare
 	class Triangle;
@@ -67,14 +67,14 @@ public:
 		inline bool		IsFacing(Vec3Arg inPosition) const
 		{
 			JPH_ASSERT(!mRemoved);
-			return mNormal.Dot(inPosition - mCentroid) > 0.0f;
+			return mNormal.Dot(inPosition - mCentroid) > C0;
 		}
 
 		/// Check if triangle is facing the origin
 		inline bool		IsFacingOrigin() const
 		{
 			JPH_ASSERT(!mRemoved);
-			return mNormal.Dot(mCentroid) < 0.0f;
+			return mNormal.Dot(mCentroid) < C0;
 		}
 
 		/// Get the next edge of edge inIndex
@@ -86,8 +86,8 @@ public:
 		Edge			mEdge[3];							///< 3 edges of this triangle
 		Vec3			mNormal;							///< Normal of this triangle, length is 2 times area of triangle
 		Vec3			mCentroid;							///< Center of the triangle
-		float			mClosestLenSq = FLT_MAX;			///< Closest distance^2 from origin to triangle
-		float			mLambda[2];							///< Barycentric coordinates of closest point to origin on triangle
+		decimal			mClosestLenSq = FIX_MAX;			///< Closest distance^2 from origin to triangle
+		decimal			mLambda[2];							///< Barycentric coordinates of closest point to origin on triangle
 		bool			mLambdaRelativeTo0;					///< How to calculate the closest point, true: y0 + l0 * (y1 - y0) + l1 * (y2 - y0), false: y1 + l0 * (y0 - y1) + l1 * (y2 - y1)
 		bool			mClosestPointInterior = false;		///< Flag that indicates that the closest point from this triangle to the origin is an interior point
 		bool			mRemoved = false;					///< Flag that indicates that triangle has been removed
@@ -276,18 +276,18 @@ public:
 
 	/// Find the triangle on which inPosition is the furthest to the front
 	/// Note this function works as long as all points added have been added with AddPoint(..., FLT_MAX).
-	Triangle *			FindFacingTriangle(Vec3Arg inPosition, float &outBestDistSq)
+	Triangle *			FindFacingTriangle(Vec3Arg inPosition, decimal &outBestDistSq)
 	{
 		Triangle *best = nullptr;
-		float best_dist_sq = 0.0f;
+		decimal best_dist_sq = C0;
 
 		for (Triangle *t : mTriangleQueue)
 			if (!t->mRemoved)
 			{
-				float dot = t->mNormal.Dot(inPosition - t->mCentroid);
-				if (dot > 0.0f)
+				decimal dot = t->mNormal.Dot(inPosition - t->mCentroid);
+				if (dot > C0)
 				{
-					float dist_sq = dot * dot / t->mNormal.LengthSq();
+					decimal dist_sq = dot * dot / t->mNormal.LengthSq();
 					if (dist_sq > best_dist_sq)
 					{
 						best = t;
@@ -301,7 +301,7 @@ public:
 	}
 
 	/// Add a new point to the convex hull
-	bool				AddPoint(Triangle *inFacingTriangle, int inIdx, float inClosestDistSq, NewTriangles &outTriangles)
+	bool				AddPoint(Triangle *inFacingTriangle, int inIdx, decimal inClosestDistSq, NewTriangles &outTriangles)
 	{
 		// Get position
 		Vec3 pos = mPositions[inIdx];
@@ -333,7 +333,7 @@ public:
 
 			// Check if we need to put this triangle in the priority queue
 			if ((nt->mClosestPointInterior && nt->mClosestLenSq < inClosestDistSq)	// For the main algorithm
-				|| nt->mClosestLenSq < 0.0f)										// For when the origin is not inside the hull yet
+				|| nt->mClosestLenSq < C0)										// For when the origin is not inside the hull yet
 				mTriangleQueue.push_back(nt);
 		}
 		
@@ -630,14 +630,14 @@ public:
 
 				// Draw normal
 				RVec3 centroid = cDrawScale * (mOffset + t->mCentroid);
-				float len = t->mNormal.Length();
-				if (len > 0.0f)
+				decimal len = t->mNormal.Length();
+				if (len > C0)
 					DebugRenderer::sInstance->DrawArrow(centroid, centroid + t->mNormal / len, Color::sDarkGreen, 0.01f);
 			}
 
 		// Determine max position
-		float min_x = FLT_MAX;
-		float max_x = -FLT_MAX;
+		decimal min_x = FLT_MAX;
+		decimal max_x = -FLT_MAX;
 		for (Vec3 p : mPositions)
 		{
 			min_x = min(min_x, p.GetX());
@@ -645,7 +645,7 @@ public:
 		}
 
 		// Offset to the right
-		mOffset += Vec3(max_x - min_x + 0.5f, 0.0f, 0.0f);
+		mOffset += Vec3(max_x - min_x + 0.5f, C0, C0);
 	}
 
 	/// Draw a triangle for debugging purposes
@@ -661,13 +661,13 @@ public:
 	}
 
 	/// Draw a marker for debugging purposes
-	void				DrawMarker(Vec3Arg inPosition, ColorArg inColor, float inSize)
+	void				DrawMarker(Vec3Arg inPosition, ColorArg inColor, decimal inSize)
 	{
 		DebugRenderer::sInstance->DrawMarker(cDrawScale * (mOffset + inPosition), inColor, inSize);
 	}
 
 	/// Draw an arrow for debugging purposes
-	void				DrawArrow(Vec3Arg inFrom, Vec3Arg inTo, ColorArg inColor, float inArrowSize)
+	void				DrawArrow(Vec3Arg inFrom, Vec3Arg inTo, ColorArg inColor, decimal inArrowSize)
 	{
 		DebugRenderer::sInstance->DrawArrow(cDrawScale * (mOffset + inFrom), cDrawScale * (mOffset + inTo), inColor, inArrowSize);
 	}
@@ -711,7 +711,7 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 	Vec3 y2 = inPositions[inIdx2];
 
 	// Calculate centroid
-	mCentroid = (y0 + y1 + y2) / 3.0f;
+	mCentroid = (y0 + y1 + y2) / C3;
 
 	// Calculate edges
 	Vec3 y10 = y1 - y0;
@@ -723,21 +723,21 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 	// The difference in normals is most pronounced when one edge is much smaller than the others (in which case the other 2 must have roughly the same length).
 	// Therefore we can suffice by just picking the shortest from 2 edges and use that with the 3rd edge to calculate the normal.
 	// We first check which of the edges is shorter.
-	float y20_dot_y20 = y20.Dot(y20);
-	float y21_dot_y21 = y21.Dot(y21);
+	decimal y20_dot_y20 = y20.Dot(y20);
+	decimal y21_dot_y21 = y21.Dot(y21);
 	if (y20_dot_y20 < y21_dot_y21)
 	{
 		// We select the edges y10 and y20
 		mNormal = y10.Cross(y20);
 
 		// Check if triangle is degenerate
-		float normal_len_sq = mNormal.LengthSq();
+		decimal normal_len_sq = mNormal.LengthSq();
 		if (normal_len_sq > cMinTriangleArea)
 		{
 			// Determine distance between triangle and origin: distance = (centroid - origin) . normal / |normal|
 			// Note that this way of calculating the closest point is much more accurate than first calculating barycentric coordinates and then calculating the closest
 			// point based on those coordinates. Note that we preserve the sign of the distance to check on which side the origin is.
-			float c_dot_n = mCentroid.Dot(mNormal);
+			decimal c_dot_n = mCentroid.Dot(mNormal);
 			mClosestLenSq = abs(c_dot_n) * c_dot_n / normal_len_sq;
 
 			// Calculate closest point to origin using barycentric coordinates:
@@ -754,15 +754,15 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 			// (y10 = y1 - y0 etc.)
 			//
 			// Cramers rule to invert matrix:
-			float y10_dot_y10 = y10.LengthSq();
-			float y10_dot_y20 = y10.Dot(y20);
-			float determinant = y10_dot_y10 * y20_dot_y20 - y10_dot_y20 * y10_dot_y20;
-			if (determinant > 0.0f) // If determinant == 0 then the system is linearly dependent and the triangle is degenerate, since y10.10 * y20.y20 > y10.y20^2 it should also be > 0
+			decimal y10_dot_y10 = y10.LengthSq();
+			decimal y10_dot_y20 = y10.Dot(y20);
+			decimal determinant = y10_dot_y10 * y20_dot_y20 - y10_dot_y20 * y10_dot_y20;
+			if (determinant > C0) // If determinant == 0 then the system is linearly dependent and the triangle is degenerate, since y10.10 * y20.y20 > y10.y20^2 it should also be > 0
 			{
-				float y0_dot_y10 = y0.Dot(y10);
-				float y0_dot_y20 = y0.Dot(y20);
-				float l0 = (y10_dot_y20 * y0_dot_y20 - y20_dot_y20 * y0_dot_y10) / determinant;
-				float l1 = (y10_dot_y20 * y0_dot_y10 - y10_dot_y10 * y0_dot_y20) / determinant;
+				decimal y0_dot_y10 = y0.Dot(y10);
+				decimal y0_dot_y20 = y0.Dot(y20);
+				decimal l0 = (y10_dot_y20 * y0_dot_y20 - y20_dot_y20 * y0_dot_y10) / determinant;
+				decimal l1 = (y10_dot_y20 * y0_dot_y10 - y10_dot_y10 * y0_dot_y20) / determinant;
 				mLambda[0] = l0;
 				mLambda[1] = l1;
 				mLambdaRelativeTo0 = true;
@@ -770,7 +770,7 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 				// Check if closest point is interior to the triangle. For a convex hull which contains the origin each face must contain the origin, but because
 				// our faces are triangles, we can have multiple coplanar triangles and only 1 will have the origin as an interior point. We want to use this triangle
 				// to calculate the contact points because it gives the most accurate results, so we will only add these triangles to the priority queue.
-				if (l0 > -cBarycentricEpsilon && l1 > -cBarycentricEpsilon && l0 + l1 < 1.0f + cBarycentricEpsilon)
+				if (l0 > -cBarycentricEpsilon && l1 > -cBarycentricEpsilon && l0 + l1 < C1 + cBarycentricEpsilon)
 					mClosestPointInterior = true;
 			}
 		}
@@ -781,11 +781,11 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 		mNormal = y10.Cross(y21);
 
 		// Check if triangle is degenerate
-		float normal_len_sq = mNormal.LengthSq();
+		decimal normal_len_sq = mNormal.LengthSq();
 		if (normal_len_sq > cMinTriangleArea)
 		{
 			// Again calculate distance between triangle and origin
-			float c_dot_n = mCentroid.Dot(mNormal);
+			decimal c_dot_n = mCentroid.Dot(mNormal);
 			mClosestLenSq = abs(c_dot_n) * c_dot_n / normal_len_sq;
 
 			// Calculate closest point to origin using barycentric coordinates but this time using y1 as the reference vertex
@@ -800,21 +800,21 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 			// | -y10.y21  y21.y21 | | l1 |   | -y1.y21 |
 			//
 			// Cramers rule to invert matrix:
-			float y10_dot_y10 = y10.LengthSq();
-			float y10_dot_y21 = y10.Dot(y21);
-			float determinant = y10_dot_y10 * y21_dot_y21 - y10_dot_y21 * y10_dot_y21;
-			if (determinant > 0.0f)
+			decimal y10_dot_y10 = y10.LengthSq();
+			decimal y10_dot_y21 = y10.Dot(y21);
+			decimal determinant = y10_dot_y10 * y21_dot_y21 - y10_dot_y21 * y10_dot_y21;
+			if (determinant > C0)
 			{
-				float y1_dot_y10 = y1.Dot(y10);
-				float y1_dot_y21 = y1.Dot(y21);
-				float l0 = (y21_dot_y21 * y1_dot_y10 - y10_dot_y21 * y1_dot_y21) / determinant;
-				float l1 = (y10_dot_y21 * y1_dot_y10 - y10_dot_y10 * y1_dot_y21) / determinant;
+				decimal y1_dot_y10 = y1.Dot(y10);
+				decimal y1_dot_y21 = y1.Dot(y21);
+				decimal l0 = (y21_dot_y21 * y1_dot_y10 - y10_dot_y21 * y1_dot_y21) / determinant;
+				decimal l1 = (y10_dot_y21 * y1_dot_y10 - y10_dot_y10 * y1_dot_y21) / determinant;
 				mLambda[0] = l0;
 				mLambda[1] = l1;
 				mLambdaRelativeTo0 = false;
 
 				// Again check if the closest point is inside the triangle
-				if (l0 > -cBarycentricEpsilon && l1 > -cBarycentricEpsilon && l0 + l1 < 1.0f + cBarycentricEpsilon)
+				if (l0 > -cBarycentricEpsilon && l1 > -cBarycentricEpsilon && l0 + l1 < C1 + cBarycentricEpsilon)
 					mClosestPointInterior = true;
 			}
 		}

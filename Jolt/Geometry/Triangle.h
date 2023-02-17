@@ -20,7 +20,7 @@ public:
 	/// Get center of triangle
 	Vec3			GetCentroid() const
 	{
-		return (Vec3::sLoadFloat3Unsafe(mV[0]) + Vec3::sLoadFloat3Unsafe(mV[1]) + Vec3::sLoadFloat3Unsafe(mV[2])) * (1.0f / 3.0f);
+		return (Vec3::sLoadFloat3Unsafe(mV[0]) + Vec3::sLoadFloat3Unsafe(mV[1]) + Vec3::sLoadFloat3Unsafe(mV[2])) * (C1 / C3);
 	}
 
 	/// Vertices

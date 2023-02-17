@@ -17,9 +17,9 @@ public:
 	JPH_OVERRIDE_NEW_DELETE
 
 	/// Constructor
-					AABox()												: mMin(Vec3::sReplicate(numeric_limits<decimal>::max())), mMax(Vec3::sReplicate(numeric_limits<decimal>::min())) { }
+					AABox()												: mMin(Vec3::sReplicate(FIX_MAX)), mMax(Vec3::sReplicate(FIX_MIN)) { }
 					AABox(Vec3Arg inMin, Vec3Arg inMax)					: mMin(inMin), mMax(inMax) { }
-					AABox(Vec3Arg inCenter, float inRadius)				: mMin(inCenter - Vec3::sReplicate(inRadius)), mMax(inCenter + Vec3::sReplicate(inRadius)) { }
+					AABox(Vec3Arg inCenter, decimal inRadius)				: mMin(inCenter - Vec3::sReplicate(inRadius)), mMax(inCenter + Vec3::sReplicate(inRadius)) { }
 
 	/// Create box from 2 points
 	static AABox	sFromTwoPoints(Vec3Arg inP1, Vec3Arg inP2)			{ return AABox(Vec3::sMin(inP1, inP2), Vec3::sMax(inP1, inP2)); }
@@ -37,8 +37,8 @@ public:
 	/// Reset the bounding box to an empty bounding box
 	void			SetEmpty()
 	{
-		mMin = Vec3::sReplicate(numeric_limits<decimal>::max());
-		mMax = Vec3::sReplicate(numeric_limits<decimal>::min());
+		mMin = Vec3::sReplicate(FIX_MAX);
+		mMax = Vec3::sReplicate(FIX_MIN);
 	}
 
 	/// Check if the bounding box is valid (max >= min)
@@ -86,7 +86,7 @@ public:
 	}
 
 	/// Make sure that each edge of the bounding box has a minimal length
-	void			EnsureMinimalEdgeLength(float inMinEdgeLength)
+	void			EnsureMinimalEdgeLength(decimal inMinEdgeLength)
 	{
 		Vec3 min_length = Vec3::sReplicate(inMinEdgeLength);
 		mMax = Vec3::sSelect(mMax, mMin + min_length, Vec3::sLess(mMax - mMin, min_length));
@@ -102,13 +102,13 @@ public:
 	/// Get center of bounding box
 	Vec3			GetCenter() const
 	{
-		return 0.5f * (mMin + mMax);
+		return C0P5 * (mMin + mMax);
 	}
 
 	/// Get extent of bounding box (half of the size)
 	Vec3			GetExtent() const
 	{
-		return 0.5f * (mMax - mMin);
+		return C0P5 * (mMax - mMin);
 	}
 
 	/// Get size of bounding box
@@ -118,14 +118,14 @@ public:
 	}
 
 	/// Get surface area of bounding box
-	float			GetSurfaceArea() const							
+	decimal			GetSurfaceArea() const							
 	{ 
 		Vec3 extent = mMax - mMin;
-		return 2.0f * (extent.GetX() * extent.GetY() + extent.GetX() * extent.GetZ() + extent.GetY() * extent.GetZ());
+		return C2 * (extent.GetX() * extent.GetY() + extent.GetX() * extent.GetZ() + extent.GetY() * extent.GetZ());
 	}
 
 	/// Get volume of bounding box
-	float			GetVolume() const
+	decimal			GetVolume() const
 	{
 		Vec3 extent = mMax - mMin;
 		return extent.GetX() * extent.GetY() * extent.GetZ();
@@ -153,9 +153,9 @@ public:
 	bool			Overlaps(const Plane &inPlane) const
 	{
 		Vec3 normal = inPlane.GetNormal();
-		float dist_normal = inPlane.SignedDistance(GetSupport(normal));
-		float dist_min_normal = inPlane.SignedDistance(GetSupport(-normal));
-		return dist_normal * dist_min_normal <= 0.0f; // If both support points are on the same side of the plane we don't overlap
+		decimal dist_normal = inPlane.SignedDistance(GetSupport(normal));
+		decimal dist_min_normal = inPlane.SignedDistance(GetSupport(-normal));
+		return dist_normal * dist_min_normal <= C0; // If both support points are on the same side of the plane we don't overlap
 	}
 
 	/// Translate bounding box
@@ -207,7 +207,7 @@ public:
 		outVertices.resize(4);
 
 		int axis = inDirection.Abs().GetHighestComponentIndex();
-		if (inDirection[axis] < 0.0f)
+		if (inDirection[axis] < C0)
 		{
 			switch (axis)
 			{
@@ -268,7 +268,7 @@ public:
 	}
 
 	/// Get the squared distance between inPoint and this box (will be 0 if in Point is inside the box)
-	inline float	GetSqDistanceTo(Vec3Arg inPoint) const
+	inline decimal	GetSqDistanceTo(Vec3Arg inPoint) const
 	{
 		return (GetClosestPoint(inPoint) - inPoint).LengthSq();
 	}

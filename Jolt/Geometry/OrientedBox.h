@@ -26,10 +26,10 @@ public:
 					OrientedBox(Mat44Arg inOrientation, const AABox &inBox)				: OrientedBox(inOrientation.PreTranslated(inBox.GetCenter()), inBox.GetExtent()) { }
 
 	/// Test if oriented boxe overlaps with axis aligned box eachother
-	bool			Overlaps(const AABox &inBox, float inEpsilon = 1.0e-6f) const;
+	bool			Overlaps(const AABox &inBox, decimal inEpsilon = decimal(1.0e-6f)) const;
 
 	/// Test if two oriented boxes overlap eachother
-	bool			Overlaps(const OrientedBox &inBox, float inEpsilon = 1.0e-6f) const;
+	bool			Overlaps(const OrientedBox &inBox, decimal inEpsilon = decimal(1.0e-6f)) const;
 						
 	Mat44			mOrientation;														///< Transform that positions and rotates the local space axis aligned box into world space
 	Vec3			mHalfExtents;														///< Half extents (half the size of the edge) of the local space axis aligned box

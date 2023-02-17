@@ -57,7 +57,7 @@ public:
 	/// Get center of triangle
 	Vec3			GetCentroid(const VertexList &inVertices) const
 	{
-		return (Vec3(inVertices[mIdx[0]]) + Vec3(inVertices[mIdx[1]]) + Vec3(inVertices[mIdx[2]])) / 3.0f;
+		return (Vec3(inVertices[mIdx[0]]) + Vec3(inVertices[mIdx[1]]) + Vec3(inVertices[mIdx[2]])) / C3;
 	}
 
 	uint32			mIdx[3];

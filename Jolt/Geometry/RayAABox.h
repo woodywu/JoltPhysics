@@ -17,10 +17,10 @@ public:
 	inline void		Set(Vec3Arg inDirection)
 	{
 		// if (abs(inDirection) <= Epsilon) the ray is nearly parallel to the slab.
-		mIsParallel = Vec3::sLessOrEqual(inDirection.Abs(), Vec3::sReplicate(1.0e-20f));
+		mIsParallel = Vec3::sLessOrEqual(inDirection.Abs(), Vec3::sReplicate(decimal(1.0e-20f)));
 
 		// Calculate 1 / direction while avoiding division by zero
-		mInvDirection = Vec3::sSelect(inDirection, Vec3::sReplicate(1.0f), mIsParallel).Reciprocal();
+		mInvDirection = Vec3::sSelect(inDirection, Vec3::sReplicate(C1), mIsParallel).Reciprocal();
 	}
 
 	Vec3			mInvDirection;					///< 1 / ray direction
@@ -29,11 +29,11 @@ public:
 
 /// Intersect AABB with ray, returns minimal distance along ray or FLT_MAX if no hit
 /// Note: Can return negative value if ray starts in box
-JPH_INLINE float RayAABox(Vec3Arg inOrigin, const RayInvDirection &inInvDirection, Vec3Arg inBoundsMin, Vec3Arg inBoundsMax)
+JPH_INLINE decimal RayAABox(Vec3Arg inOrigin, const RayInvDirection &inInvDirection, Vec3Arg inBoundsMin, Vec3Arg inBoundsMax)
 {
 	// Constants
-	Vec3 flt_min = Vec3::sReplicate(-FLT_MAX);
-	Vec3 flt_max = Vec3::sReplicate(FLT_MAX);
+	Vec3 flt_min = Vec3::sReplicate(FIX_MIN);
+	Vec3 flt_max = Vec3::sReplicate(FIX_MAX);
 
 	// Test against all three axii simultaneously.
 	Vec3 t1 = (inBoundsMin - inOrigin) * inInvDirection.mInvDirection;
@@ -71,8 +71,8 @@ JPH_INLINE float RayAABox(Vec3Arg inOrigin, const RayInvDirection &inInvDirectio
 JPH_INLINE Vec4 RayAABox4(Vec3Arg inOrigin, const RayInvDirection &inInvDirection, Vec4Arg inBoundsMinX, Vec4Arg inBoundsMinY, Vec4Arg inBoundsMinZ, Vec4Arg inBoundsMaxX, Vec4Arg inBoundsMaxY, Vec4Arg inBoundsMaxZ)
 {
 	// Constants
-	Vec4 flt_min = Vec4::sReplicate(-FLT_MAX);
-	Vec4 flt_max = Vec4::sReplicate(FLT_MAX);
+	Vec4 flt_min = Vec4::sReplicate(FIX_MIN);
+	Vec4 flt_max = Vec4::sReplicate(FIX_MAX);
 
 	// Origin
 	Vec4 originx = inOrigin.SplatX();
@@ -132,11 +132,11 @@ JPH_INLINE Vec4 RayAABox4(Vec3Arg inOrigin, const RayInvDirection &inInvDirectio
 
 /// Intersect AABB with ray, returns minimal and maximal distance along ray or FLT_MAX, -FLT_MAX if no hit
 /// Note: Can return negative value for outMin if ray starts in box
-JPH_INLINE void RayAABox(Vec3Arg inOrigin, const RayInvDirection &inInvDirection, Vec3Arg inBoundsMin, Vec3Arg inBoundsMax, float &outMin, float &outMax)
+JPH_INLINE void RayAABox(Vec3Arg inOrigin, const RayInvDirection &inInvDirection, Vec3Arg inBoundsMin, Vec3Arg inBoundsMax, decimal &outMin, decimal &outMax)
 {
 	// Constants
-	Vec3 flt_min = Vec3::sReplicate(-FLT_MAX);
-	Vec3 flt_max = Vec3::sReplicate(FLT_MAX);
+	Vec3 flt_min = Vec3::sReplicate(FIX_MIN);
+	Vec3 flt_max = Vec3::sReplicate(FIX_MAX);
 
 	// Test against all three axii simultaneously.
 	Vec3 t1 = (inBoundsMin - inOrigin) * inInvDirection.mInvDirection;
@@ -171,11 +171,11 @@ JPH_INLINE void RayAABox(Vec3Arg inOrigin, const RayInvDirection &inInvDirection
 }
 
 /// Intersect AABB with ray, returns true if there is a hit closer than inClosest
-JPH_INLINE bool RayAABoxHits(Vec3Arg inOrigin, const RayInvDirection &inInvDirection, Vec3Arg inBoundsMin, Vec3Arg inBoundsMax, float inClosest)
+JPH_INLINE bool RayAABoxHits(Vec3Arg inOrigin, const RayInvDirection &inInvDirection, Vec3Arg inBoundsMin, Vec3Arg inBoundsMax, decimal inClosest)
 {
 	// Constants
-	Vec3 flt_min = Vec3::sReplicate(-FLT_MAX);
-	Vec3 flt_max = Vec3::sReplicate(FLT_MAX);
+	Vec3 flt_min = Vec3::sReplicate(FIX_MIN);
+	Vec3 flt_max = Vec3::sReplicate(FIX_MAX);
 
 	// Test against all three axii simultaneously.
 	Vec3 t1 = (inBoundsMin - inOrigin) * inInvDirection.mInvDirection;
@@ -216,7 +216,7 @@ JPH_INLINE bool RayAABoxHits(Vec3Arg inOrigin, Vec3Arg inDirection, Vec3Arg inBo
 {
 	Vec3 extents = inBoundsMax - inBoundsMin;
 
-	Vec3 diff = 2.0f * inOrigin - inBoundsMin - inBoundsMax;
+	Vec3 diff = C2 * inOrigin - inBoundsMin - inBoundsMax;
 	Vec3 abs_diff = diff.Abs();
 		
 	UVec4 no_intersection = UVec4::sAnd(Vec3::sGreater(abs_diff, extents), Vec3::sGreaterOrEqual(diff * inDirection, Vec3::sZero()));

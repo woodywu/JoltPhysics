@@ -14,7 +14,7 @@ public:
 	/// Constructor
 					Plane() = default;
 	explicit		Plane(Vec4Arg inNormalAndConstant)										: mNormalAndConstant(inNormalAndConstant) { }
-					Plane(Vec3Arg inNormal, float inConstant)								: mNormalAndConstant(inNormal, inConstant) { }
+					Plane(Vec3Arg inNormal, decimal inConstant)								: mNormalAndConstant(inNormal, inConstant) { }
 
 	/// Create from point and normal
 	static Plane	sFromPointAndNormal(Vec3Arg inPoint, Vec3Arg inNormal)					{ return Plane(Vec4(inNormal, -inNormal.Dot(inPoint))); }
@@ -25,14 +25,14 @@ public:
 	// Properties
 	Vec3			GetNormal() const														{ return Vec3(mNormalAndConstant); }
 	void			SetNormal(Vec3Arg inNormal)												{ mNormalAndConstant = Vec4(inNormal, mNormalAndConstant.GetW()); }
-	float			GetConstant() const														{ return mNormalAndConstant.GetW(); }
-	void			SetConstant(float inConstant)											{ mNormalAndConstant.SetW(inConstant); }
+	decimal			GetConstant() const														{ return mNormalAndConstant.GetW(); }
+	void			SetConstant(decimal inConstant)											{ mNormalAndConstant.SetW(inConstant); }
 
 	/// Offset the plane (positive value means move it in the direction of the plane normal)
-	Plane			Offset(float inDistance) const											{ return Plane(mNormalAndConstant - Vec4(Vec3::sZero(), inDistance)); }
+	Plane			Offset(decimal inDistance) const											{ return Plane(mNormalAndConstant - Vec4(Vec3::sZero(), inDistance)); }
 
 	/// Distance point to plane
-	float			SignedDistance(Vec3Arg inPoint) const									{ return inPoint.Dot(GetNormal()) + GetConstant(); }
+	decimal			SignedDistance(Vec3Arg inPoint) const									{ return inPoint.Dot(GetNormal()) + GetConstant(); }
 
 	/// Returns intersection point between 3 planes
 	static bool		sIntersectPlanes(const Plane &inP1, const Plane &inP2, const Plane &inP3, Vec3 &outPoint)
@@ -51,8 +51,8 @@ public:
 		Vec4 c = inP3.mNormalAndConstant;
 
 		// Result is a vector that we have to divide by:
-		float denominator = Vec3(a).Dot(Vec3(b).Cross(Vec3(c)));
-		if (denominator == 0.0f)
+		decimal denominator = Vec3(a).Dot(Vec3(b).Cross(Vec3(c)));
+		if (denominator == C0)
 			return false;
 
 		// The numerator is:

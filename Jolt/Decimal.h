@@ -14,4 +14,8 @@ constexpr decimal C0P5 = decimal(0.5);
 constexpr decimal C0P1 = decimal(0.1);
 constexpr decimal C1 = decimal(1);
 constexpr decimal C2 = decimal(2);
+constexpr decimal C3 = decimal(3);
 
+constexpr decimal FIX_MIN = std::numeric_limits<decimal>::min();
+constexpr decimal FIX_MAX = std::numeric_limits<decimal>::max();
+constexpr decimal FIX_EPSILON = std::numeric_limits<decimal>::epsilon();

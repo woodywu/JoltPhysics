@@ -84,7 +84,7 @@ JPH_INLINE UVec4 AABox4VsPoint(Vec3Arg inPoint, Vec4Arg inBoxMinX, Vec4Arg inBox
 }
 
 /// Test if 4 bounding boxes overlap with an oriented box
-JPH_INLINE UVec4 AABox4VsBox(Mat44Arg inOrientation, Vec3Arg inHalfExtents, Vec4Arg inBoxMinX, Vec4Arg inBoxMinY, Vec4Arg inBoxMinZ, Vec4Arg inBoxMaxX, Vec4Arg inBoxMaxY, Vec4Arg inBoxMaxZ, float inEpsilon = 1.0e-6f)
+JPH_INLINE UVec4 AABox4VsBox(Mat44Arg inOrientation, Vec3Arg inHalfExtents, Vec4Arg inBoxMinX, Vec4Arg inBoxMinY, Vec4Arg inBoxMinZ, Vec4Arg inBoxMaxX, Vec4Arg inBoxMaxY, Vec4Arg inBoxMaxZ, decimal inEpsilon = decimal(1.0e-6f))
 {
 	// Taken from: Real Time Collision Detection - Christer Ericson
 	// Chapter 4.4.1, page 103-105.
@@ -92,9 +92,9 @@ JPH_INLINE UVec4 AABox4VsBox(Mat44Arg inOrientation, Vec3Arg inHalfExtents, Vec4
 
 	// Compute translation vector t (the translation of B in the space of A)
 	Vec4 t[3] { 
-		inOrientation.GetTranslation().SplatX() - 0.5f * (inBoxMinX + inBoxMaxX), 
-		inOrientation.GetTranslation().SplatY() - 0.5f * (inBoxMinY + inBoxMaxY), 
-		inOrientation.GetTranslation().SplatZ() - 0.5f * (inBoxMinZ + inBoxMaxZ) };
+		inOrientation.GetTranslation().SplatX() - C0P5 * (inBoxMinX + inBoxMaxX), 
+		inOrientation.GetTranslation().SplatY() - C0P5 * (inBoxMinY + inBoxMaxY), 
+		inOrientation.GetTranslation().SplatZ() - C0P5 * (inBoxMinZ + inBoxMaxZ) };
 	
 	// Compute common subexpressions. Add in an epsilon term to
 	// counteract arithmetic errors when two edges are parallel and
@@ -104,9 +104,9 @@ JPH_INLINE UVec4 AABox4VsBox(Mat44Arg inOrientation, Vec3Arg inHalfExtents, Vec4
 
 	// Half extents for a
 	Vec4 a_half_extents[3] { 
-		0.5f * (inBoxMaxX - inBoxMinX), 
-		0.5f * (inBoxMaxY - inBoxMinY), 
-		0.5f * (inBoxMaxZ - inBoxMinZ) };
+		C0P5 * (inBoxMaxX - inBoxMinX), 
+		C0P5 * (inBoxMaxY - inBoxMinY), 
+		C0P5 * (inBoxMaxZ - inBoxMinZ) };
 
 	// Half extents of b
 	Vec4 b_half_extents_x = inHalfExtents.SplatX();
@@ -183,7 +183,7 @@ JPH_INLINE UVec4 AABox4VsBox(Mat44Arg inOrientation, Vec3Arg inHalfExtents, Vec4
 }
 
 /// Convenience function that tests 4 AABoxes vs OrientedBox
-JPH_INLINE UVec4 AABox4VsBox(const OrientedBox &inBox, Vec4Arg inBoxMinX, Vec4Arg inBoxMinY, Vec4Arg inBoxMinZ, Vec4Arg inBoxMaxX, Vec4Arg inBoxMaxY, Vec4Arg inBoxMaxZ, float inEpsilon = 1.0e-6f)
+JPH_INLINE UVec4 AABox4VsBox(const OrientedBox &inBox, Vec4Arg inBoxMinX, Vec4Arg inBoxMinY, Vec4Arg inBoxMinZ, Vec4Arg inBoxMaxX, Vec4Arg inBoxMaxY, Vec4Arg inBoxMaxZ, decimal inEpsilon = decimal(1.0e-6f))
 {
 	return AABox4VsBox(inBox.mOrientation, inBox.mHalfExtents, inBoxMinX, inBoxMinY, inBoxMinZ, inBoxMaxX, inBoxMaxY, inBoxMaxZ, inEpsilon);
 }
@@ -202,7 +202,7 @@ JPH_INLINE UVec4 AABox4VsSphere(Vec4Arg inCenterX, Vec4Arg inCenterY, Vec4Arg in
 }
 
 /// Test 4 AABoxes vs a sphere
-JPH_INLINE UVec4 AABox4VsSphere(Vec3Arg inCenter, float inRadiusSq, Vec4Arg inBoxMinX, Vec4Arg inBoxMinY, Vec4Arg inBoxMinZ, Vec4Arg inBoxMaxX, Vec4Arg inBoxMaxY, Vec4Arg inBoxMaxZ)
+JPH_INLINE UVec4 AABox4VsSphere(Vec3Arg inCenter, decimal inRadiusSq, Vec4Arg inBoxMinX, Vec4Arg inBoxMinY, Vec4Arg inBoxMinZ, Vec4Arg inBoxMaxX, Vec4Arg inBoxMaxY, Vec4Arg inBoxMaxZ)
 {
 	return AABox4VsSphere(inCenter.SplatX(), inCenter.SplatY(), inCenter.SplatZ(), Vec4::sReplicate(inRadiusSq), inBoxMinX, inBoxMinY, inBoxMinZ, inBoxMaxX, inBoxMaxY, inBoxMaxZ);
 }

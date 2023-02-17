@@ -17,7 +17,7 @@ void ClipPolyVsPlane(const VERTEX_ARRAY &inPolygonToClip, Vec3Arg inPlaneOrigin,
 
 	// Determine state of last point
 	Vec3 e1 = inPolygonToClip[inPolygonToClip.size() - 1];
-	float prev_num = (inPlaneOrigin - e1).Dot(inPlaneNormal);
+	decimal prev_num = (inPlaneOrigin - e1).Dot(inPlaneNormal);
 	bool prev_inside = prev_num < 0.0f; 
 
 	// Loop through all vertices
@@ -25,7 +25,7 @@ void ClipPolyVsPlane(const VERTEX_ARRAY &inPolygonToClip, Vec3Arg inPlaneOrigin,
 	{
 		// Check if second point is inside
 		Vec3Arg e2 = inPolygonToClip[j];
-		float num = (inPlaneOrigin - e2).Dot(inPlaneNormal);
+		decimal num = (inPlaneOrigin - e2).Dot(inPlaneNormal);
 		bool cur_inside = num < 0.0f;
 
 		// In -> Out or Out -> In: Add point on clipping plane
@@ -33,7 +33,7 @@ void ClipPolyVsPlane(const VERTEX_ARRAY &inPolygonToClip, Vec3Arg inPlaneOrigin,
 		{
 			// Solve: (X - inPlaneOrigin) . inPlaneNormal = 0 and X = e1 + t * (e2 - e1) for X
 			Vec3 e12 = e2 - e1;
-			float denom = e12.Dot(inPlaneNormal);
+			decimal denom = e12.Dot(inPlaneNormal);
 			if (denom != 0.0f)
 				outClippedPolygon.push_back(e1 + (prev_num / denom) * e12);
 			else
@@ -105,15 +105,15 @@ void ClipPolyVsEdge(const VERTEX_ARRAY &inPolygonToClip, Vec3Arg inEdgeVertex1, 
 
 	// Project vertices of edge on inPolygonToClip
 	Vec3 polygon_normal = (inPolygonToClip[2] - inPolygonToClip[0]).Cross(inPolygonToClip[1] - inPolygonToClip[0]);
-	float polygon_normal_len_sq = polygon_normal.LengthSq();
+	decimal polygon_normal_len_sq = polygon_normal.LengthSq();
 	Vec3 v1 = inEdgeVertex1 + polygon_normal.Dot(inPolygonToClip[0] - inEdgeVertex1) * polygon_normal / polygon_normal_len_sq;
 	Vec3 v2 = inEdgeVertex2 + polygon_normal.Dot(inPolygonToClip[0] - inEdgeVertex2) * polygon_normal / polygon_normal_len_sq;
 	Vec3 v12 = v2 - v1;
-	float v12_len_sq = v12.LengthSq();
+	decimal v12_len_sq = v12.LengthSq();
 
 	// Determine state of last point
 	Vec3 e1 = inPolygonToClip[inPolygonToClip.size() - 1];
-	float prev_num = (inEdgeVertex1 - e1).Dot(edge_normal);
+	decimal prev_num = (inEdgeVertex1 - e1).Dot(edge_normal);
 	bool prev_inside = prev_num < 0.0f; 
 	
 	// Loop through all vertices
@@ -121,7 +121,7 @@ void ClipPolyVsEdge(const VERTEX_ARRAY &inPolygonToClip, Vec3Arg inEdgeVertex1, 
 	{
 		// Check if second point is inside
 		Vec3 e2 = inPolygonToClip[j];
-		float num = (inEdgeVertex1 - e2).Dot(edge_normal);
+		decimal num = (inEdgeVertex1 - e2).Dot(edge_normal);
 		bool cur_inside = num < 0.0f;
 
 		// In -> Out or Out -> In: Add point on clipping plane
@@ -129,11 +129,11 @@ void ClipPolyVsEdge(const VERTEX_ARRAY &inPolygonToClip, Vec3Arg inEdgeVertex1, 
 		{
 			// Solve: (X - inPlaneOrigin) . inPlaneNormal = 0 and X = e1 + t * (e2 - e1) for X
 			Vec3 e12 = e2 - e1;
-			float denom = e12.Dot(edge_normal);
+			decimal denom = e12.Dot(edge_normal);
 			Vec3 clipped_point = e1 + (prev_num / denom) * e12;
 
 			// Project point on line segment v1, v2 so see if it falls outside if the edge
-			float projection = (clipped_point - v1).Dot(v12);
+			decimal projection = (clipped_point - v1).Dot(v12);
 			if (projection < 0.0f)
 				outClippedPolygon.push_back(v1);
 			else if (projection > v12_len_sq)

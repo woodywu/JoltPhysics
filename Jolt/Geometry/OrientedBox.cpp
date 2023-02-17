@@ -8,7 +8,7 @@
 
 JPH_NAMESPACE_BEGIN
 
-bool OrientedBox::Overlaps(const AABox &inBox, float inEpsilon) const
+bool OrientedBox::Overlaps(const AABox &inBox, decimal inEpsilon) const
 {
 	// Taken from: Real Time Collision Detection - Christer Ericson
 	// Chapter 4.4.1, page 103-105.
@@ -19,7 +19,7 @@ bool OrientedBox::Overlaps(const AABox &inBox, float inEpsilon) const
 	Vec3 a_half_extents = inBox.GetExtent();
 
 	// Compute rotation matrix expressing b in a's coordinate frame
-	Mat44 rot(mOrientation.GetColumn4(0), mOrientation.GetColumn4(1), mOrientation.GetColumn4(2), mOrientation.GetColumn4(3) - Vec4(a_center, 0));
+	Mat44 rot(mOrientation.GetColumn4(0), mOrientation.GetColumn4(1), mOrientation.GetColumn4(2), mOrientation.GetColumn4(3) - Vec4(a_center, C0));
 
 	// Compute common subexpressions. Add in an epsilon term to
 	// counteract arithmetic errors when two edges are parallel and
@@ -28,7 +28,7 @@ bool OrientedBox::Overlaps(const AABox &inBox, float inEpsilon) const
 	Vec3 abs_r[3] { rot.GetAxisX().Abs() + epsilon, rot.GetAxisY().Abs() + epsilon, rot.GetAxisZ().Abs() + epsilon };
 
 	// Test axes L = A0, L = A1, L = A2
-	float ra, rb;
+	decimal ra, rb;
 	for (int i = 0; i < 3; i++) 
 	{
 		ra = a_half_extents[i];
@@ -93,7 +93,7 @@ bool OrientedBox::Overlaps(const AABox &inBox, float inEpsilon) const
 	return true;
 }
 
-bool OrientedBox::Overlaps(const OrientedBox &inBox, float inEpsilon) const
+bool OrientedBox::Overlaps(const OrientedBox &inBox, decimal inEpsilon) const
 {
 	// Taken from: Real Time Collision Detection - Christer Ericson
 	// Chapter 4.4.1, page 103-105.
@@ -109,7 +109,7 @@ bool OrientedBox::Overlaps(const OrientedBox &inBox, float inEpsilon) const
 	Vec3 abs_r[3] { rot.GetAxisX().Abs() + epsilon, rot.GetAxisY().Abs() + epsilon, rot.GetAxisZ().Abs() + epsilon };
 
 	// Test axes L = A0, L = A1, L = A2
-	float ra, rb;
+	decimal ra, rb;
 	for (int i = 0; i < 3; i++) 
 	{
 		ra = mHalfExtents[i];

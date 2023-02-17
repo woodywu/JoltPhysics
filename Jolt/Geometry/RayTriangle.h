@@ -7,14 +7,14 @@ JPH_NAMESPACE_BEGIN
 
 /// Intersect ray with triangle, returns closest point or FLT_MAX if no hit (branch less version)
 /// Adapted from: http://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
-JPH_INLINE float RayTriangle(Vec3Arg inOrigin, Vec3Arg inDirection, Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2)
+JPH_INLINE decimal RayTriangle(Vec3Arg inOrigin, Vec3Arg inDirection, Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2)
 {
 	// Epsilon
-	Vec3 epsilon = Vec3::sReplicate(1.0e-12f);
+	Vec3 epsilon = Vec3::sReplicate(decimal(1.0e-12f));
 
 	// Zero & one
 	Vec3 zero = Vec3::sZero();
-	Vec3 one = Vec3::sReplicate(1.0f);
+	Vec3 one = Vec3::sReplicate(C1);
 
 	// Find vectors for two edges sharing inV0
 	Vec3 e1 = inV1 - inV0;
@@ -30,7 +30,7 @@ JPH_INLINE float RayTriangle(Vec3Arg inOrigin, Vec3Arg inDirection, Vec3Arg inV0
 	UVec4 det_near_zero = Vec3::sLess(det.Abs(), epsilon);
 
 	// When the determinant is near zero, set it to one to avoid dividing by zero
-	det = Vec3::sSelect(det, Vec3::sReplicate(1.0f), det_near_zero);
+	det = Vec3::sSelect(det, Vec3::sReplicate(C1), det_near_zero);
 
 	// Calculate distance from inV0 to ray origin
 	Vec3 s = inOrigin - inV0;
@@ -68,14 +68,14 @@ JPH_INLINE float RayTriangle(Vec3Arg inOrigin, Vec3Arg inDirection, Vec3Arg inV0
 		);
 
 	// Select intersection point or FLT_MAX based on if there is an intersection or not
-	return Vec3::sSelect(t, Vec3::sReplicate(FLT_MAX), no_intersection).GetX();
+	return Vec3::sSelect(t, Vec3::sReplicate(FIX_MAX), no_intersection).GetX();
 }
 
 /// Intersect ray with 4 triangles in SOA format, returns 4 vector of closest points or FLT_MAX if no hit (uses bit tricks to do less divisions)
 JPH_INLINE Vec4 RayTriangle4(Vec3Arg inOrigin, Vec3Arg inDirection, Vec4Arg inV0X, Vec4Arg inV0Y, Vec4Arg inV0Z, Vec4Arg inV1X, Vec4Arg inV1Y, Vec4Arg inV1Z, Vec4Arg inV2X, Vec4Arg inV2Y, Vec4Arg inV2Z)
 {
 	// Epsilon
-	Vec4 epsilon = Vec4::sReplicate(1.0e-12f);
+	Vec4 epsilon = Vec4::sReplicate(decimal(1.0e-12f));
 
 	// Zero
 	Vec4 zero = Vec4::sZero();
@@ -109,7 +109,7 @@ JPH_INLINE Vec4 RayTriangle4(Vec3Arg inOrigin, Vec3Arg inDirection, Vec4Arg inV0
 	UVec4 det_near_zero = Vec4::sLess(det, epsilon);
 
 	// Set components of the determinant to 1 that are near zero to avoid dividing by zero
-	det = Vec4::sSelect(det, Vec4::sReplicate(1.0f), det_near_zero);
+	det = Vec4::sSelect(det, Vec4::sReplicate(C1), det_near_zero);
 
 	// Calculate distance from inV0 to ray origin
 	Vec4 sx = inOrigin.SplatX() - inV0X;
@@ -151,7 +151,7 @@ JPH_INLINE Vec4 RayTriangle4(Vec3Arg inOrigin, Vec3Arg inDirection, Vec4Arg inV0
 		);
 
 	// Select intersection point or FLT_MAX based on if there is an intersection or not
-	return Vec4::sSelect(t / det, Vec4::sReplicate(FLT_MAX), no_intersection);
+	return Vec4::sSelect(t / det, Vec4::sReplicate(FIX_MAX), no_intersection);
 }
 
 JPH_NAMESPACE_END

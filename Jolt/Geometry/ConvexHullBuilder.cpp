@@ -83,7 +83,7 @@ void ConvexHullBuilder::Face::CalculateNormalAndCentroid(const Vec3 *inPositions
 	}
 
 	// Finalize centroid
-	mCentroid /= float(n);
+	mCentroid /= decimal(n);
 }
 
 void ConvexHullBuilder::Face::Initialize(int inIdx0, int inIdx1, int inIdx2, const Vec3 *inPositions)
@@ -120,7 +120,7 @@ ConvexHullBuilder::ConvexHullBuilder(const Positions &inPositions) :
 	}
 	else
 	{
-		Vec3 maxv = Vec3::sReplicate(-FLT_MAX), minv = Vec3::sReplicate(FLT_MAX);
+		Vec3 maxv = Vec3::sReplicate(-FIX_MAX), minv = Vec3::sReplicate(FIX_MAX);
 		for (Vec3 v : mPositions)
 		{
 			minv = Vec3::sMin(minv, v);
@@ -141,19 +141,19 @@ void ConvexHullBuilder::FreeFaces()
 	mFaces.clear();
 }
 
-void ConvexHullBuilder::GetFaceForPoint(Vec3Arg inPoint, const Faces &inFaces, Face *&outFace, float &outDistSq) const
+void ConvexHullBuilder::GetFaceForPoint(Vec3Arg inPoint, const Faces &inFaces, Face *&outFace, decimal &outDistSq) const
 {
 	outFace = nullptr;
-	outDistSq = 0.0f;
+	outDistSq = C0;
 
 	for (Face *f : inFaces)
 		if (!f->mRemoved)
 		{
 			// Determine distance to face
-			float dot = f->mNormal.Dot(inPoint - f->mCentroid);
-			if (dot > 0.0f)
+			decimal dot = f->mNormal.Dot(inPoint - f->mCentroid);
+			if (dot > C0)
 			{
-				float dist_sq = dot * dot / f->mNormal.LengthSq();
+				decimal dist_sq = dot * dot / f->mNormal.LengthSq();
 				if (dist_sq > outDistSq)
 				{
 					outFace = f;
@@ -163,10 +163,10 @@ void ConvexHullBuilder::GetFaceForPoint(Vec3Arg inPoint, const Faces &inFaces, F
 		}
 }
 
-float ConvexHullBuilder::GetDistanceToEdgeSq(Vec3Arg inPoint, const Face *inFace) const
+decimal ConvexHullBuilder::GetDistanceToEdgeSq(Vec3Arg inPoint, const Face *inFace) const
 {
 	bool all_inside = true;
-	float edge_dist_sq = FLT_MAX;
+	decimal edge_dist_sq = FIX_MAX;
 
 	// Test if it is inside the edges of the polygon
 	Edge *edge = inFace->mFirstEdge;
@@ -174,7 +174,7 @@ float ConvexHullBuilder::GetDistanceToEdgeSq(Vec3Arg inPoint, const Face *inFace
 	do
 	{
 		Vec3 p2 = mPositions[edge->mStartIdx];
-		if ((p2 - p1).Cross(inPoint - p1).Dot(inFace->mNormal) < 0.0f)
+		if ((p2 - p1).Cross(inPoint - p1).Dot(inFace->mNormal) < C0)
 		{
 			// It is outside
 			all_inside = false;
@@ -187,16 +187,16 @@ float ConvexHullBuilder::GetDistanceToEdgeSq(Vec3Arg inPoint, const Face *inFace
 		edge = edge->mNextEdge;
 	} while (edge != inFace->mFirstEdge);
 
-	return all_inside? 0.0f : edge_dist_sq;
+	return all_inside? C0 : edge_dist_sq;
 }
 
-bool ConvexHullBuilder::AssignPointToFace(int inPositionIdx, const Faces &inFaces, float inToleranceSq)
+bool ConvexHullBuilder::AssignPointToFace(int inPositionIdx, const Faces &inFaces, decimal inToleranceSq)
 {
 	Vec3 point = mPositions[inPositionIdx];
 
 	// Find the face for which the point is furthest away
 	Face *best_face;
-	float best_dist_sq;
+	decimal best_dist_sq;
 	GetFaceForPoint(point, inFaces, best_face, best_dist_sq);
 
 	if (best_face != nullptr)
@@ -205,7 +205,7 @@ bool ConvexHullBuilder::AssignPointToFace(int inPositionIdx, const Faces &inFace
 		if (best_dist_sq <= inToleranceSq)
 		{
 			// Check distance to edges
-			float dist_to_edge_sq = GetDistanceToEdgeSq(point, best_face);
+			decimal dist_to_edge_sq = GetDistanceToEdgeSq(point, best_face);
 			if (dist_to_edge_sq > inToleranceSq)
 			{
 				// Point is outside of the face and too far away to discard
@@ -235,13 +235,13 @@ bool ConvexHullBuilder::AssignPointToFace(int inPositionIdx, const Faces &inFace
 	return false;
 }
 
-float ConvexHullBuilder::DetermineCoplanarDistance() const
+decimal ConvexHullBuilder::DetermineCoplanarDistance() const
 {
 	// Formula as per: Implementing Quickhull - Dirk Gregorius.
 	Vec3 vmax = Vec3::sZero();
 	for (Vec3 v : mPositions)
 		vmax = Vec3::sMax(vmax, v.Abs());
-	return 3.0f * FLT_EPSILON * (vmax.GetX() + vmax.GetY() + vmax.GetZ());
+	return C3 * FIX_EPSILON * (vmax.GetX() + vmax.GetY() + vmax.GetZ());
 }
 
 int ConvexHullBuilder::GetNumVerticesUsed() const
@@ -295,7 +295,7 @@ bool ConvexHullBuilder::ContainsFace(const Array<int> &inIndices) const
 	return false;
 }
 
-ConvexHullBuilder::EResult ConvexHullBuilder::Initialize(int inMaxVertices, float inTolerance, const char *&outError)
+ConvexHullBuilder::EResult ConvexHullBuilder::Initialize(int inMaxVertices, decimal inTolerance, const char *&outError)
 {
 	// Free the faces possibly left over from an earlier hull
 	FreeFaces();
@@ -308,17 +308,17 @@ ConvexHullBuilder::EResult ConvexHullBuilder::Initialize(int inMaxVertices, floa
 	}
 
 	// Determine a suitable tolerance for detecting that points are coplanar
-	float coplanar_tolerance_sq = Square(DetermineCoplanarDistance());
+	decimal coplanar_tolerance_sq = Square(DetermineCoplanarDistance());
 
 	// Increase desired tolerance if accuracy doesn't allow it
-	float tolerance_sq = max(coplanar_tolerance_sq, Square(inTolerance));
+	decimal tolerance_sq = max(coplanar_tolerance_sq, Square(inTolerance));
 	
 	// Find point furthest from the origin
 	int idx1 = -1;
-	float max_dist_sq = -1.0f;
+	decimal max_dist_sq = -C1;
 	for (int i = 0; i < (int)mPositions.size(); ++i)
 	{
-		float dist_sq = mPositions[i].LengthSq();
+		decimal dist_sq = mPositions[i].LengthSq();
 		if (dist_sq > max_dist_sq)
 		{
 			max_dist_sq = dist_sq;
@@ -329,11 +329,11 @@ ConvexHullBuilder::EResult ConvexHullBuilder::Initialize(int inMaxVertices, floa
 
 	// Find point that is furthest away from this point
 	int idx2 = -1;
-	max_dist_sq = -1.0f;
+	max_dist_sq = -C1;
 	for (int i = 0; i < (int)mPositions.size(); ++i)
 		if (i != idx1)
 		{
-			float dist_sq = (mPositions[i] - mPositions[idx1]).LengthSq();
+			decimal dist_sq = (mPositions[i] - mPositions[idx1]).LengthSq();
 			if (dist_sq > max_dist_sq)
 			{
 				max_dist_sq = dist_sq;
@@ -344,11 +344,11 @@ ConvexHullBuilder::EResult ConvexHullBuilder::Initialize(int inMaxVertices, floa
 
 	// Find point that forms the biggest triangle
 	int idx3 = -1;
-	float best_triangle_area_sq = -1.0f;
+	decimal best_triangle_area_sq = -C1;
 	for (int i = 0; i < (int)mPositions.size(); ++i)
 		if (i != idx1 && i != idx2)
 		{
-			float triangle_area_sq = (mPositions[idx1] - mPositions[i]).Cross(mPositions[idx2] - mPositions[i]).LengthSq();
+			decimal triangle_area_sq = (mPositions[idx1] - mPositions[i]).Cross(mPositions[idx2] - mPositions[i]).LengthSq();
 			if (triangle_area_sq > best_triangle_area_sq)
 			{
 				best_triangle_area_sq = triangle_area_sq;
@@ -384,13 +384,13 @@ ConvexHullBuilder::EResult ConvexHullBuilder::Initialize(int inMaxVertices, floa
 
 	// Find point that forms the biggest tetrahedron
 	Vec3 initial_plane_normal = (mPositions[idx2] - mPositions[idx1]).Cross(mPositions[idx3] - mPositions[idx1]).Normalized();
-	Vec3 initial_plane_centroid = (mPositions[idx1] + mPositions[idx2] + mPositions[idx3]) / 3.0f;
+	Vec3 initial_plane_centroid = (mPositions[idx1] + mPositions[idx2] + mPositions[idx3]) / C3;
 	int idx4 = -1;
-	float max_dist = 0.0f;
+	decimal max_dist = C0;
 	for (int i = 0; i < (int)mPositions.size(); ++i)
 		if (i != idx1 && i != idx2 && i != idx3)
 		{
-			float dist = (mPositions[i] - initial_plane_centroid).Dot(initial_plane_normal);
+			decimal dist = (mPositions[i] - initial_plane_centroid).Dot(initial_plane_normal);
 			if (abs(dist) > abs(max_dist))
 			{
 				max_dist = dist;
@@ -399,7 +399,7 @@ ConvexHullBuilder::EResult ConvexHullBuilder::Initialize(int inMaxVertices, floa
 		}
 
 	// Check if the hull is coplanar
-	if (Square(max_dist) <= 25.0f * coplanar_tolerance_sq)
+	if (Square(max_dist) <= decimal(25.0f) * coplanar_tolerance_sq)
 	{
 		// First project all points in 2D space
 		Vec3 base1 = initial_plane_normal.GetNormalizedPerpendicular();
@@ -407,7 +407,7 @@ ConvexHullBuilder::EResult ConvexHullBuilder::Initialize(int inMaxVertices, floa
 		Array<Vec3> positions_2d;
 		positions_2d.reserve(mPositions.size());
 		for (Vec3 v : mPositions)
-			positions_2d.push_back(Vec3(base1.Dot(v), base2.Dot(v), 0));
+			positions_2d.push_back(Vec3(base1.Dot(v), base2.Dot(v), C0));
 
 		// Build hull
 		Array<int> edges_2d;
@@ -464,7 +464,7 @@ ConvexHullBuilder::EResult ConvexHullBuilder::Initialize(int inMaxVertices, floa
 	}
 
 	// Ensure the planes are facing outwards
-	if (max_dist < 0.0f)
+	if (max_dist < C0)
 		swap(idx2, idx3);
 
 	// Create tetrahedron
@@ -503,7 +503,7 @@ ConvexHullBuilder::EResult ConvexHullBuilder::Initialize(int inMaxVertices, floa
 	{
 		// Find the face with the furthest point on it
 		Face *face_with_furthest_point = nullptr;
-		float furthest_dist_sq = 0.0f;
+		decimal furthest_dist_sq = C0;
 		for (Face *f : mFaces)
 			if (f->mFurthestPointDistanceSq > furthest_dist_sq)
 			{
@@ -539,7 +539,7 @@ ConvexHullBuilder::EResult ConvexHullBuilder::Initialize(int inMaxVertices, floa
 			{
 				// Find the vertex that is furthest from the hull
 				CoplanarList::size_type best_idx = 0;
-				float best_dist_sq = mCoplanarList.front().mDistanceSq;
+				decimal best_dist_sq = mCoplanarList.front().mDistanceSq;
 				for (CoplanarList::size_type idx = 1; idx < mCoplanarList.size(); ++idx)
 				{
 					const Coplanar &c = mCoplanarList[idx];
@@ -616,7 +616,7 @@ ConvexHullBuilder::EResult ConvexHullBuilder::Initialize(int inMaxVertices, floa
 	return EResult::Success;
 }
 
-void ConvexHullBuilder::AddPoint(Face *inFacingFace, int inIdx, float inCoplanarToleranceSq, Faces &outNewFaces)
+void ConvexHullBuilder::AddPoint(Face *inFacingFace, int inIdx, decimal inCoplanarToleranceSq, Faces &outNewFaces)
 {
 	// Get position
 	Vec3 pos = mPositions[inIdx];
@@ -943,7 +943,7 @@ void ConvexHullBuilder::MergeDegenerateFace(Face *inFace, Faces &ioAffectedFaces
 	if (inFace->mNormal.LengthSq() < cMinTriangleAreaSq)
 	{
 		// Find longest edge, since this face is a sliver this should keep the face convex
-		float max_length_sq = 0.0f;
+		decimal max_length_sq = C0;
 		Edge *longest_edge = nullptr;
 		Edge *e = inFace->mFirstEdge;
 		Vec3 p1 = mPositions[e->mStartIdx];
@@ -951,7 +951,7 @@ void ConvexHullBuilder::MergeDegenerateFace(Face *inFace, Faces &ioAffectedFaces
 		{
 			Edge *next = e->mNextEdge;
 			Vec3 p2 = mPositions[next->mStartIdx];
-			float length_sq = (p2 - p1).LengthSq();
+			decimal length_sq = (p2 - p1).LengthSq();
 			if (length_sq >= max_length_sq)
 			{
 				max_length_sq = length_sq;
@@ -969,7 +969,7 @@ void ConvexHullBuilder::MergeDegenerateFace(Face *inFace, Faces &ioAffectedFaces
 	}
 }
 
-void ConvexHullBuilder::MergeCoplanarOrConcaveFaces(Face *inFace, float inCoplanarToleranceSq, Faces &ioAffectedFaces)
+void ConvexHullBuilder::MergeCoplanarOrConcaveFaces(Face *inFace, decimal inCoplanarToleranceSq, Faces &ioAffectedFaces)
 {
 	bool merged = false;
 
@@ -983,15 +983,15 @@ void ConvexHullBuilder::MergeCoplanarOrConcaveFaces(Face *inFace, float inCoplan
 		// If so we need to merge other face into inFace.
 		const Face *other_face = edge->mNeighbourEdge->mFace;
 		Vec3 delta_centroid = other_face->mCentroid - inFace->mCentroid;
-		float dist_other_face_centroid = inFace->mNormal.Dot(delta_centroid);
-		float signed_dist_other_face_centroid_sq = abs(dist_other_face_centroid) * dist_other_face_centroid;
-		float dist_face_centroid = -other_face->mNormal.Dot(delta_centroid);
-		float signed_dist_face_centroid_sq = abs(dist_face_centroid) * dist_face_centroid;
-		float face_normal_len_sq = inFace->mNormal.LengthSq();
-		float other_face_normal_len_sq = other_face->mNormal.LengthSq();
+		decimal dist_other_face_centroid = inFace->mNormal.Dot(delta_centroid);
+		decimal signed_dist_other_face_centroid_sq = abs(dist_other_face_centroid) * dist_other_face_centroid;
+		decimal dist_face_centroid = -other_face->mNormal.Dot(delta_centroid);
+		decimal signed_dist_face_centroid_sq = abs(dist_face_centroid) * dist_face_centroid;
+		decimal face_normal_len_sq = inFace->mNormal.LengthSq();
+		decimal other_face_normal_len_sq = other_face->mNormal.LengthSq();
 		if ((signed_dist_other_face_centroid_sq > -inCoplanarToleranceSq * face_normal_len_sq 
 			|| signed_dist_face_centroid_sq > -inCoplanarToleranceSq * other_face_normal_len_sq)
-			&& inFace->mNormal.Dot(other_face->mNormal) > 0.0f) // Never merge faces that are back to back
+			&& inFace->mNormal.Dot(other_face->mNormal) > C0) // Never merge faces that are back to back
 		{
 			MergeFaces(edge);
 			merged = true;
@@ -1252,16 +1252,16 @@ void ConvexHullBuilder::ValidateFaces() const
 
 #endif // JPH_ENABLE_ASSERTS
 
-void ConvexHullBuilder::GetCenterOfMassAndVolume(Vec3 &outCenterOfMass, float &outVolume) const
+void ConvexHullBuilder::GetCenterOfMassAndVolume(Vec3 &outCenterOfMass, decimal &outVolume) const
 {
 	// Fourth point is the average of all face centroids
 	Vec3 v4 = Vec3::sZero();
 	for (const Face *f : mFaces)
 		v4 += f->mCentroid;
-	v4 /= float(mFaces.size());
+	v4 /= decimal(mFaces.size());
 
 	// Calculate mass and center of mass of this convex hull by summing all tetrahedrons
-	outVolume = 0.0f;
+	outVolume = C0;
 	outCenterOfMass = Vec3::sZero();
 	for (const Face *f : mFaces)
 	{
@@ -1280,7 +1280,7 @@ void ConvexHullBuilder::GetCenterOfMassAndVolume(Vec3 &outCenterOfMass, float &o
 
 			// Calculate center of mass and mass of this tetrahedron,
 			// see: https://en.wikipedia.org/wiki/Tetrahedron#Volume
-			float volume_tetrahedron = (v1 - v4).Dot((v2 - v4).Cross(v3 - v4)); // Needs to be divided by 6, postpone this until the end of the loop
+			decimal volume_tetrahedron = (v1 - v4).Dot((v2 - v4).Cross(v3 - v4)); // Needs to be divided by 6, postpone this until the end of the loop
 			Vec3 center_of_mass_tetrahedron = v1 + v2 + v3 + v4; // Needs to be divided by 4, postpone this until the end of the loop
 
 			// Accumulate results
@@ -1293,20 +1293,20 @@ void ConvexHullBuilder::GetCenterOfMassAndVolume(Vec3 &outCenterOfMass, float &o
 	}
 
 	// Calculate center of mass, fall back to average point in case there is no volume (everything is on a plane in this case)
-	if (outVolume > FLT_EPSILON)
-		outCenterOfMass /= 4.0f * outVolume;
+	if (outVolume > FIX_EPSILON)
+		outCenterOfMass /= decimal(4.0f) * outVolume;
 	else
 		outCenterOfMass = v4;
 
-	outVolume /= 6.0f;
+	outVolume /= decimal(6.0f);
 }
 
-void ConvexHullBuilder::DetermineMaxError(Face *&outFaceWithMaxError, float &outMaxError, int &outMaxErrorPositionIdx, float &outCoplanarDistance) const
+void ConvexHullBuilder::DetermineMaxError(Face *&outFaceWithMaxError, decimal &outMaxError, int &outMaxErrorPositionIdx, decimal &outCoplanarDistance) const
 {
 	outCoplanarDistance = DetermineCoplanarDistance();
 
 	// This measures the distance from a polygon to the furthest point outside of the hull
-	float max_error = 0.0f;
+	decimal max_error = C0;
 	Face *max_error_face = nullptr;
 	int max_error_point = -1;
 
@@ -1318,19 +1318,19 @@ void ConvexHullBuilder::DetermineMaxError(Face *&outFaceWithMaxError, float &out
 		// Note that we take the min of all faces since there may be multiple near coplanar faces so if we were to test this per face
 		// we may find that a point is outside of a polygon and mark it as an error, while it is actually inside a nearly coplanar
 		// polygon.
-		float min_edge_dist_sq = FLT_MAX;
+		decimal min_edge_dist_sq = FIX_MAX;
 		Face *min_edge_dist_face = nullptr;
 
 		for (Face *f : mFaces)
 		{
 			// Check if point is on or in front of plane
-			float normal_len = f->mNormal.Length();
-			JPH_ASSERT(normal_len > 0.0f);
-			float plane_dist = f->mNormal.Dot(v - f->mCentroid) / normal_len;
+			decimal normal_len = f->mNormal.Length();
+			JPH_ASSERT(normal_len > C0);
+			decimal plane_dist = f->mNormal.Dot(v - f->mCentroid) / normal_len;
 			if (plane_dist > -outCoplanarDistance)
 			{
 				// Check distance to the edges of this face
-				float edge_dist_sq = GetDistanceToEdgeSq(v, f);
+				decimal edge_dist_sq = GetDistanceToEdgeSq(v, f);
 				if (edge_dist_sq < min_edge_dist_sq)
 				{
 					min_edge_dist_sq = edge_dist_sq;
@@ -1338,7 +1338,7 @@ void ConvexHullBuilder::DetermineMaxError(Face *&outFaceWithMaxError, float &out
 				}
 
 				// If the point is inside the polygon and the point is in front of the plane, measure the distance
-				if (edge_dist_sq == 0.0f && plane_dist > max_error)
+				if (edge_dist_sq == C0 && plane_dist > max_error)
 				{
 					max_error = plane_dist;
 					max_error_face = f;
@@ -1348,7 +1348,7 @@ void ConvexHullBuilder::DetermineMaxError(Face *&outFaceWithMaxError, float &out
 		}
 
 		// If the minimum distance to an edge is further than our current max error, we use that as max error
-		float min_edge_dist = sqrt(min_edge_dist_sq);
+		decimal min_edge_dist = sqrt(min_edge_dist_sq);
 		if (min_edge_dist_face != nullptr && min_edge_dist > max_error)
 		{
 			max_error = min_edge_dist;

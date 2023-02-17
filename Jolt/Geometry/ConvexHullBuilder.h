@@ -67,14 +67,14 @@ public:
 		inline bool		IsFacing(Vec3Arg inPosition) const
 		{
 			JPH_ASSERT(!mRemoved);
-			return mNormal.Dot(inPosition - mCentroid) > 0.0f;
+			return mNormal.Dot(inPosition - mCentroid) > C0;
 		}
 
 		Vec3			mNormal;							///< Normal of this face, length is 2 times area of face
 		Vec3			mCentroid;							///< Center of the face
 		ConflictList	mConflictList;						///< Positions associated with this edge (that are closest to this edge). The last position in the list is the point that is furthest away from the face.
 		Edge *			mFirstEdge = nullptr;				///< First edge of this face
-		float			mFurthestPointDistanceSq = 0.0f;	///< Squared distance of furtest point from the conflict list to the face
+		decimal			mFurthestPointDistanceSq = C0;	///< Squared distance of furtest point from the conflict list to the face
 		bool			mRemoved = false;					///< Flag that indicates that face has been removed (face will be freed later)
 #ifdef JPH_CONVEX_BUILDER_DEBUG
 		int				mIteration;							///< Iteration that this face was created
@@ -107,7 +107,7 @@ public:
 	/// @param inTolerance Max distance that a point is allowed to be outside of the hull
 	/// @param outError Error message when building fails
 	/// @return Status code that reports if the hull was created or not
-	EResult				Initialize(int inMaxVertices, float inTolerance, const char *&outError);
+	EResult				Initialize(int inMaxVertices, decimal inTolerance, const char *&outError);
 
 	/// Returns the amount of vertices that are currently used by the hull
 	int					GetNumVerticesUsed() const;
@@ -116,21 +116,21 @@ public:
 	bool				ContainsFace(const Array<int> &inIndices) const;
 
 	/// Calculate the center of mass and the volume of the current convex hull
-	void				GetCenterOfMassAndVolume(Vec3 &outCenterOfMass, float &outVolume) const;
+	void				GetCenterOfMassAndVolume(Vec3 &outCenterOfMass, decimal &outVolume) const;
 
 	/// Determines the point that is furthest outside of the hull and reports how far it is outside of the hull (which indicates a failure during hull building)
 	/// @param outFaceWithMaxError The face that caused the error
 	/// @param outMaxError The maximum distance of a point to the hull
 	/// @param outMaxErrorPositionIdx The index of the point that had this distance
 	/// @param outCoplanarDistance Points that are less than this distance from the hull are considered on the hull. This should be used as a lowerbound for the allowed error.
-	void				DetermineMaxError(Face *&outFaceWithMaxError, float &outMaxError, int &outMaxErrorPositionIdx, float &outCoplanarDistance) const;
+	void				DetermineMaxError(Face *&outFaceWithMaxError, decimal &outMaxError, int &outMaxErrorPositionIdx, decimal &outCoplanarDistance) const;
 
 	/// Access to the created faces. Memory is owned by the convex hull builder.
 	const Faces &		GetFaces() const					{ return mFaces; }
 
 private:
 	/// Minimal square area of a triangle (used for merging and checking if a triangle is degenerate)
-	static constexpr float cMinTriangleAreaSq = 1.0e-12f;
+	static constexpr decimal cMinTriangleAreaSq = decimal(1.0e-12f);
 
 #ifdef JPH_CONVEX_BUILDER_DEBUG
 	/// Factor to scale convex hull when debug drawing the construction process
@@ -150,30 +150,30 @@ private:
 	using FullEdges = Array<FullEdge>;
 
 	// Determine a suitable tolerance for detecting that points are coplanar
-	float				DetermineCoplanarDistance() const;
+	decimal				DetermineCoplanarDistance() const;
 
 	/// Find the face for which inPoint is furthest to the front
 	/// @param inPoint Point to test
 	/// @param inFaces List of faces to test
 	/// @param outFace Returns the best face
 	/// @param outDistSq Returns the squared distance how much inPoint is in front of the plane of the face
-	void				GetFaceForPoint(Vec3Arg inPoint, const Faces &inFaces, Face *&outFace, float &outDistSq) const;
+	void				GetFaceForPoint(Vec3Arg inPoint, const Faces &inFaces, Face *&outFace, decimal &outDistSq) const;
 
 	/// @brief Calculates the distance between inPoint and inFace
 	/// @param inFace Face to test
 	/// @param inPoint Point to test
 	/// @return If the projection of the point on the plane is interior to the face 0, otherwise the squared distance to the closest edge
-	float				GetDistanceToEdgeSq(Vec3Arg inPoint, const Face *inFace) const;
+	decimal				GetDistanceToEdgeSq(Vec3Arg inPoint, const Face *inFace) const;
 
 	/// Assigns a position to one of the supplied faces based on which face is closest.
 	/// @param inPositionIdx Index of the position to add
 	/// @param inFaces List of faces to consider
 	/// @param inToleranceSq Tolerance of the hull, if the point is closer to the face than this, we ignore it
 	/// @return True if point was assigned, false if it was discarded or added to the coplanar list
-	bool				AssignPointToFace(int inPositionIdx, const Faces &inFaces, float inToleranceSq);
+	bool				AssignPointToFace(int inPositionIdx, const Faces &inFaces, decimal inToleranceSq);
 
 	/// Add a new point to the convex hull
-	void				AddPoint(Face *inFacingFace, int inIdx, float inToleranceSq, Faces &outNewFaces);
+	void				AddPoint(Face *inFacingFace, int inIdx, decimal inToleranceSq, Faces &outNewFaces);
 
 	/// Remove all faces that have been marked 'removed' from mFaces list
 	void				GarbageCollectFaces();
@@ -208,7 +208,7 @@ private:
 
 	/// Merges any coplanar as well as neighbours that form a non-convex edge into inFace. 
 	/// Faces are considered coplanar if the distance^2 of the other face's centroid is smaller than inToleranceSq.
-	void				MergeCoplanarOrConcaveFaces(Face *inFace, float inToleranceSq, Faces &ioAffectedFaces);
+	void				MergeCoplanarOrConcaveFaces(Face *inFace, decimal inToleranceSq, Faces &ioAffectedFaces);
 
 	/// Mark face as affected if it is not already in the list
 	static void			sMarkAffected(Face *inFace, Faces &ioAffectedFaces);
@@ -259,7 +259,7 @@ private:
 	struct Coplanar
 	{
 		int				mPositionIdx;						///< Index in mPositions
-		float			mDistanceSq;						///< Distance to the edge of closest face (should be > 0)
+		decimal			mDistanceSq;						///< Distance to the edge of closest face (should be > 0)
 	};
 	using CoplanarList = Array<Coplanar>;
 
