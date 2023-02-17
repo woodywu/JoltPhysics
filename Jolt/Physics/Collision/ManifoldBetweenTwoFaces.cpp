@@ -25,10 +25,10 @@ void PruneContactPoints(Vec3Arg inPenetrationAxis, ContactPoints &ioContactPoint
 
 	// We use a heuristic of (distance to center of mass) * (penetration depth) to find the contact point that we should keep
 	// Neither of those two terms should ever become zero, so we clamp against this minimum value
-	constexpr float cMinDistanceSq = 1.0e-6f; // 1 mm
+	constexpr decimal cMinDistanceSq = decimal(1.0e-6f); // 1 mm
 
 	ContactPoints projected;
-	StaticArray<float, 64> penetration_depth_sq;
+	StaticArray<decimal, 64> penetration_depth_sq;
 	for (ContactPoints::size_type i = 0; i < ioContactPointsOn1.size(); ++i)
 	{
 		// Project contact points on the plane through inCenterOfMass with normal inPenetrationAxis and center around the center of mass of body 1
@@ -44,10 +44,10 @@ void PruneContactPoints(Vec3Arg inPenetrationAxis, ContactPoints &ioContactPoint
 	// Find the point that is furthest away from the center of mass (its torque will have the biggest influence)
 	// and the point that has the deepest penetration depth. Use the heuristic (distance to center of mass) * (penetration depth) for this.
 	uint point1 = 0;
-	float val = max(cMinDistanceSq, projected[0].LengthSq()) * penetration_depth_sq[0];
+	decimal val = max(cMinDistanceSq, projected[0].LengthSq()) * penetration_depth_sq[0];
 	for (uint i = 0; i < projected.size(); ++i)
 	{
-		float v = max(cMinDistanceSq, projected[i].LengthSq()) * penetration_depth_sq[i];
+		decimal v = max(cMinDistanceSq, projected[i].LengthSq()) * penetration_depth_sq[i];
 		if (v > val)
 		{
 			val = v;
@@ -59,11 +59,11 @@ void PruneContactPoints(Vec3Arg inPenetrationAxis, ContactPoints &ioContactPoint
 	// Find point furthest from the first point forming a line segment with point1. Again combine this with the heuristic
 	// for deepest point as per above.
 	uint point2 = uint(-1);
-	val = -FLT_MAX;
+	val = FIX_MIN;
 	for (uint i = 0; i < projected.size(); ++i)
 		if (i != point1)
 		{
-			float v = max(cMinDistanceSq, (projected[i] - point1v).LengthSq()) * penetration_depth_sq[i];
+			decimal v = max(cMinDistanceSq, (projected[i] - point1v).LengthSq()) * penetration_depth_sq[i];
 			if (v > val)
 			{
 				val = v; 
@@ -76,13 +76,13 @@ void PruneContactPoints(Vec3Arg inPenetrationAxis, ContactPoints &ioContactPoint
 	// Find furthest points on both sides of the line segment in order to maximize the area
 	uint point3 = uint(-1);
 	uint point4 = uint(-1);
-	float min_val = 0.0f;
-	float max_val = 0.0f;
+	decimal min_val = C0;
+	decimal max_val = C0;
 	Vec3 perp = (point2v - point1v).Cross(inPenetrationAxis);
 	for (uint i = 0; i < projected.size(); ++i)
 		if (i != point1 && i != point2)
 		{
-			float v = perp.Dot(projected[i] - point1v);
+			decimal v = perp.Dot(projected[i] - point1v);
 			if (v < min_val)
 			{
 				min_val = v;
@@ -117,14 +117,14 @@ void PruneContactPoints(Vec3Arg inPenetrationAxis, ContactPoints &ioContactPoint
 	if (ContactConstraintManager::sDrawContactPointReduction)
 	{
 		// Draw input polygon
-		DebugRenderer::sInstance->DrawWirePolygon(RMat44::sTranslation(inCenterOfMass), ioContactPointsOn1, Color::sOrange, 0.05f);
+		DebugRenderer::sInstance->DrawWirePolygon(RMat44::sTranslation(inCenterOfMass), ioContactPointsOn1, Color::sOrange, decimal(0.05f));
 
 		// Draw primary axis
-		DebugRenderer::sInstance->DrawArrow(inCenterOfMass + ioContactPointsOn1[point1], inCenterOfMass + ioContactPointsOn1[point2], Color::sRed, 0.05f);
+		DebugRenderer::sInstance->DrawArrow(inCenterOfMass + ioContactPointsOn1[point1], inCenterOfMass + ioContactPointsOn1[point2], Color::sRed, decimal(0.05f));
 
 		// Draw contact points we kept
 		for (Vec3 p : points_to_keep_on_1)
-			DebugRenderer::sInstance->DrawMarker(inCenterOfMass + p, Color::sGreen, 0.1f);
+			DebugRenderer::sInstance->DrawMarker(inCenterOfMass + p, Color::sGreen, decimal(0.1f));
 	}
 #endif // JPH_DEBUG_RENDERER
 
@@ -133,7 +133,7 @@ void PruneContactPoints(Vec3Arg inPenetrationAxis, ContactPoints &ioContactPoint
 	ioContactPointsOn2 = points_to_keep_on_2;
 }	
 
-void ManifoldBetweenTwoFaces(Vec3Arg inContactPoint1, Vec3Arg inContactPoint2, Vec3Arg inPenetrationAxis, float inSpeculativeContactDistanceSq, const ConvexShape::SupportingFace &inShape1Face, const ConvexShape::SupportingFace &inShape2Face, ContactPoints &outContactPoints1, ContactPoints &outContactPoints2 JPH_IF_DEBUG_RENDERER(, RVec3Arg inCenterOfMass))
+void ManifoldBetweenTwoFaces(Vec3Arg inContactPoint1, Vec3Arg inContactPoint2, Vec3Arg inPenetrationAxis, decimal inSpeculativeContactDistanceSq, const ConvexShape::SupportingFace &inShape1Face, const ConvexShape::SupportingFace &inShape2Face, ContactPoints &outContactPoints1, ContactPoints &outContactPoints2 JPH_IF_DEBUG_RENDERER(, RVec3Arg inCenterOfMass))
 {
 #ifdef JPH_DEBUG_RENDERER
 	if (ContactConstraintManager::sDrawContactPoint)
@@ -142,11 +142,11 @@ void ManifoldBetweenTwoFaces(Vec3Arg inContactPoint1, Vec3Arg inContactPoint2, V
 		RVec3 cp2 = inCenterOfMass + inContactPoint2;
 
 		// Draw contact points
-		DebugRenderer::sInstance->DrawMarker(cp1, Color::sRed, 0.1f);
-		DebugRenderer::sInstance->DrawMarker(cp2, Color::sGreen, 0.1f);
+		DebugRenderer::sInstance->DrawMarker(cp1, Color::sRed, decimal(0.1f));
+		DebugRenderer::sInstance->DrawMarker(cp2, Color::sGreen, decimal(0.1f));
 
 		// Draw contact normal
-		DebugRenderer::sInstance->DrawArrow(cp1, cp1 + inPenetrationAxis.Normalized(), Color::sRed, 0.05f);
+		DebugRenderer::sInstance->DrawArrow(cp1, cp1 + inPenetrationAxis.Normalized(), Color::sRed, decimal(0.05f));
 	}
 #endif // JPH_DEBUG_RENDERER
 
@@ -180,14 +180,14 @@ void ManifoldBetweenTwoFaces(Vec3Arg inContactPoint1, Vec3Arg inContactPoint2, V
 		}
 
 		// Check if the plane normal has any length, if not the clipped shape is so small that we'll just use the contact points
-		float plane_normal_len_sq = plane_normal.LengthSq();
-		if (plane_normal_len_sq > 0.0f)
+		decimal plane_normal_len_sq = plane_normal.LengthSq();
+		if (plane_normal_len_sq > C0)
 		{
 			// Discard points of faces that are too far away to collide
 			for (Vec3 p2 : clipped_face)
 			{
-				float distance = (p2 - plane_origin).Dot(plane_normal); // Note should divide by length of plane_normal (unnormalized here)
-				if (distance <= 0.0f || Square(distance) < inSpeculativeContactDistanceSq * plane_normal_len_sq) // Must be close enough to plane, note we correct for not dividing by plane normal length here
+				decimal distance = (p2 - plane_origin).Dot(plane_normal); // Note should divide by length of plane_normal (unnormalized here)
+				if (distance <= C0 || Square(distance) < inSpeculativeContactDistanceSq * plane_normal_len_sq) // Must be close enough to plane, note we correct for not dividing by plane normal length here
 				{
 					// Project point back on shape 1 using the normal, note we correct for not dividing by plane normal length here:
 					// p1 = p2 - (distance / sqrt(plane_normal_len_sq)) * (plane_normal / sqrt(plane_normal_len_sq));
@@ -208,19 +208,19 @@ void ManifoldBetweenTwoFaces(Vec3Arg inContactPoint1, Vec3Arg inContactPoint2, V
 			DebugRenderer::sInstance->DrawWirePolygon(com, clipped_face, Color::sOrange);
 
 			// Draw supporting faces
-			DebugRenderer::sInstance->DrawWirePolygon(com, inShape1Face, Color::sRed, 0.05f);
-			DebugRenderer::sInstance->DrawWirePolygon(com, inShape2Face, Color::sGreen, 0.05f);
+			DebugRenderer::sInstance->DrawWirePolygon(com, inShape1Face, Color::sRed, decimal(0.05f));
+			DebugRenderer::sInstance->DrawWirePolygon(com, inShape2Face, Color::sGreen, decimal(0.05f));
 
 			// Draw normal
-			if (plane_normal_len_sq > 0.0f)
+			if (plane_normal_len_sq > C0)
 			{
 				RVec3 plane_origin_ws = inCenterOfMass + plane_origin;
-				DebugRenderer::sInstance->DrawArrow(plane_origin_ws, plane_origin_ws + plane_normal / sqrt(plane_normal_len_sq), Color::sYellow, 0.05f);
+				DebugRenderer::sInstance->DrawArrow(plane_origin_ws, plane_origin_ws + plane_normal / sqrt(plane_normal_len_sq), Color::sYellow, decimal(0.05f));
 			}
 
 			// Draw contact points that remain after distance check
 			for (ContactPoints::size_type p = old_size; p < outContactPoints1.size(); ++p)
-				DebugRenderer::sInstance->DrawMarker(inCenterOfMass + outContactPoints1[p], Color::sYellow, 0.1f);
+				DebugRenderer::sInstance->DrawMarker(inCenterOfMass + outContactPoints1[p], Color::sYellow, decimal(0.1f));
 		}
 	#endif // JPH_DEBUG_RENDERER
 	}

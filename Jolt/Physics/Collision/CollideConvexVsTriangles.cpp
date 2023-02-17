@@ -34,7 +34,7 @@ CollideConvexVsTriangles::CollideConvexVsTriangles(const ConvexShape *inShape1, 
 	mBoundsOf1InSpaceOf2 = mBoundsOf1.Transformed(transform1_to_2);	// Convert bounding box of 1 into space of 2
 
 	// Determine if shape 2 is inside out or not
-	mScaleSign2 = ScaleHelpers::IsInsideOut(inScale2)? -1.0f : 1.0f;
+	mScaleSign2 = ScaleHelpers::IsInsideOut(inScale2)? -C1 : C1;
 }
 
 void CollideConvexVsTriangles::Collide(Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2, uint8 inActiveEdges, const SubShapeID &inSubShapeID2)
@@ -50,7 +50,7 @@ void CollideConvexVsTriangles::Collide(Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2,
 	Vec3 triangle_normal = mScaleSign2 * (v1 - v0).Cross(v2 - v0);
 
 	// Backface check
-	bool back_facing = triangle_normal.Dot(v0) > 0.0f;
+	bool back_facing = triangle_normal.Dot(v0) > C0;
 	if (mCollideShapeSettings.mBackFaceMode == EBackFaceMode::IgnoreBackFaces && back_facing)
 		return;
 
@@ -78,7 +78,7 @@ void CollideConvexVsTriangles::Collide(Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2,
 		mShape1ExCvxRadius = mShape1->GetSupportFunction(ConvexShape::ESupportMode::ExcludeConvexRadius, mBufferExCvxRadius, mScale1);
 
 	// Perform GJK step
-	status = pen_depth.GetPenetrationDepthStepGJK(*mShape1ExCvxRadius, mShape1ExCvxRadius->GetConvexRadius() + mCollideShapeSettings.mMaxSeparationDistance, triangle, 0.0f, mCollideShapeSettings.mCollisionTolerance, penetration_axis, point1, point2);
+	status = pen_depth.GetPenetrationDepthStepGJK(*mShape1ExCvxRadius, mShape1ExCvxRadius->GetConvexRadius() + mCollideShapeSettings.mMaxSeparationDistance, triangle, C0, mCollideShapeSettings.mCollisionTolerance, penetration_axis, point1, point2);
 
 	// Check result of collision detection
 	if (status == EPAPenetrationDepth::EStatus::NotColliding)
@@ -100,13 +100,13 @@ void CollideConvexVsTriangles::Collide(Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2,
 	}
 
 	// Check if the penetration is bigger than the early out fraction
-	float penetration_depth = (point2 - point1).Length() - mCollideShapeSettings.mMaxSeparationDistance;
+	decimal penetration_depth = (point2 - point1).Length() - mCollideShapeSettings.mMaxSeparationDistance;
 	if (-penetration_depth >= mCollector.GetEarlyOutFraction())
 		return;
 
 	// Correct point1 for the added separation distance
-	float penetration_axis_len = penetration_axis.Length();
-	if (penetration_axis_len > 0.0f)
+	decimal penetration_axis_len = penetration_axis.Length();
+	if (penetration_axis_len > C0)
 		point1 -= penetration_axis * (mCollideShapeSettings.mMaxSeparationDistance / penetration_axis_len);
 
 	// Check if we have enabled active edge detection

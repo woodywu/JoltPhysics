@@ -45,7 +45,7 @@ protected:
 	AABox							mBoundsOf1;								///< Bounds of the colliding shape in local space
 	AABox							mBoundsOf1InSpaceOf2;					///< Bounds of the colliding shape in space of shape we're colliding with
 	SubShapeID						mSubShapeID1;							///< Sub shape ID of colliding shape
-	float							mScaleSign2;							///< Sign of the scale of object 2, -1 if object is inside out, 1 if not
+	decimal							mScaleSign2;							///< Sign of the scale of object 2, -1 if object is inside out, 1 if not
 	ConvexShape::SupportBuffer		mBufferExCvxRadius;						///< Buffer that holds the support function data excluding convex radius
 	ConvexShape::SupportBuffer		mBufferIncCvxRadius;					///< Buffer that holds the support function data including convex radius
 	const ConvexShape::Support *	mShape1ExCvxRadius = nullptr;			///< Actual support function object excluding convex radius

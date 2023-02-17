@@ -56,7 +56,7 @@ bool NarrowPhaseQuery::CastRay(const RRayCast &inRay, RayCastResult &ioHit, cons
 						if (ts.CastRay(mRay, mHit))
 						{
 							// Test that we didn't find a further hit by accident
-							JPH_ASSERT(mHit.mFraction >= 0.0f && mHit.mFraction < GetEarlyOutFraction());
+							JPH_ASSERT(mHit.mFraction >= C0 && mHit.mFraction < GetEarlyOutFraction());
 
 							// Update early out fraction based on narrow phase collector
 							UpdateEarlyOutFraction(mHit.mFraction);
@@ -75,7 +75,7 @@ bool NarrowPhaseQuery::CastRay(const RRayCast &inRay, RayCastResult &ioHit, cons
 	// Do broadphase test, note that the broadphase uses floats so we drop precision here
 	MyCollector collector(inRay, ioHit, *mBodyLockInterface, inBodyFilter);
 	mBroadPhase->CastRay(RayCast(inRay), collector, inBroadPhaseLayerFilter, inObjectLayerFilter);
-	return ioHit.mFraction <= 1.0f;
+	return ioHit.mFraction <= C1;
 }
 
 void NarrowPhaseQuery::CastRay(const RRayCast &inRay, const RayCastSettings &inRayCastSettings, CastRayCollector &ioCollector, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter) const
@@ -292,7 +292,7 @@ void NarrowPhaseQuery::CastShape(const RShapeCast &inShapeCast, const ShapeCastS
 				if (mCollector.ShouldEarlyOut())
 					ForceEarlyOut();
 				else
-					UpdateEarlyOutFraction(max(FLT_MIN, mCollector.GetEarlyOutFraction()));
+					UpdateEarlyOutFraction(max(FIX_MIN, mCollector.GetEarlyOutFraction()));
 			}
 
 	public:
@@ -310,7 +310,7 @@ void NarrowPhaseQuery::CastShape(const RShapeCast &inShapeCast, const ShapeCastS
 
 		virtual void		AddHit(const ResultType &inResult) override
 		{
-			JPH_ASSERT(inResult.mFraction <= max(0.0f, mCollector.GetEarlyOutFraction()), "This hit should not have been passed on to the collector");
+			JPH_ASSERT(inResult.mFraction <= max(C0, mCollector.GetEarlyOutFraction()), "This hit should not have been passed on to the collector");
 
 			// Only test shape if it passes the body filter
 			if (mBodyFilter.ShouldCollide(inResult.mBodyID))

@@ -36,7 +36,7 @@ CollideSphereVsTriangles::CollideSphereVsTriangles(const SphereShape *inShape1, 
 	mSphereCenterIn2 = inCenterOfMassTransform2.Multiply3x3Transposed(inCenterOfMassTransform1.GetTranslation() - inCenterOfMassTransform2.GetTranslation());
 
 	// Determine if shape 2 is inside out or not
-	mScaleSign2 = ScaleHelpers::IsInsideOut(inScale2)? -1.0f : 1.0f;
+	mScaleSign2 = ScaleHelpers::IsInsideOut(inScale2)? -C1 : C1;
 
 	// Check that the sphere is uniformly scaled
 	JPH_ASSERT(ScaleHelpers::IsUniformScale(inScale1.Abs()));
@@ -57,19 +57,19 @@ void CollideSphereVsTriangles::Collide(Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2,
 	Vec3 triangle_normal = mScaleSign2 * (v1 - v0).Cross(v2 - v0);
 
 	// Backface check
-	bool back_facing = triangle_normal.Dot(v0) > 0.0f;
+	bool back_facing = triangle_normal.Dot(v0) > C0;
 	if (mCollideShapeSettings.mBackFaceMode == EBackFaceMode::IgnoreBackFaces && back_facing)
 		return;
 
 	// Check if we collide with the sphere
 	uint32 closest_feature;
 	Vec3 point2 = ClosestPoint::GetClosestPointOnTriangle(v0, v1, v2, closest_feature);
-	float point2_len_sq = point2.LengthSq();
+	decimal point2_len_sq = point2.LengthSq();
 	if (point2_len_sq > mRadiusPlusMaxSeparationSq)
 		return;
 
 	// Calculate penetration depth
-	float penetration_depth = mRadius - sqrt(point2_len_sq);
+	decimal penetration_depth = mRadius - sqrt(point2_len_sq);
 	if (-penetration_depth >= mCollector.GetEarlyOutFraction())
 		return;
 

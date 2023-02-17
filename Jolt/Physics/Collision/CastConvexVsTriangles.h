@@ -41,7 +41,7 @@ protected:
 private:
 	ConvexShape::SupportBuffer		mSupportBuffer;						///< Buffer that holds the support function of the cast shape
 	const ConvexShape::Support *	mSupport = nullptr;					///< Support function of the cast shape
-	float							mScaleSign;							///< Sign of the scale, -1 if object is inside out, 1 if not
+	decimal							mScaleSign;							///< Sign of the scale, -1 if object is inside out, 1 if not
 };
 
 JPH_NAMESPACE_END
