@@ -15,7 +15,7 @@ struct AABBTreeBuilderStats
 	TriangleSplitter::Stats	mSplitterStats;							///< Stats returned by the triangle splitter algorithm
 
 	///@name Tree structure
-	float					mSAHCost = 0.0f;						///< Surface Area Heuristic cost of this tree
+	decimal					mSAHCost = C0;						///< Surface Area Heuristic cost of this tree
 	int						mMinDepth = 0;							///< Minimal depth of tree (number of nodes)
 	int						mMaxDepth = 0;							///< Maximum depth of tree (number of nodes)
 	int						mNodeCount = 0;							///< Number of nodes in the tree
@@ -27,7 +27,7 @@ struct AABBTreeBuilderStats
 	///@name Actual stats
 	int						mTreeMinTrianglesPerLeaf = 0;			///< Minimal amount of triangles in a leaf
 	int						mTreeMaxTrianglesPerLeaf = 0;			///< Maximal amount of triangles in a leaf
-	float					mTreeAvgTrianglesPerLeaf = 0.0f;		///< Average amount of triangles in leaf nodes
+	decimal					mTreeAvgTrianglesPerLeaf = C0;		///< Average amount of triangles in leaf nodes
 };
 
 /// Helper class to build an AABB tree
@@ -66,10 +66,10 @@ public:
 		uint				GetTriangleCountInTree() const;
 
 		/// Calculate min and max triangles per node
-		void				GetTriangleCountPerNode(float &outAverage, uint &outMin, uint &outMax) const;
+		void				GetTriangleCountPerNode(decimal &outAverage, uint &outMin, uint &outMax) const;
 
 		/// Calculate the total cost of the tree using the surface area heuristic
-		float				CalculateSAHCost(float inCostTraversal, float inCostLeaf) const;
+		decimal				CalculateSAHCost(decimal inCostTraversal, decimal inCostLeaf) const;
 
 		/// Recursively get children (breadth first) to get in total inN children (or less if there are no more)
 		void				GetNChildren(uint inN, Array<const Node *> &outChildren) const;
@@ -87,10 +87,10 @@ public:
 		friend class AABBTreeBuilder;
 
 		/// Recursive helper function to calculate cost of the tree
-		float				CalculateSAHCostInternal(float inCostTraversalDivSurfaceArea, float inCostLeafDivSurfaceArea) const;
+		decimal				CalculateSAHCostInternal(decimal inCostTraversalDivSurfaceArea, decimal inCostLeafDivSurfaceArea) const;
 
 		/// Recursive helper function to calculate min and max triangles per node
-		void				GetTriangleCountPerNodeInternal(float &outAverage, uint &outAverageDivisor, uint &outMin, uint &outMax) const;
+		void				GetTriangleCountPerNodeInternal(decimal &outAverage, uint &outAverageDivisor, uint &outMin, uint &outMax) const;
 	};
 
 	/// Constructor

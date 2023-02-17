@@ -192,10 +192,10 @@ public:
 
 			// Compress vertices
 			VertexData *vertices = ioBuffer.Allocate<VertexData>(mVertices.size());
-			Vec3 compress_scale = Vec3::sReplicate(COMPONENT_MASK) / Vec3::sMax(bounds.GetSize(), Vec3::sReplicate(1.0e-20f));
+			Vec3 compress_scale = Vec3::sReplicate(decimal((float)COMPONENT_MASK)) / Vec3::sMax(bounds.GetSize(), Vec3::sReplicate(decimal(1.0e-20f)));
 			for (uint32 v : mVertices)
 			{
-				UVec4 c = ((Vec3(inVertices[v]) - bounds.mMin) * compress_scale + Vec3::sReplicate(0.5f)).ToInt();
+				UVec4 c = ((Vec3(inVertices[v]) - bounds.mMin) * compress_scale + Vec3::sReplicate(C0P5)).ToInt();
 				JPH_ASSERT(c.GetX() <= COMPONENT_MASK);
 				JPH_ASSERT(c.GetY() <= COMPONENT_MASK);
 				JPH_ASSERT(c.GetZ() <= COMPONENT_MASK);
@@ -206,7 +206,7 @@ public:
 
 			// Store decompression information
 			bounds.mMin.StoreFloat3(&ioHeader->mOffset);
-			(bounds.GetSize() / Vec3::sReplicate(COMPONENT_MASK)).StoreFloat3(&ioHeader->mScale);
+			(bounds.GetSize() / Vec3::sReplicate(decimal((float)COMPONENT_MASK))).StoreFloat3(&ioHeader->mScale);
 		}
 
 	private:
@@ -234,7 +234,7 @@ public:
 			UVec4 yc = UVec4::sOr(c1.LogicalShiftRight<COMPONENT_Y1>(), c2.LogicalShiftRight<COMPONENT_Y2>().LogicalShiftLeft<COMPONENT_Y1_BITS>());
 			UVec4 zc = UVec4::sAnd(c2, UVec4::sReplicate(COMPONENT_MASK));
 
-			// Convert to float
+			// Convert to decimal
 			outX = Vec4::sFusedMultiplyAdd(xc.ToFloat(), mScaleX, mOffsetX);
 			outY = Vec4::sFusedMultiplyAdd(yc.ToFloat(), mScaleY, mOffsetY);
 			outZ = Vec4::sFusedMultiplyAdd(zc.ToFloat(), mScaleZ, mOffsetZ);
@@ -295,7 +295,7 @@ public:
 		}
 
 		/// Tests a ray against the packed triangles
-		JPH_INLINE float			TestRay(Vec3Arg inRayOrigin, Vec3Arg inRayDirection, const void *inTriangleStart, uint32 inNumTriangles, float inClosest, uint32 &outClosestTriangleIndex) const
+		JPH_INLINE decimal			TestRay(Vec3Arg inRayOrigin, Vec3Arg inRayDirection, const void *inTriangleStart, uint32 inNumTriangles, decimal inClosest, uint32 &outClosestTriangleIndex) const
 		{
 			JPH_ASSERT(inNumTriangles > 0);
 			const TriangleBlockHeader *header = reinterpret_cast<const TriangleBlockHeader *>(inTriangleStart);
@@ -366,7 +366,7 @@ public:
 			UVec4 yc = UVec4::sOr(c1.LogicalShiftRight<COMPONENT_Y1>(), c2.LogicalShiftRight<COMPONENT_Y2>().LogicalShiftLeft<COMPONENT_Y1_BITS>());
 			UVec4 zc = UVec4::sAnd(c2, UVec4::sReplicate(COMPONENT_MASK));
 
-			// Convert to float
+			// Convert to decimal
 			Vec4 vx = Vec4::sFusedMultiplyAdd(xc.ToFloat(), mScaleX, mOffsetX);
 			Vec4 vy = Vec4::sFusedMultiplyAdd(yc.ToFloat(), mScaleY, mOffsetY);
 			Vec4 vz = Vec4::sFusedMultiplyAdd(zc.ToFloat(), mScaleZ, mOffsetZ);

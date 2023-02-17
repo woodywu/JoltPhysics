@@ -67,21 +67,21 @@ uint AABBTreeBuilder::Node::GetTriangleCountInTree() const
 		return GetTriangleCount();
 }
 
-void AABBTreeBuilder::Node::GetTriangleCountPerNode(float &outAverage, uint &outMin, uint &outMax) const
+void AABBTreeBuilder::Node::GetTriangleCountPerNode(decimal &outAverage, uint &outMin, uint &outMax) const
 {
 	outMin = INT_MAX;
 	outMax = 0;
-	outAverage = 0;
+	outAverage = C0;
 	uint avg_divisor = 0;
 	GetTriangleCountPerNodeInternal(outAverage, avg_divisor, outMin, outMax);
 	if (avg_divisor > 0)
 		outAverage /= avg_divisor;
 }
 
-float AABBTreeBuilder::Node::CalculateSAHCost(float inCostTraversal, float inCostLeaf) const
+decimal AABBTreeBuilder::Node::CalculateSAHCost(decimal inCostTraversal, decimal inCostLeaf) const
 {
-	float surface_area = mBounds.GetSurfaceArea();
-	return surface_area > 0.0f? CalculateSAHCostInternal(inCostTraversal / surface_area, inCostLeaf / surface_area) : 0.0f;
+	decimal surface_area = mBounds.GetSurfaceArea();
+	return surface_area > C0? CalculateSAHCostInternal(inCostTraversal / surface_area, inCostLeaf / surface_area) : C0;
 }
 
 void AABBTreeBuilder::Node::GetNChildren(uint inN, Array<const Node *> &outChildren) const
@@ -126,7 +126,7 @@ void AABBTreeBuilder::Node::GetNChildren(uint inN, Array<const Node *> &outChild
 	}
 }
 
-float AABBTreeBuilder::Node::CalculateSAHCostInternal(float inCostTraversalDivSurfaceArea, float inCostLeafDivSurfaceArea) const
+decimal AABBTreeBuilder::Node::CalculateSAHCostInternal(decimal inCostTraversalDivSurfaceArea, decimal inCostLeafDivSurfaceArea) const
 {
 	if (HasChildren())
 		return inCostTraversalDivSurfaceArea * mBounds.GetSurfaceArea() 
@@ -136,7 +136,7 @@ float AABBTreeBuilder::Node::CalculateSAHCostInternal(float inCostTraversalDivSu
 		return inCostLeafDivSurfaceArea * mBounds.GetSurfaceArea() * GetTriangleCount();
 }
 
-void AABBTreeBuilder::Node::GetTriangleCountPerNodeInternal(float &outAverage, uint &outAverageDivisor, uint &outMin, uint &outMax) const
+void AABBTreeBuilder::Node::GetTriangleCountPerNodeInternal(decimal &outAverage, uint &outAverageDivisor, uint &outMin, uint &outMax) const
 {
 	if (HasChildren())
 	{
@@ -163,13 +163,13 @@ AABBTreeBuilder::Node *AABBTreeBuilder::Build(AABBTreeBuilderStats &outStats)
 	TriangleSplitter::Range initial = mTriangleSplitter.GetInitialRange();
 	Node *root = BuildInternal(initial);
 
-	float avg_triangles_per_leaf;
+	decimal avg_triangles_per_leaf;
 	uint min_triangles_per_leaf, max_triangles_per_leaf;
 	root->GetTriangleCountPerNode(avg_triangles_per_leaf, min_triangles_per_leaf, max_triangles_per_leaf);
 
 	mTriangleSplitter.GetStats(outStats.mSplitterStats);
 
-	outStats.mSAHCost = root->CalculateSAHCost(1.0f, 1.0f);
+	outStats.mSAHCost = root->CalculateSAHCost(C1, C1);
 	outStats.mMinDepth = root->GetMinDepth();
 	outStats.mMaxDepth = root->GetMaxDepth();
 	outStats.mNodeCount = root->GetNodeCount();
