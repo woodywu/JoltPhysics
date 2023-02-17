@@ -34,14 +34,14 @@ public:
 				mF32[inDestRow + r] = inV[inSourceRow + r];
 		}
 
-	/// Get float component by index
-	inline float				operator [] (uint inCoordinate) const			
+	/// Get decimal component by index
+	inline decimal				operator [] (uint inCoordinate) const			
 	{ 
 		JPH_ASSERT(inCoordinate < Rows); 
 		return mF32[inCoordinate]; 
 	}
 	
-	inline float &				operator [] (uint inCoordinate)
+	inline decimal &				operator [] (uint inCoordinate)
 	{ 
 		JPH_ASSERT(inCoordinate < Rows); 
 		return mF32[inCoordinate]; 
@@ -74,7 +74,7 @@ public:
 	}
 
 	/// Test if two vectors are close to each other
-	inline bool					IsClose(const Vector &inV2, float inMaxDistSq = 1.0e-12f)
+	inline bool					IsClose(const Vector &inV2, decimal inMaxDistSq = 1.0e-12f)
 	{
 		return (inV2 - *this).LengthSq() <= inMaxDistSq;
 	}
@@ -87,8 +87,8 @@ public:
 		return *this;
 	}
 
-	/// Multiply vector with float
-	inline Vector				operator * (const float inV2) const
+	/// Multiply vector with decimal
+	inline Vector				operator * (const decimal inV2) const
 	{
 		Vector v;
 		for (uint r = 0; r < Rows; ++r)
@@ -96,21 +96,21 @@ public:
 		return v;
 	}
 
-	inline Vector &				operator *= (const float inV2) 
+	inline Vector &				operator *= (const decimal inV2) 
 	{
 		for (uint r = 0; r < Rows; ++r)
 			mF32[r] *= inV2;
 		return *this;
 	}
 
-	/// Multiply vector with float
-	inline friend Vector		operator * (const float inV1, const Vector &inV2)
+	/// Multiply vector with decimal
+	inline friend Vector		operator * (const decimal inV1, const Vector &inV2)
 	{
 		return inV2 * inV1;
 	}
 
-	/// Divide vector by float
-	inline Vector				operator / (float inV2) const
+	/// Divide vector by decimal
+	inline Vector				operator / (decimal inV2) const
 	{
 		Vector v;
 		for (uint r = 0; r < Rows; ++r)
@@ -118,7 +118,7 @@ public:
 		return v;
 	}
 
-	/// Add two float vectors (component wise)
+	/// Add two decimal vectors (component wise)
 	inline Vector				operator + (const Vector &inV2) const
 	{
 		Vector v;
@@ -143,7 +143,7 @@ public:
 		return v;
 	}
 
-	/// Subtract two float vectors (component wise)
+	/// Subtract two decimal vectors (component wise)
 	inline Vector				operator - (const Vector &inV2) const
 	{
 		Vector v;
@@ -160,28 +160,28 @@ public:
 	}
 
 	/// Dot product
-	inline float				Dot(const Vector &inV2) const
+	inline decimal				Dot(const Vector &inV2) const
 	{
-		float dot = 0.0f;
+		decimal dot = 0.0f;
 		for (uint r = 0; r < Rows; ++r)
 			dot += mF32[r] * inV2.mF32[r];
 		return dot;
 	}
 
 	/// Squared length of vector
-	inline float				LengthSq() const
+	inline decimal				LengthSq() const
 	{
 		return Dot(*this);
 	}
 
 	/// Length of vector
-	inline float				Length() const
+	inline decimal				Length() const
 	{
 		return sqrt(LengthSq());
 	}
 
 	/// Check if vector is normalized
-	inline bool					IsNormalized(float inToleranceSq = 1.0e-6f)
+	inline bool					IsNormalized(decimal inToleranceSq = 1.0e-6f)
 	{
 		return abs(LengthSq() - 1.0f) <= inToleranceSq;
 	}
@@ -202,7 +202,7 @@ public:
 		return inStream;
 	}
 
-	float						mF32[Rows];
+	decimal						mF32[Rows];
 };
 
 JPH_NAMESPACE_END

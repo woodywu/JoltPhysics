@@ -6,33 +6,33 @@
 JPH_NAMESPACE_BEGIN
 
 /// The constant \f$\pi\f$
-static constexpr float JPH_PI = 3.14159265358979323846f;
+static constexpr decimal JPH_PI = decimal::pi();
 
 /// Convert a value from degrees to radians
-constexpr float DegreesToRadians(float inV)
+constexpr decimal DegreesToRadians(decimal inV)
 {
-	return inV * (JPH_PI / 180.0f);
+	return inV * (JPH_PI / decimal(180.0f));
 }
 
 /// Convert a value from radians to degrees
-constexpr float RadiansToDegrees(float inV)
+constexpr decimal RadiansToDegrees(decimal inV)
 {
-	return inV * (180.0f / JPH_PI);
+	return inV * (decimal(180.0f) / JPH_PI);
 }
 
 /// Convert angle in radians to the range \f$[-\pi, \pi]\f$
-inline float CenterAngleAroundZero(float inV)
+inline decimal CenterAngleAroundZero(decimal inV)
 {
 	if (inV < -JPH_PI)
 	{
 		do
-			inV += 2.0f * JPH_PI;
+			inV += C2 * JPH_PI;
 		while (inV < -JPH_PI);
 	}
 	else if (inV > JPH_PI)
 	{
 		do
-			inV -= 2.0f * JPH_PI;
+			inV -= C2 * JPH_PI;
 		while (inV > JPH_PI);
 	}
 	JPH_ASSERT(inV >= -JPH_PI && inV <= JPH_PI);

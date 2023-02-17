@@ -6,7 +6,7 @@
 JPH_NAMESPACE_BEGIN
 
 // Define real to float
-using Real = float;
+using Real = decimal;
 using Real3 = Float3;
 using RVec3  = Vec3;
 using RVec3Arg = Vec3Arg;

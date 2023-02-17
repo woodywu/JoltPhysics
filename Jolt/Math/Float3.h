@@ -7,7 +7,7 @@
 
 JPH_NAMESPACE_BEGIN
 
-/// Class that holds 3 floats. Used as a storage class. Convert to Vec3 for calculations.
+/// Class that holds 3 decimals. Used as a storage class. Convert to Vec3 for calculations.
 class [[nodiscard]] Float3
 {
 public:
@@ -15,9 +15,9 @@ public:
 
 				Float3() = default; ///< Intentionally not initialized for performance reasons
 				Float3(const Float3 &inRHS) = default;
-				Float3(float inX, float inY, float inZ) : x(inX), y(inY), z(inZ) { }
+				Float3(decimal inX, decimal inY, decimal inZ) : x(inX), y(inY), z(inZ) { }
 
-	float		operator [] (int inCoordinate) const	
+	decimal		operator [] (int inCoordinate) const	
 	{ 
 		JPH_ASSERT(inCoordinate < 3); 
 		return *(&x + inCoordinate); 
@@ -33,9 +33,9 @@ public:
 		return x != inRHS.x || y != inRHS.y || z != inRHS.z;
 	}
 
-	float		x;
-	float		y;
-	float		z;
+	decimal		x;
+	decimal		y;
+	decimal		z;
 };
 
 using VertexList = Array<Float3>;

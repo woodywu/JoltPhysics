@@ -17,7 +17,7 @@ public:
 	JPH_OVERRIDE_NEW_DELETE
 
 	/// Constructor
-					AABox()												: mMin(Vec3::sReplicate(FLT_MAX)), mMax(Vec3::sReplicate(-FLT_MAX)) { }
+					AABox()												: mMin(Vec3::sReplicate(numeric_limits<decimal>::max())), mMax(Vec3::sReplicate(numeric_limits<decimal>::min())) { }
 					AABox(Vec3Arg inMin, Vec3Arg inMax)					: mMin(inMin), mMax(inMax) { }
 					AABox(Vec3Arg inCenter, float inRadius)				: mMin(inCenter - Vec3::sReplicate(inRadius)), mMax(inCenter + Vec3::sReplicate(inRadius)) { }
 
@@ -27,7 +27,7 @@ public:
 	/// Get bounding box of size 2 * FLT_MAX
 	static AABox	sBiggest()
 	{
-		return AABox(Vec3::sReplicate(-FLT_MAX), Vec3::sReplicate(FLT_MAX));
+		return AABox(Vec3::sReplicate(numeric_limits<decimal>::min()), Vec3::sReplicate(numeric_limits<decimal>::max()));
 	}
 
 	/// Comparison operators
@@ -37,8 +37,8 @@ public:
 	/// Reset the bounding box to an empty bounding box
 	void			SetEmpty()
 	{
-		mMin = Vec3::sReplicate(FLT_MAX);
-		mMax = Vec3::sReplicate(-FLT_MAX);
+		mMin = Vec3::sReplicate(numeric_limits<decimal>::max());
+		mMax = Vec3::sReplicate(numeric_limits<decimal>::min());
 	}
 
 	/// Check if the bounding box is valid (max >= min)

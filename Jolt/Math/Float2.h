@@ -5,7 +5,7 @@
 
 JPH_NAMESPACE_BEGIN
 
-/// Class that holds 2 floats, used as a storage class mainly.
+/// Class that holds 2 decimals, used as a storage class mainly.
 class [[nodiscard]] Float2
 {
 public:
@@ -13,7 +13,7 @@ public:
 
 						Float2() = default; ///< Intentionally not initialized for performance reasons
 						Float2(const Float2 &inRHS) = default;
-						Float2(float inX, float inY)					: x(inX), y(inY) { }
+						Float2(decimal inX, decimal inY)					: x(inX), y(inY) { }
 
 	bool				operator == (const Float2 &inRHS) const			{ return x == inRHS.x && y == inRHS.y; }
 	bool				operator != (const Float2 &inRHS) const			{ return x != inRHS.x || y != inRHS.y; }
@@ -25,8 +25,8 @@ public:
 		return inStream;
 	}
 
-	float				x;
-	float				y;
+	decimal				x;
+	decimal				y;
 };
 
 static_assert(is_trivial<Float2>(), "Is supposed to be a trivial type!");

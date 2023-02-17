@@ -16,14 +16,7 @@ class [[nodiscard]] alignas(JPH_VECTOR_ALIGNMENT) Vec3
 public:
 	JPH_OVERRIDE_NEW_DELETE
 
-	// Underlying vector type
-#if defined(JPH_USE_SSE)
-	using Type = __m128;
-#elif defined(JPH_USE_NEON)
-	using Type = float32x4_t;
-#else
 	using Type = Vec4::Type;
-#endif
 
 	// Argument type
 	using ArgType = Vec3Arg;
@@ -34,11 +27,11 @@ public:
 	explicit JPH_INLINE			Vec3(Vec4Arg inRHS);
 	JPH_INLINE					Vec3(Type inRHS) : mValue(inRHS)				{ CheckW(); }
 
-	/// Load 3 floats from memory
+	/// Load 3 decimals from memory
 	explicit JPH_INLINE			Vec3(const Float3 &inV);
 
 	/// Create a vector from 3 components
-	JPH_INLINE					Vec3(float inX, float inY, float inZ);
+	JPH_INLINE					Vec3(decimal inX, decimal inY, decimal inZ);
 
 	/// Vector with all zeros
 	static JPH_INLINE Vec3		sZero();
@@ -47,14 +40,14 @@ public:
 	static JPH_INLINE Vec3		sNaN();
 
 	/// Vectors with the principal axis
-	static JPH_INLINE Vec3		sAxisX()										{ return Vec3(1, 0, 0); }
-	static JPH_INLINE Vec3		sAxisY()										{ return Vec3(0, 1, 0); }
-	static JPH_INLINE Vec3		sAxisZ()										{ return Vec3(0, 0, 1); }
+	static JPH_INLINE Vec3		sAxisX()										{ return Vec3(C1, C0, C0); }
+	static JPH_INLINE Vec3		sAxisY()										{ return Vec3(C0, C1, C0); }
+	static JPH_INLINE Vec3		sAxisZ()										{ return Vec3(C0, C0, C1); }
 
 	/// Replicate inV across all components
-	static JPH_INLINE Vec3		sReplicate(float inV);
+	static JPH_INLINE Vec3		sReplicate(decimal inV);
 		
-	/// Load 3 floats from memory (reads 32 bits extra which it doesn't use)
+	/// Load 3 decimals from memory (reads 32 bits extra which it doesn't use)
 	static JPH_INLINE Vec3		sLoadFloat3Unsafe(const Float3 &inV);
 
 	/// Return the minimum value of each of the components
@@ -99,7 +92,7 @@ public:
 	/// Get unit vector given spherical coordinates
 	/// inTheta \f$\in [0, \pi]\f$ is angle between vector and z-axis
 	/// inPhi \f$\in [0, 2 \pi]\f$ is the angle in the xy-plane starting from the x axis and rotating counter clockwise around the z-axis
-	static JPH_INLINE Vec3		sUnitSpherical(float inTheta, float inPhi);
+	static JPH_INLINE Vec3		sUnitSpherical(decimal inTheta, decimal inPhi);
 
 	/// A set of vectors uniformly spanning the surface of a unit sphere, usable for debug purposes
 	static const std::vector<Vec3> sUnitSphere;
@@ -109,81 +102,71 @@ public:
 	static inline Vec3			sRandom(Random &inRandom);
 
 	/// Get individual components
-#if defined(JPH_USE_SSE)
-	JPH_INLINE float			GetX() const									{ return _mm_cvtss_f32(mValue); }
-	JPH_INLINE float			GetY() const									{ return mF32[1]; }
-	JPH_INLINE float			GetZ() const									{ return mF32[2]; }
-#elif defined(JPH_USE_NEON)
-	JPH_INLINE float			GetX() const									{ return vgetq_lane_f32(mValue, 0); }
-	JPH_INLINE float			GetY() const									{ return vgetq_lane_f32(mValue, 1); }
-	JPH_INLINE float			GetZ() const									{ return vgetq_lane_f32(mValue, 2); }
-#else
-	JPH_INLINE float			GetX() const									{ return mF32[0]; }
-	JPH_INLINE float			GetY() const									{ return mF32[1]; }
-	JPH_INLINE float			GetZ() const									{ return mF32[2]; }
-#endif
+	JPH_INLINE decimal			GetX() const									{ return mF32[0]; }
+	JPH_INLINE decimal			GetY() const									{ return mF32[1]; }
+	JPH_INLINE decimal			GetZ() const									{ return mF32[2]; }
 	
 	/// Set individual components
-	JPH_INLINE void				SetX(float inX)									{ mF32[0] = inX; }
-	JPH_INLINE void				SetY(float inY)									{ mF32[1] = inY; }
-	JPH_INLINE void				SetZ(float inZ)									{ mF32[2] = mF32[3] = inZ; } // Assure Z and W are the same
+	JPH_INLINE void				SetX(decimal inX)									{ mF32[0] = inX; }
+	JPH_INLINE void				SetY(decimal inY)									{ mF32[1] = inY; }
+	JPH_INLINE void				SetZ(decimal inZ)									{ mF32[2] = mF32[3] = inZ; } // Assure Z and W are the same
 
-	/// Get float component by index
-	JPH_INLINE float			operator [] (uint inCoordinate) const			{ JPH_ASSERT(inCoordinate < 3); return mF32[inCoordinate]; }
+	/// Get decimal component by index
+	JPH_INLINE decimal			operator [] (uint inCoordinate) const			{ JPH_ASSERT(inCoordinate < 3); return mF32[inCoordinate]; }
 
-	/// Set float component by index
-	JPH_INLINE void				SetComponent(uint inCoordinate, float inValue)	{ JPH_ASSERT(inCoordinate < 3); mF32[inCoordinate] = inValue; mValue = sFixW(mValue); } // Assure Z and W are the same
+	/// Set decimal component by index
+	JPH_INLINE void				SetComponent(uint inCoordinate, decimal inValue)	{ JPH_ASSERT(inCoordinate < 3); mF32[inCoordinate] = inValue; mValue = sFixW(mValue); } // Assure Z and W are the same
 
 	/// Comparison
 	JPH_INLINE bool				operator == (Vec3Arg inV2) const;
 	JPH_INLINE bool				operator != (Vec3Arg inV2) const				{ return !(*this == inV2); }
 
 	/// Test if two vectors are close
-	JPH_INLINE bool				IsClose(Vec3Arg inV2, float inMaxDistSq = 1.0e-12f) const;
+	JPH_INLINE bool				IsClose(Vec3Arg inV2, decimal inMaxDistSq = decimal(1.0e-12f)) const;
 
 	/// Test if vector is near zero
-	JPH_INLINE bool				IsNearZero(float inMaxDistSq = 1.0e-12f) const;
+	JPH_INLINE bool				IsNearZero(decimal inMaxDistSq = decimal(1.0e-12f)) const;
 
 	/// Test if vector is normalized
-	JPH_INLINE bool				IsNormalized(float inTolerance = 1.0e-6f) const;
+	JPH_INLINE bool				IsNormalized(decimal inTolerance = decimal(1.0e-6f)) const;
 
 	/// Test if vector contains NaN elements
 	JPH_INLINE bool				IsNaN() const;
 
-	/// Multiply two float vectors (component wise)
+	/// Multiply two decimal vectors (component wise)
 	JPH_INLINE Vec3				operator * (Vec3Arg inV2) const;
 
-	/// Multiply vector with float
-	JPH_INLINE Vec3				operator * (float inV2) const;
+	/// Multiply vector with decimal
+	JPH_INLINE Vec3				operator * (decimal inV2) const;
 
-	/// Multiply vector with float
-	friend JPH_INLINE Vec3		operator * (float inV1, Vec3Arg inV2);
+	/// Multiply vector with decimal
+	friend JPH_INLINE Vec3		operator * (decimal inV1, Vec3Arg inV2);
 
-	/// Divide vector by float
-	JPH_INLINE Vec3				operator / (float inV2) const;
+	/// Divide vector by decimal
+	JPH_INLINE Vec3				operator / (decimal inV2) const;
 
-	/// Multiply vector with float
-	JPH_INLINE Vec3 &			operator *= (float inV2);
+	/// Multiply vector with decimal
+	JPH_INLINE Vec3 &			operator *= (decimal inV2);
 
 	/// Multiply vector with vector
 	JPH_INLINE Vec3 &			operator *= (Vec3Arg inV2);
 
-	/// Divide vector by float
-	JPH_INLINE Vec3 &			operator /= (float inV2);
+	/// Divide vector by decimal
+	JPH_INLINE Vec3 &			operator /= (decimal inV2);
 
-	/// Add two float vectors (component wise)
+	/// Add two decimal vectors (component wise)
 	JPH_INLINE Vec3				operator + (Vec3Arg inV2) const;
 
-	/// Add two float vectors (component wise)
+	/// Add two decimal vectors (component wise)
 	JPH_INLINE Vec3 &			operator += (Vec3Arg inV2);
 
 	/// Negate
 	JPH_INLINE Vec3				operator - () const;
 
-	/// Subtract two float vectors (component wise)
+	/// Subtract two decimal vectors (component wise)
 	JPH_INLINE Vec3				operator - (Vec3Arg inV2) const;
 
-	/// Add two float vectors (component wise)
+	/// Add two decimal vectors (component wise)
 	JPH_INLINE Vec3 &			operator -= (Vec3Arg inV2);
 
 	/// Divide (component wise)
@@ -224,13 +207,13 @@ public:
 	JPH_INLINE Vec4				DotV4(Vec3Arg inV2) const;
 
 	/// Dot product
-	JPH_INLINE float			Dot(Vec3Arg inV2) const;
+	JPH_INLINE decimal			Dot(Vec3Arg inV2) const;
 
 	/// Squared length of vector
-	JPH_INLINE float			LengthSq() const;
+	JPH_INLINE decimal			LengthSq() const;
 
 	/// Length of vector
-	JPH_INLINE float			Length() const;
+	JPH_INLINE decimal			Length() const;
 
 	/// Normalize vector
 	JPH_INLINE Vec3				Normalized() const;
@@ -238,20 +221,20 @@ public:
 	/// Normalize vector or return inZeroValue if the length of the vector is zero
 	JPH_INLINE Vec3				NormalizedOr(Vec3Arg inZeroValue) const;
 
-	/// Store 3 floats to memory
+	/// Store 3 decimals to memory
 	JPH_INLINE void				StoreFloat3(Float3 *outV) const;
 
-	/// Convert each component from a float to an int
+	/// Convert each component from a decimal to an int
 	JPH_INLINE UVec4			ToInt() const;
 
 	/// Reinterpret Vec3 as a UVec4 (doesn't change the bits)
 	JPH_INLINE UVec4			ReinterpretAsInt() const;
 
 	/// Get the minimum of X, Y and Z
-	JPH_INLINE float			ReduceMin() const;
+	JPH_INLINE decimal			ReduceMin() const;
 
 	/// Get the maximum of X, Y and Z
-	JPH_INLINE float			ReduceMax() const;
+	JPH_INLINE decimal			ReduceMax() const;
 
 	/// Component wise square root
 	JPH_INLINE Vec3				Sqrt() const;
@@ -278,7 +261,7 @@ public:
 	union
 	{
 		Type					mValue;
-		float					mF32[4];
+		decimal					mF32[4];
 	};
 };
 

@@ -14,8 +14,8 @@ public:
 					DynMatrix(uint inRows, uint inCols)			: mRows(inRows), mCols(inCols) { mElements.resize(inRows * inCols); }
 
 	/// Access an element
-	float			operator () (uint inRow, uint inCol) const	{ JPH_ASSERT(inRow < mRows && inCol < mCols); return mElements[inRow * mCols + inCol]; }
-	float &			operator () (uint inRow, uint inCol)		{ JPH_ASSERT(inRow < mRows && inCol < mCols); return mElements[inRow * mCols + inCol]; }
+	decimal			operator () (uint inRow, uint inCol) const	{ JPH_ASSERT(inRow < mRows && inCol < mCols); return mElements[inRow * mCols + inCol]; }
+	decimal &			operator () (uint inRow, uint inCol)		{ JPH_ASSERT(inRow < mRows && inCol < mCols); return mElements[inRow * mCols + inCol]; }
 
 	/// Get dimensions
 	uint			GetCols() const								{ return mCols; }
@@ -24,7 +24,7 @@ public:
 private:
 	uint			mRows;
 	uint			mCols;
-	Array<float>	mElements;
+	Array<decimal>	mElements;
 };
 
 JPH_NAMESPACE_END

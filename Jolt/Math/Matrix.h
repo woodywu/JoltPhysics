@@ -83,15 +83,15 @@ public:
 					mCol[inDestCol + c].mF32[inDestRow + r] = inM(inSourceRow + r, inSourceCol + c);
 		}
 
-	/// Get float component by element index
-	inline float							operator () (uint inRow, uint inColumn) const			
+	/// Get decimal component by element index
+	inline decimal							operator () (uint inRow, uint inColumn) const			
 	{ 
 		JPH_ASSERT(inRow < Rows); 
 		JPH_ASSERT(inColumn < Cols); 
 		return mCol[inColumn].mF32[inRow]; 
 	}
 	
-	inline float &							operator () (uint inRow, uint inColumn)
+	inline decimal &							operator () (uint inRow, uint inColumn)
 	{ 
 		JPH_ASSERT(inRow < Rows); 
 		JPH_ASSERT(inColumn < Cols); 
@@ -131,7 +131,7 @@ public:
 		for (uint c = 0; c < OtherCols; ++c)
 			for (uint r = 0; r < Rows; ++r)
 			{
-				float dot = 0.0f;
+				decimal dot = 0.0f;
 				for (uint i = 0; i < Cols; ++i)
 					dot += mCol[i].mF32[r] * inM.mCol[c].mF32[i];
 				m.mCol[c].mF32[r] = dot;
@@ -145,7 +145,7 @@ public:
 		Vector<Rows> v;
 		for (uint r = 0; r < Rows; ++r)
 		{
-			float dot = 0.0f;
+			decimal dot = 0.0f;
 			for (uint c = 0; c < Cols; ++c)
 				dot += mCol[c].mF32[r] * inV.mF32[c];
 			v.mF32[r] = dot;
@@ -153,8 +153,8 @@ public:
 		return v;
 	}
 
-	/// Multiply matrix with float
-	inline Matrix							operator * (float inV) const
+	/// Multiply matrix with decimal
+	inline Matrix							operator * (decimal inV) const
 	{
 		Matrix m;
 		for (uint c = 0; c < Cols; ++c)
@@ -162,7 +162,7 @@ public:
 		return m;
 	}
 
-	inline friend Matrix					operator * (float inV, const Matrix &inM)				
+	inline friend Matrix					operator * (decimal inV, const Matrix &inM)				
 	{ 
 		return inM * inV; 
 	}
@@ -235,14 +235,14 @@ template <>
 inline bool Matrix<2, 2>::SetInversed(const Matrix<2, 2> &inM)
 {
 	// Fetch elements
-	float a = inM.mCol[0].mF32[0];
-	float b = inM.mCol[1].mF32[0];
-	float c = inM.mCol[0].mF32[1];
-	float d = inM.mCol[1].mF32[1];
+	decimal a = inM.mCol[0].mF32[0];
+	decimal b = inM.mCol[1].mF32[0];
+	decimal c = inM.mCol[0].mF32[1];
+	decimal d = inM.mCol[1].mF32[1];
 
 	// Calculate determinant
-	float det = a * d - b * c;
-	if (det == 0.0f)
+	decimal det = a * d - b * c;
+	if (det == C0)
 		return false;
 
 	// Construct inverse

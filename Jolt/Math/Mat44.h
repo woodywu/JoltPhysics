@@ -7,7 +7,7 @@
 
 JPH_NAMESPACE_BEGIN
 
-/// Holds a 4x4 matrix of floats, but supports also operations on the 3x3 upper left part of the matrix.
+/// Holds a 4x4 matrix of decimals, but supports also operations on the 3x3 upper left part of the matrix.
 class [[nodiscard]] alignas(JPH_VECTOR_ALIGNMENT) Mat44
 {
 public:
@@ -35,19 +35,19 @@ public:
 	/// Matrix filled with NaN's
 	static JPH_INLINE Mat44		sNaN();
 
-	/// Load 16 floats from memory
+	/// Load 16 decimals from memory
 	static JPH_INLINE Mat44		sLoadFloat4x4(const Float4 *inV);
 
-	/// Load 16 floats from memory, 16 bytes aligned
+	/// Load 16 decimals from memory, 16 bytes aligned
 	static JPH_INLINE Mat44		sLoadFloat4x4Aligned(const Float4 *inV);
 
 	/// Rotate around X, Y or Z axis (angle in radians)
-	static JPH_INLINE Mat44		sRotationX(float inX);
-	static JPH_INLINE Mat44		sRotationY(float inY);
-	static JPH_INLINE Mat44		sRotationZ(float inZ);
+	static JPH_INLINE Mat44		sRotationX(decimal inX);
+	static JPH_INLINE Mat44		sRotationY(decimal inY);
+	static JPH_INLINE Mat44		sRotationZ(decimal inZ);
 
 	/// Rotate around arbitrary axis
-	static JPH_INLINE Mat44		sRotation(Vec3Arg inAxis, float inAngle);
+	static JPH_INLINE Mat44		sRotation(Vec3Arg inAxis, decimal inAngle);
 
 	/// Rotate from quaternion
 	static JPH_INLINE Mat44		sRotation(QuatArg inQuat);
@@ -62,7 +62,7 @@ public:
 	static JPH_INLINE Mat44		sInverseRotationTranslation(QuatArg inR, Vec3Arg inT);
 
 	/// Get matrix that scales uniformly
-	static JPH_INLINE Mat44		sScale(float inScale);
+	static JPH_INLINE Mat44		sScale(decimal inScale);
 
 	/// Get matrix that scales (produces a matrix with (inV, 1) on its diagonal)
 	static JPH_INLINE Mat44		sScale(Vec3Arg inV);
@@ -85,16 +85,16 @@ public:
 	/// @param inUp Up vector
 	static JPH_INLINE Mat44		sLookAt(Vec3Arg inPos, Vec3Arg inTarget, Vec3Arg inUp);
 
-	/// Get float component by element index
-	JPH_INLINE float			operator () (uint inRow, uint inColumn) const			{ JPH_ASSERT(inRow < 4); JPH_ASSERT(inColumn < 4); return mCol[inColumn].mF32[inRow]; }
-	JPH_INLINE float &			operator () (uint inRow, uint inColumn)					{ JPH_ASSERT(inRow < 4); JPH_ASSERT(inColumn < 4); return mCol[inColumn].mF32[inRow]; }
+	/// Get decimal component by element index
+	JPH_INLINE decimal			operator () (uint inRow, uint inColumn) const			{ JPH_ASSERT(inRow < 4); JPH_ASSERT(inColumn < 4); return mCol[inColumn].mF32[inRow]; }
+	JPH_INLINE decimal&			operator () (uint inRow, uint inColumn)					{ JPH_ASSERT(inRow < 4); JPH_ASSERT(inColumn < 4); return mCol[inColumn].mF32[inRow]; }
 	
 	/// Comparsion
 	JPH_INLINE bool				operator == (Mat44Arg inM2) const;
 	JPH_INLINE bool				operator != (Mat44Arg inM2) const						{ return !(*this == inM2); }
 
 	/// Test if two matrices are close
-	JPH_INLINE bool				IsClose(Mat44Arg inM2, float inMaxDistSq = 1.0e-12f) const;
+	JPH_INLINE bool				IsClose(Mat44Arg inM2, decimal inMaxDistSq = decimal(1.0e-12f)) const;
 
 	/// Multiply matrix by matrix
 	JPH_INLINE Mat44			operator * (Mat44Arg inM) const;
@@ -118,12 +118,12 @@ public:
 	/// Multiply 3x3 matrix by the transpose of a 3x3 matrix (\f$result = this \: inM^T\f$)
 	JPH_INLINE Mat44			Multiply3x3RightTransposed(Mat44Arg inM) const;
 
-	/// Multiply matrix with float
-	JPH_INLINE Mat44			operator * (float inV) const;
-	friend JPH_INLINE Mat44		operator * (float inV, Mat44Arg inM)					{ return inM * inV; }
+	/// Multiply matrix with decimal
+	JPH_INLINE Mat44			operator * (decimal inV) const;
+	friend JPH_INLINE Mat44		operator * (decimal inV, Mat44Arg inM)					{ return inM * inV; }
 
-	/// Multiply matrix with float
-	JPH_INLINE Mat44 &			operator *= (float inV);
+	/// Multiply matrix with decimal
+	JPH_INLINE Mat44 &			operator *= (decimal inV);
 
 	/// Per element addition of matrix
 	JPH_INLINE Mat44			operator + (Mat44Arg inM) const;
@@ -139,19 +139,19 @@ public:
 
 	/// Access to the columns
 	JPH_INLINE Vec3				GetAxisX() const										{ return Vec3(mCol[0]); }
-	JPH_INLINE void				SetAxisX(Vec3Arg inV)									{ mCol[0] = Vec4(inV, 0.0f); }
+	JPH_INLINE void				SetAxisX(Vec3Arg inV)									{ mCol[0] = Vec4(inV, C0); }
 	JPH_INLINE Vec3				GetAxisY() const										{ return Vec3(mCol[1]); }
-	JPH_INLINE void				SetAxisY(Vec3Arg inV)									{ mCol[1] = Vec4(inV, 0.0f); }
+	JPH_INLINE void				SetAxisY(Vec3Arg inV)									{ mCol[1] = Vec4(inV, C0); }
 	JPH_INLINE Vec3				GetAxisZ() const										{ return Vec3(mCol[2]); }
-	JPH_INLINE void				SetAxisZ(Vec3Arg inV)									{ mCol[2] = Vec4(inV, 0.0f); }
+	JPH_INLINE void				SetAxisZ(Vec3Arg inV)									{ mCol[2] = Vec4(inV, C0); }
 	JPH_INLINE Vec3				GetTranslation() const									{ return Vec3(mCol[3]); }
-	JPH_INLINE void				SetTranslation(Vec3Arg inV)								{ mCol[3] = Vec4(inV, 1.0f); }
+	JPH_INLINE void				SetTranslation(Vec3Arg inV)								{ mCol[3] = Vec4(inV, C1); }
 	JPH_INLINE Vec3				GetDiagonal3() const									{ return Vec3(mCol[0][0], mCol[1][1], mCol[2][2]); }
 	JPH_INLINE void				SetDiagonal3(Vec3Arg inV)								{ mCol[0][0] = inV.GetX(); mCol[1][1] = inV.GetY(); mCol[2][2] = inV.GetZ(); }
 	JPH_INLINE Vec4				GetDiagonal4() const									{ return Vec4(mCol[0][0], mCol[1][1], mCol[2][2], mCol[3][3]); }
 	JPH_INLINE void				SetDiagonal4(Vec4Arg inV)								{ mCol[0][0] = inV.GetX(); mCol[1][1] = inV.GetY(); mCol[2][2] = inV.GetZ(); mCol[3][3] = inV.GetW(); }
 	JPH_INLINE Vec3				GetColumn3(uint inCol) const							{ JPH_ASSERT(inCol < 4); return Vec3(mCol[inCol]); }
-	JPH_INLINE void				SetColumn3(uint inCol, Vec3Arg inV)						{ JPH_ASSERT(inCol < 4); mCol[inCol] = Vec4(inV, inCol == 3? 1.0f : 0.0f); }
+	JPH_INLINE void				SetColumn3(uint inCol, Vec3Arg inV)						{ JPH_ASSERT(inCol < 4); mCol[inCol] = Vec4(inV, inCol == 3? C1 : C0); }
 	JPH_INLINE Vec4				GetColumn4(uint inCol) const							{ JPH_ASSERT(inCol < 4); return mCol[inCol]; }
 	JPH_INLINE void				SetColumn4(uint inCol, Vec4Arg inV)						{ JPH_ASSERT(inCol < 4); mCol[inCol] = inV; }
 
@@ -171,7 +171,7 @@ public:
 	JPH_INLINE Mat44			InversedRotationTranslation() const;
 
 	/// Get the determinant of a 3x3 matrix
-	JPH_INLINE float			GetDeterminant3x3() const;
+	JPH_INLINE decimal			GetDeterminant3x3() const;
 
 	/// Get the adjoint of a 3x3 matrix
 	JPH_INLINE Mat44			Adjointed3x3() const;

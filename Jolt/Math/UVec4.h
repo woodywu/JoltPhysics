@@ -13,13 +13,7 @@ public:
 	JPH_OVERRIDE_NEW_DELETE
 
 	// Underlying vector type
-#if defined(JPH_USE_SSE)
-	using Type = __m128i;
-#elif defined(JPH_USE_NEON)
-	using Type = uint32x4_t;
-#else
 	using Type = struct { uint32 mData[4]; };
-#endif
 
 	/// Constructor
 								UVec4() = default; ///< Intentionally not initialized for performance reasons
@@ -86,22 +80,10 @@ public:
 	static JPH_INLINE UVec4		sSort4True(UVec4Arg inValue, UVec4Arg inIndex);
 
 	/// Get individual components
-#if defined(JPH_USE_SSE)
-	JPH_INLINE uint32			GetX() const										{ return (uint32)_mm_cvtsi128_si32(mValue); }
-	JPH_INLINE uint32			GetY() const										{ return mU32[1]; }
-	JPH_INLINE uint32			GetZ() const										{ return mU32[2]; }
-	JPH_INLINE uint32			GetW() const										{ return mU32[3]; }
-#elif defined(JPH_USE_NEON)
-	JPH_INLINE uint32			GetX() const										{ return vgetq_lane_u32(mValue, 0); }
-	JPH_INLINE uint32			GetY() const										{ return vgetq_lane_u32(mValue, 1); }
-	JPH_INLINE uint32			GetZ() const										{ return vgetq_lane_u32(mValue, 2); }
-	JPH_INLINE uint32			GetW() const										{ return vgetq_lane_u32(mValue, 3); }
-#else
 	JPH_INLINE uint32			GetX() const										{ return mU32[0]; }
 	JPH_INLINE uint32			GetY() const										{ return mU32[1]; }
 	JPH_INLINE uint32			GetZ() const										{ return mU32[2]; }
 	JPH_INLINE uint32			GetW() const										{ return mU32[3]; }
-#endif
 
 	/// Set individual components
 	JPH_INLINE void				SetX(uint32 inX)									{ mU32[0] = inX; }
