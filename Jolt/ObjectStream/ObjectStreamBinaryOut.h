@@ -27,7 +27,7 @@ public:
 	virtual void				WritePrimitiveData(const int &inPrimitive) override;
 	virtual void				WritePrimitiveData(const uint32 &inPrimitive) override;
 	virtual void				WritePrimitiveData(const uint64 &inPrimitive) override;
-	virtual void				WritePrimitiveData(const float &inPrimitive) override;
+	virtual void				WritePrimitiveData(const decimal &inPrimitive) override;
 	virtual void				WritePrimitiveData(const double &inPrimitive) override;
 	virtual void				WritePrimitiveData(const bool &inPrimitive) override;
 	virtual void				WritePrimitiveData(const String &inPrimitive) override;

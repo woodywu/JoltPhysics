@@ -89,9 +89,9 @@ bool ObjectStreamBinaryIn::ReadPrimitiveData(uint64 &outPrimitive)
 	return true;
 }
 
-bool ObjectStreamBinaryIn::ReadPrimitiveData(float &outPrimitive)
+bool ObjectStreamBinaryIn::ReadPrimitiveData(decimal &outPrimitive)
 {
-	float primitive;
+	decimal primitive;
 	mStream.read((char *)&primitive, sizeof(primitive));
 	if (mStream.fail()) return false;
 	outPrimitive = primitive;

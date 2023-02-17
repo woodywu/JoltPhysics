@@ -28,11 +28,11 @@ void ObjectStreamTextOut::WriteDataType(EOSDataType inType)
 	case EOSDataType::T_int:		WriteWord("int");			break;
 	case EOSDataType::T_uint32:		WriteWord("uint32");		break;
 	case EOSDataType::T_uint64:		WriteWord("uint64");		break;
-	case EOSDataType::T_float:		WriteWord("float");			break;
+	case EOSDataType::T_decimal:	WriteWord("decimal");			break;
 	case EOSDataType::T_double:		WriteWord("double");		break;
 	case EOSDataType::T_bool:		WriteWord("bool");			break;
 	case EOSDataType::T_String:		WriteWord("string");		break;
-	case EOSDataType::T_Float3:		WriteWord("float3");		break;
+	case EOSDataType::T_Float3:		WriteWord("decimal3");		break;
 	case EOSDataType::T_Vec3:		WriteWord("vec3");			break;
 	case EOSDataType::T_Vec4:		WriteWord("vec4");			break;
 	case EOSDataType::T_Quat:		WriteWord("quat");			break;
@@ -82,7 +82,7 @@ void ObjectStreamTextOut::WritePrimitiveData(const uint64 &inPrimitive)
 	WriteWord(std::to_string(inPrimitive));
 }
 
-void ObjectStreamTextOut::WritePrimitiveData(const float &inPrimitive)
+void ObjectStreamTextOut::WritePrimitiveData(const decimal &inPrimitive)
 {
 	std::ostringstream stream;
 	stream.precision(9);

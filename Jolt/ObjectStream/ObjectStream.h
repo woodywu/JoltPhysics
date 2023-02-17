@@ -49,7 +49,7 @@ public:
 	virtual bool				ReadPrimitiveData(int &outPrimitive) = 0;
 	virtual bool				ReadPrimitiveData(uint32 &outPrimitive) = 0;
 	virtual bool				ReadPrimitiveData(uint64 &outPrimitive) = 0;
-	virtual bool				ReadPrimitiveData(float &outPrimitive) = 0;
+	virtual bool				ReadPrimitiveData(decimal &outPrimitive) = 0;
 	virtual bool				ReadPrimitiveData(double &outPrimitive) = 0;
 	virtual bool				ReadPrimitiveData(bool &outPrimitive) = 0;
 	virtual bool				ReadPrimitiveData(String &outPrimitive) = 0;
@@ -80,7 +80,7 @@ public:
 	virtual void				WritePrimitiveData(const int &inPrimitive) = 0;
 	virtual void				WritePrimitiveData(const uint32 &inPrimitive) = 0;
 	virtual void				WritePrimitiveData(const uint64 &inPrimitive) = 0;
-	virtual void				WritePrimitiveData(const float &inPrimitive) = 0;
+	virtual void				WritePrimitiveData(const decimal &inPrimitive) = 0;
 	virtual void				WritePrimitiveData(const double &inPrimitive) = 0;
 	virtual void				WritePrimitiveData(const bool &inPrimitive) = 0;
 	virtual void				WritePrimitiveData(const String &inPrimitive) = 0;

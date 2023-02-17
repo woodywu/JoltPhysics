@@ -38,15 +38,15 @@ bool ObjectStreamTextIn::ReadDataType(EOSDataType &outType)
 			outType  = EOSDataType::T_uint32;
 		else if (token == "uint64")
 			outType  = EOSDataType::T_uint64;
-		else if (token == "float")
-			outType  = EOSDataType::T_float;
+		else if (token == "decimal")
+			outType  = EOSDataType::T_decimal;
 		else if (token == "double")
 			outType  = EOSDataType::T_double;
 		else if (token == "bool")
 			outType  = EOSDataType::T_bool;
 		else if (token == "string")
 			outType  = EOSDataType::T_String;
-		else if (token == "float3")
+		else if (token == "decimal3")
 			outType  = EOSDataType::T_Float3;
 		else if (token == "vec3")
 			outType  = EOSDataType::T_Vec3;
@@ -152,7 +152,7 @@ bool ObjectStreamTextIn::ReadPrimitiveData(uint64 &outPrimitive)
 	return !stream.fail();
 }
 
-bool ObjectStreamTextIn::ReadPrimitiveData(float &outPrimitive)
+bool ObjectStreamTextIn::ReadPrimitiveData(decimal &outPrimitive)
 {
 	String token;
 	if (!ReadWord(token))
@@ -274,7 +274,7 @@ bool ObjectStreamTextIn::ReadPrimitiveData(String &outPrimitive)
 
 bool ObjectStreamTextIn::ReadPrimitiveData(Float3 &outPrimitive)
 {
-	float x, y, z;
+	decimal x, y, z;
 	if (!ReadPrimitiveData(x) || !ReadPrimitiveData(y) || !ReadPrimitiveData(z))
 		return false;
 	outPrimitive = Float3(x, y, z);
@@ -283,7 +283,7 @@ bool ObjectStreamTextIn::ReadPrimitiveData(Float3 &outPrimitive)
 
 bool ObjectStreamTextIn::ReadPrimitiveData(Vec3 &outPrimitive)
 {
-	float x, y, z;
+	decimal x, y, z;
 	if (!ReadPrimitiveData(x) || !ReadPrimitiveData(y) || !ReadPrimitiveData(z))
 		return false;
 	outPrimitive = Vec3(x, y, z);
@@ -292,7 +292,7 @@ bool ObjectStreamTextIn::ReadPrimitiveData(Vec3 &outPrimitive)
 
 bool ObjectStreamTextIn::ReadPrimitiveData(Vec4 &outPrimitive)
 {
-	float x, y, z, w;
+	decimal x, y, z, w;
 	if (!ReadPrimitiveData(x) || !ReadPrimitiveData(y) || !ReadPrimitiveData(z) || !ReadPrimitiveData(w))
 		return false;
 	outPrimitive = Vec4(x, y, z, w);
@@ -301,7 +301,7 @@ bool ObjectStreamTextIn::ReadPrimitiveData(Vec4 &outPrimitive)
 
 bool ObjectStreamTextIn::ReadPrimitiveData(Quat &outPrimitive)
 {
-	float x, y, z, w;
+	decimal x, y, z, w;
 	if (!ReadPrimitiveData(x) || !ReadPrimitiveData(y) || !ReadPrimitiveData(z) || !ReadPrimitiveData(w))
 		return false;
 	outPrimitive = Quat(x, y, z, w);

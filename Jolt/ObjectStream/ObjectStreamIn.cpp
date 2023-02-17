@@ -487,9 +487,9 @@ bool ObjectStreamIn::SkipAttributeData(int inArrayDepth, EOSDataType inDataType,
 						break;
 					}
 				
-				case EOSDataType::T_float:
+				case EOSDataType::T_decimal:
 					{	
-						float temporary;
+						decimal temporary;
 						continue_reading = ReadPrimitiveData(temporary);
 						break;
 					}
