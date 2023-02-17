@@ -97,12 +97,12 @@ public:
 	void					SetAllowSleeping(bool inAllow);
 
 	/// Friction (dimensionless number, usually between 0 and 1, 0 = no friction, 1 = friction force equals force that presses the two bodies together)
-	inline float			GetFriction() const												{ return mFriction; }
-	void					SetFriction(float inFriction)									{ JPH_ASSERT(inFriction >= 0.0f); mFriction = inFriction; }
+	inline decimal			GetFriction() const												{ return mFriction; }
+	void					SetFriction(decimal inFriction)									{ JPH_ASSERT(inFriction >= C0); mFriction = inFriction; }
 
 	/// Restitution (dimensionless number, usually between 0 and 1, 0 = completely inelastic collision response, 1 = completely elastic collision response)
-	inline float			GetRestitution() const											{ return mRestitution; }
-	void					SetRestitution(float inRestitution)								{ JPH_ASSERT(inRestitution >= 0.0f && inRestitution <= 1.0f); mRestitution = inRestitution; }
+	inline decimal			GetRestitution() const											{ return mRestitution; }
+	void					SetRestitution(decimal inRestitution)								{ JPH_ASSERT(inRestitution >= C0 && inRestitution <= C1); mRestitution = inRestitution; }
 
 	/// Get world space linear velocity of the center of mass (unit: m/s)
 	inline Vec3				GetLinearVelocity() const										{ return !IsStatic()? mMotionProperties->GetLinearVelocity() : Vec3::sZero(); }
@@ -156,19 +156,19 @@ public:
 	inline void				AddAngularImpulse(Vec3Arg inAngularImpulse);
 	
 	/// Set velocity of body such that it will be positioned at inTargetPosition/Rotation in inDeltaTime seconds.
-	void					MoveKinematic(RVec3Arg inTargetPosition, QuatArg inTargetRotation, float inDeltaTime);
+	void					MoveKinematic(RVec3Arg inTargetPosition, QuatArg inTargetRotation, decimal inDeltaTime);
 
 	/// Applies an impulse to the body that simulates fluid buoyancy and drag
 	/// @param inSurfacePosition Position on the fluid surface in world space
 	/// @param inSurfaceNormal Normal of the fluid surface (should point up)
-	/// @param inBuoyancy The buoyancy factor for the body. 1 = neutral body, < 1 sinks, > 1 floats. Note that we don't use the fluid density since it is harder to configure than a simple number between [0, 2]
+	/// @param inBuoyancy The buoyancy factor for the body. 1 = neutral body, < 1 sinks, > 1 decimals. Note that we don't use the fluid density since it is harder to configure than a simple number between [0, 2]
 	/// @param inLinearDrag Linear drag factor that slows down the body when in the fluid (approx. 0.5)
 	/// @param inAngularDrag Angular drag factor that slows down rotation when the body is in the fluid (approx. 0.01)
 	/// @param inFluidVelocity The average velocity of the fluid (in m/s) in which the body resides
 	/// @param inGravity The graviy vector (pointing down)
 	/// @param inDeltaTime Delta time of the next simulation step (in s)
 	/// @return true if an impulse was applied, false if the body was not in the fluid
-	bool					ApplyBuoyancyImpulse(RVec3Arg inSurfacePosition, Vec3Arg inSurfaceNormal, float inBuoyancy, float inLinearDrag, float inAngularDrag, Vec3Arg inFluidVelocity, Vec3Arg inGravity, float inDeltaTime);
+	bool					ApplyBuoyancyImpulse(RVec3Arg inSurfacePosition, Vec3Arg inSurfaceNormal, decimal inBuoyancy, decimal inLinearDrag, decimal inAngularDrag, Vec3Arg inFluidVelocity, Vec3Arg inGravity, decimal inDeltaTime);
 
 	/// Check if this body has been added to the physics system
 	inline bool				IsInBroadPhase() const											{ return (mFlags.load(memory_order_relaxed) & uint8(EFlags::IsInBroadPhase)) != 0; }
@@ -274,7 +274,7 @@ public:
 	};
 
 	/// Update eligibility for sleeping
-	ECanSleep				UpdateSleepStateInternal(float inDeltaTime, float inMaxMovement, float inTimeBeforeSleep);
+	ECanSleep				UpdateSleepStateInternal(decimal inDeltaTime, decimal inMaxMovement, decimal inTimeBeforeSleep);
 
 	/// Saving state for replay
 	void					SaveState(StateRecorder &inStream) const;
@@ -314,8 +314,8 @@ private:
 	CollisionGroup			mCollisionGroup;												///< The collision group this body belongs to (determines if two objects can collide)
 
 	// 4 byte aligned
-	float					mFriction;														///< Friction of the body (dimensionless number, usually between 0 and 1, 0 = no friction, 1 = friction force equals force that presses the two bodies together)
-	float					mRestitution;													///< Restitution of body (dimensionless number, usually between 0 and 1, 0 = completely inelastic collision response, 1 = completely elastic collision response)
+	decimal					mFriction;														///< Friction of the body (dimensionless number, usually between 0 and 1, 0 = no friction, 1 = friction force equals force that presses the two bodies together)
+	decimal					mRestitution;													///< Restitution of body (dimensionless number, usually between 0 and 1, 0 = completely inelastic collision response, 1 = completely elastic collision response)
 	BodyID					mID;															///< ID of the body (index in the bodies array)
 
 	// 2 bytes aligned

@@ -141,7 +141,7 @@ RMat44 VehicleConstraint::GetWheelWorldTransform(uint inWheelIndex, Vec3Arg inWh
 	return mBody->GetWorldTransform() * GetWheelLocalTransform(inWheelIndex, inWheelRight, inWheelUp);
 }
 
-void VehicleConstraint::OnStep(float inDeltaTime, PhysicsSystem &inPhysicsSystem)
+void VehicleConstraint::OnStep(decimal inDeltaTime, PhysicsSystem &inPhysicsSystem)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -161,7 +161,7 @@ void VehicleConstraint::OnStep(float inDeltaTime, PhysicsSystem &inPhysicsSystem
 		w->mContactBodyID = BodyID();
 		w->mContactBody = nullptr;
 		w->mContactSubShapeID = SubShapeID();
-		float max_len = settings->mSuspensionMaxLength + settings->mRadius;
+		decimal max_len = settings->mSuspensionMaxLength + settings->mRadius;
 		w->mContactLength = max_len;
 
 		// Test collision to find the floor
@@ -196,8 +196,8 @@ void VehicleConstraint::OnStep(float inDeltaTime, PhysicsSystem &inPhysicsSystem
 		if (lw->mContactBody != nullptr && rw->mContactBody != nullptr)
 		{
 			// Calculate the impulse to apply based on the difference in suspension length
-			float difference = rw->mContactLength - lw->mContactLength;
-			float impulse = difference * r.mStiffness * inDeltaTime;
+			decimal difference = rw->mContactLength - lw->mContactLength;
+			decimal impulse = difference * r.mStiffness * inDeltaTime;
 			lw->mAntiRollBarImpulse = -impulse;
 			rw->mAntiRollBarImpulse = impulse;
 		}
@@ -286,7 +286,7 @@ void VehicleConstraint::CalculateWheelContactPoint(RMat44Arg inBodyTransform, co
 	outR2 = Vec3(contact_pos - inWheel.mContactBody->GetCenterOfMassPosition());
 }
 
-void VehicleConstraint::CalculatePitchRollConstraintProperties(float inDeltaTime, RMat44Arg inBodyTransform)
+void VehicleConstraint::CalculatePitchRollConstraintProperties(decimal inDeltaTime, RMat44Arg inBodyTransform)
 {
 	// Check if a limit was specified
 	if (mCosMaxPitchRollAngle < JPH_PI)
@@ -298,7 +298,7 @@ void VehicleConstraint::CalculatePitchRollConstraintProperties(float inDeltaTime
 		{
 			// Calculate rotation axis to rotate vehicle towards up
 			Vec3 rotation_axis = mUp.Cross(vehicle_up);
-			float len = rotation_axis.Length();
+			decimal len = rotation_axis.Length();
 			if (len > 0.0f)
 				mPitchRollRotationAxis = rotation_axis / len;
 
@@ -311,7 +311,7 @@ void VehicleConstraint::CalculatePitchRollConstraintProperties(float inDeltaTime
 		mPitchRollPart.Deactivate();
 }
 
-void VehicleConstraint::SetupVelocityConstraint(float inDeltaTime)
+void VehicleConstraint::SetupVelocityConstraint(decimal inDeltaTime)
 {
 	RMat44 body_transform = mBody->GetWorldTransform();
 
@@ -330,7 +330,7 @@ void VehicleConstraint::SetupVelocityConstraint(float inDeltaTime)
 				w->mSuspensionPart.Deactivate();
 
 			// Check if we reached the 'max up' position
-			float max_up_error = w->mContactLength - settings->mRadius - settings->mSuspensionMinLength;
+			decimal max_up_error = w->mContactLength - settings->mRadius - settings->mSuspensionMinLength;
 			if (max_up_error < 0.0f)
 				w->mSuspensionMaxUpPart.CalculateConstraintProperties(inDeltaTime, *mBody, r1_plus_u, *w->mContactBody, r2, w->mWSDirection, 0.0f, max_up_error);
 			else
@@ -352,7 +352,7 @@ void VehicleConstraint::SetupVelocityConstraint(float inDeltaTime)
 	CalculatePitchRollConstraintProperties(inDeltaTime, body_transform);
 }
 
-void VehicleConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio) 
+void VehicleConstraint::WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio) 
 {
 	for (Wheel *w : mWheels)
 		if (w->mContactBody != nullptr)
@@ -366,7 +366,7 @@ void VehicleConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRati
 	mPitchRollPart.WarmStart(*mBody, Body::sFixedToWorld, inWarmStartImpulseRatio);
 }
 
-bool VehicleConstraint::SolveVelocityConstraint(float inDeltaTime) 
+bool VehicleConstraint::SolveVelocityConstraint(decimal inDeltaTime) 
 {
 	bool impulse = false;
 
@@ -393,7 +393,7 @@ bool VehicleConstraint::SolveVelocityConstraint(float inDeltaTime)
 	return impulse;
 }
 
-bool VehicleConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgarte) 
+bool VehicleConstraint::SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte) 
 {
 	bool impulse = false;
 
@@ -408,10 +408,10 @@ bool VehicleConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumg
 			// TODO: This assumes that only the vehicle moved and not the ground (contact point/normal is stored in world space)
 			Vec3 ws_direction = body_transform.Multiply3x3(settings->mDirection);
 			RVec3 ws_position = body_transform * settings->mPosition;
-			float contact_length = Vec3(w->mContactPosition - ws_position).Dot(ws_direction);
+			decimal contact_length = Vec3(w->mContactPosition - ws_position).Dot(ws_direction);
 
 			// Check if we reached the 'max up' position
-			float max_up_error = contact_length - settings->mRadius - settings->mSuspensionMinLength;
+			decimal max_up_error = contact_length - settings->mRadius - settings->mSuspensionMinLength;
 			if (max_up_error < 0.0f)
 			{
 				// Recalculate constraint properties since the body may have moved

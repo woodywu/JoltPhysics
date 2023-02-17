@@ -113,11 +113,11 @@ void PhysicsSystem::RemoveStepListener(PhysicsStepListener *inListener)
 	mStepListeners.erase(i);
 }
 
-void PhysicsSystem::Update(float inDeltaTime, int inCollisionSteps, int inIntegrationSubSteps, TempAllocator *inTempAllocator, JobSystem *inJobSystem)
+void PhysicsSystem::Update(decimal inDeltaTime, int inCollisionSteps, int inIntegrationSubSteps, TempAllocator *inTempAllocator, JobSystem *inJobSystem)
 {	
 	JPH_PROFILE_FUNCTION();
 
-	JPH_ASSERT(inDeltaTime >= 0.0f);
+	JPH_ASSERT(inDeltaTime >= C0);
 	JPH_ASSERT(inIntegrationSubSteps <= PhysicsUpdateContext::cMaxSubSteps);
 
 	// Sync point for the broadphase. This will allow it to do clean up operations without having any mutexes locked yet.
@@ -125,7 +125,7 @@ void PhysicsSystem::Update(float inDeltaTime, int inCollisionSteps, int inIntegr
 
 	// If there are no active bodies or there's no time delta
 	uint32 num_active_bodies = mBodyManager.GetNumActiveBodies();
-	if (num_active_bodies == 0 || inDeltaTime <= 0.0f)
+	if (num_active_bodies == 0 || inDeltaTime <= C0)
 	{
 		mBodyManager.LockAllBodies();
 
@@ -144,8 +144,8 @@ void PhysicsSystem::Update(float inDeltaTime, int inCollisionSteps, int inIntegr
 	}
 
 	// Calculate ratio between current and previous frame delta time to scale initial constraint forces
-	float sub_step_delta_time = inDeltaTime / (inCollisionSteps * inIntegrationSubSteps);
-	float warm_start_impulse_ratio = mPhysicsSettings.mConstraintWarmStart && mPreviousSubStepDeltaTime > 0.0f? sub_step_delta_time / mPreviousSubStepDeltaTime : 0.0f;
+	decimal sub_step_delta_time = inDeltaTime / (inCollisionSteps * inIntegrationSubSteps);
+	decimal warm_start_impulse_ratio = mPhysicsSettings.mConstraintWarmStart && mPreviousSubStepDeltaTime > C0? sub_step_delta_time / mPreviousSubStepDeltaTime : C0;
 	mPreviousSubStepDeltaTime = sub_step_delta_time;
 
 	// Create the context used for passing information between jobs
@@ -627,7 +627,7 @@ void PhysicsSystem::JobStepListeners(PhysicsUpdateContext::Step *ioStep)
 	BodyManager::GrantActiveBodiesAccess grant_active(true, false);
 #endif
 
-	float step_time = ioStep->mContext->mStepDeltaTime;
+	decimal step_time = ioStep->mContext->mStepDeltaTime;
 	uint32 batch_size = mPhysicsSettings.mStepListenersBatchSize;
 	for (;;)
 	{
@@ -690,7 +690,7 @@ void PhysicsSystem::JobApplyGravity(const PhysicsUpdateContext *ioContext, Physi
 	uint32 num_active_bodies_at_step_start = ioStep->mNumActiveBodiesAtStepStart;
 
 	// Fetch delta time once outside the loop
-	float delta_time = ioContext->mSubStepDeltaTime;
+	decimal delta_time = ioContext->mSubStepDeltaTime;
 
 	// Update velocities from forces
 	for (;;)
@@ -714,7 +714,7 @@ void PhysicsSystem::JobApplyGravity(const PhysicsUpdateContext *ioContext, Physi
 	}
 }
 
-void PhysicsSystem::JobSetupVelocityConstraints(float inDeltaTime, PhysicsUpdateContext::Step *ioStep) const
+void PhysicsSystem::JobSetupVelocityConstraints(decimal inDeltaTime, PhysicsUpdateContext::Step *ioStep) const
 {
 #ifdef JPH_ENABLE_ASSERTS
 	// We only read positions
@@ -1040,7 +1040,7 @@ void PhysicsSystem::ProcessBodyPair(ContactAllocator &ioContactAllocator, const 
 			
 					// Check if we can add it to an existing manifold
 					Manifolds::iterator manifold;
-					float contact_normal_cos_max_delta_rot = mSystem->mPhysicsSettings.mContactNormalCosMaxDeltaRotation;
+					decimal contact_normal_cos_max_delta_rot = mSystem->mPhysicsSettings.mContactNormalCosMaxDeltaRotation;
 					for (manifold = mManifolds.begin(); manifold != mManifolds.end(); ++manifold)
 						if (world_space_normal.Dot(manifold->mFirstWorldSpaceNormal) >= contact_normal_cos_max_delta_rot)
 						{
@@ -1094,7 +1094,7 @@ void PhysicsSystem::ProcessBodyPair(ContactAllocator &ioContactAllocator, const 
 
 			// Perform collision detection between the two shapes
 			SubShapeIDCreator part1, part2;
-			CollisionDispatch::sCollideShapeVsShape(body1->GetShape(), body2->GetShape(), Vec3::sReplicate(1.0f), Vec3::sReplicate(1.0f), transform1, transform2, part1, part2, settings, collector);
+			CollisionDispatch::sCollideShapeVsShape(body1->GetShape(), body2->GetShape(), Vec3::sReplicate(C1), Vec3::sReplicate(C1), transform1, transform2, part1, part2, settings, collector);
 
 			// Add the contacts
 			for (ContactManifold &manifold : collector.mManifolds)
@@ -1196,7 +1196,7 @@ void PhysicsSystem::ProcessBodyPair(ContactAllocator &ioContactAllocator, const 
 
 			// Perform collision detection between the two shapes
 			SubShapeIDCreator part1, part2;
-			CollisionDispatch::sCollideShapeVsShape(body1->GetShape(), body2->GetShape(), Vec3::sReplicate(1.0f), Vec3::sReplicate(1.0f), transform1, transform2, part1, part2, settings, collector);
+			CollisionDispatch::sCollideShapeVsShape(body1->GetShape(), body2->GetShape(), Vec3::sReplicate(C1), Vec3::sReplicate(C1), transform1, transform2, part1, part2, settings, collector);
 
 			constraint_created = collector.mConstraintCreated;
 		}
@@ -1255,14 +1255,14 @@ void PhysicsSystem::JobSolveVelocityConstraints(PhysicsUpdateContext *ioContext,
 	BodyAccess::Grant grant(BodyAccess::EAccess::ReadWrite, BodyAccess::EAccess::Read);
 #endif
 	
-	float delta_time = ioContext->mSubStepDeltaTime;
+	decimal delta_time = ioContext->mSubStepDeltaTime;
 	Constraint **active_constraints = ioContext->mActiveConstraints;
 
 	bool first_sub_step = ioSubStep->mIsFirst;
 	bool last_sub_step = ioSubStep->mIsLast;
 
 	// Only the first sub step of the first step needs to correct for the delta time difference in the previous update
-	float warm_start_impulse_ratio = ioSubStep->mIsFirstOfAll? ioContext->mWarmStartImpulseRatio : 1.0f; 
+	decimal warm_start_impulse_ratio = ioSubStep->mIsFirstOfAll? ioContext->mWarmStartImpulseRatio : C1; 
 
 	for (;;)
 	{
@@ -1371,7 +1371,7 @@ void PhysicsSystem::JobIntegrateVelocity(const PhysicsUpdateContext *ioContext, 
 	BodyAccess::Grant grant(BodyAccess::EAccess::ReadWrite, BodyAccess::EAccess::ReadWrite);
 #endif
 
-	float delta_time = ioContext->mSubStepDeltaTime;
+	decimal delta_time = ioContext->mSubStepDeltaTime;
 	const BodyID *active_bodies = mBodyManager.GetActiveBodiesUnsafe();
 	uint32 num_active_bodies = mBodyManager.GetNumActiveBodies();
 	uint32 num_active_bodies_after_find_collisions = ioSubStep->mStep->mActiveBodyReadIdx;
@@ -1441,11 +1441,11 @@ void PhysicsSystem::JobIntegrateVelocity(const PhysicsUpdateContext *ioContext, 
 					&& !body.IsSensor()) // We don't support CCD sensors
 				{
 					// Determine inner radius (the smallest sphere that fits into the shape)
-					float inner_radius = body.GetShape()->GetInnerRadius();
-					JPH_ASSERT(inner_radius > 0.0f, "The shape has no inner radius, this makes the shape unsuitable for the linear cast motion quality as we cannot move it without risking tunneling.");
+					decimal inner_radius = body.GetShape()->GetInnerRadius();
+					JPH_ASSERT(inner_radius > C0, "The shape has no inner radius, this makes the shape unsuitable for the linear cast motion quality as we cannot move it without risking tunneling.");
 
 					// Measure translation in this step and check if it above the treshold to perform a linear cast
-					float linear_cast_threshold_sq = Square(mPhysicsSettings.mLinearCastThreshold * inner_radius);
+					decimal linear_cast_threshold_sq = Square(mPhysicsSettings.mLinearCastThreshold * inner_radius);
 					if (delta_pos.LengthSq() > linear_cast_threshold_sq)
 					{
 						// This body needs a cast
@@ -1527,7 +1527,7 @@ void PhysicsSystem::JobPostIntegrateVelocity(PhysicsUpdateContext *ioContext, Ph
 }
 
 // Helper function to calculate the motion of a body during this CCD step
-inline static Vec3 sCalculateBodyMotion(const Body &inBody, float inDeltaTime)
+inline static Vec3 sCalculateBodyMotion(const Body &inBody, decimal inDeltaTime)
 {
 	// If the body is linear casting, the body has not yet moved so we need to calculate its motion
 	if (inBody.IsDynamic() && inBody.GetMotionProperties()->GetMotionQuality() == EMotionQuality::LinearCast)
@@ -1598,9 +1598,9 @@ void PhysicsSystem::JobFindCCDContacts(const PhysicsUpdateContext *ioContext, Ph
 		if (sDrawMotionQualityLinearCast)
 		{
 			RMat44 com = body.GetCenterOfMassTransform();
-			body.GetShape()->Draw(DebugRenderer::sInstance, com, Vec3::sReplicate(1.0f), Color::sGreen, false, true);
+			body.GetShape()->Draw(DebugRenderer::sInstance, com, Vec3::sReplicate(C1), Color::sGreen, false, true);
 			DebugRenderer::sInstance->DrawArrow(com.GetTranslation(), com.GetTranslation() + ccd_body.mDeltaPosition, Color::sGreen, 0.1f);
-			body.GetShape()->Draw(DebugRenderer::sInstance, com.PostTranslated(ccd_body.mDeltaPosition), Vec3::sReplicate(1.0f), Color::sRed, false, true);
+			body.GetShape()->Draw(DebugRenderer::sInstance, com.PostTranslated(ccd_body.mDeltaPosition), Vec3::sReplicate(C1), Color::sRed, false, true);
 		}
 	#endif // JPH_DEBUG_RENDERER
 
@@ -1608,7 +1608,7 @@ void PhysicsSystem::JobFindCCDContacts(const PhysicsUpdateContext *ioContext, Ph
 		class CCDNarrowPhaseCollector : public CastShapeCollector
 		{
 		public:
-										CCDNarrowPhaseCollector(const BodyManager &inBodyManager, ContactConstraintManager &inContactConstraintManager, CCDBody &inCCDBody, ShapeCastResult &inResult, float inDeltaTime) : 
+										CCDNarrowPhaseCollector(const BodyManager &inBodyManager, ContactConstraintManager &inContactConstraintManager, CCDBody &inCCDBody, ShapeCastResult &inResult, decimal inDeltaTime) : 
 				mBodyManager(inBodyManager),
 				mContactConstraintManager(inContactConstraintManager),
 				mCCDBody(inCCDBody),
@@ -1622,7 +1622,7 @@ void PhysicsSystem::JobFindCCDContacts(const PhysicsUpdateContext *ioContext, Ph
 				JPH_PROFILE_FUNCTION();
 
 				// Check if this is a possible earlier hit than the one before
-				float fraction = inResult.mFraction;
+				decimal fraction = inResult.mFraction;
 				if (fraction < mCCDBody.mFractionPlusSlop)
 				{
 					// Normalize normal
@@ -1633,10 +1633,10 @@ void PhysicsSystem::JobFindCCDContacts(const PhysicsUpdateContext *ioContext, Ph
 					// Let the extra distance that we can travel along delta_pos be 'dist': mMaxPenetration / dist = cos(angle between normal and delta_pos) = normal . delta_pos / |delta_pos|
 					// <=> dist = mMaxPenetration * |delta_pos| / normal . delta_pos
 					// Converting to a faction: delta_fraction = dist / |delta_pos| = mLinearCastTreshold / normal . delta_pos
-					float denominator = normal.Dot(mCCDBody.mDeltaPosition);
+					decimal denominator = normal.Dot(mCCDBody.mDeltaPosition);
 					if (denominator > mCCDBody.mMaxPenetration) // Avoid dividing by zero, if extra hit fraction > 1 there's also no point in continuing
 					{
-						float fraction_plus_slop = fraction + mCCDBody.mMaxPenetration / denominator;
+						decimal fraction_plus_slop = fraction + mCCDBody.mMaxPenetration / denominator;
 						if (fraction_plus_slop < mCCDBody.mFractionPlusSlop)
 						{
 							const Body &body2 = mBodyManager.GetBody(inResult.mBodyID2);
@@ -1703,7 +1703,7 @@ void PhysicsSystem::JobFindCCDContacts(const PhysicsUpdateContext *ioContext, Ph
 			ContactConstraintManager &	mContactConstraintManager;
 			CCDBody &					mCCDBody;
 			ShapeCastResult &			mResult;
-			float						mDeltaTime;
+			decimal						mDeltaTime;
 			BodyID						mAcceptedBodyID;
 		};
 
@@ -1715,7 +1715,7 @@ void PhysicsSystem::JobFindCCDContacts(const PhysicsUpdateContext *ioContext, Ph
 		class CCDBroadPhaseCollector : public CastShapeBodyCollector
 		{
 		public:
-										CCDBroadPhaseCollector(const CCDBody &inCCDBody, const Body &inBody1, const RShapeCast &inShapeCast, ShapeCastSettings &inShapeCastSettings, CCDNarrowPhaseCollector &ioCollector, const BodyManager &inBodyManager, PhysicsUpdateContext::SubStep *inSubStep, float inDeltaTime) :
+										CCDBroadPhaseCollector(const CCDBody &inCCDBody, const Body &inBody1, const RShapeCast &inShapeCast, ShapeCastSettings &inShapeCastSettings, CCDNarrowPhaseCollector &ioCollector, const BodyManager &inBodyManager, PhysicsUpdateContext::SubStep *inSubStep, decimal inDeltaTime) :
 				mCCDBody(inCCDBody),
 				mBody1(inBody1),
 				mBody1Extent(inShapeCast.mShapeWorldBounds.GetExtent()),
@@ -1763,7 +1763,7 @@ void PhysicsSystem::JobFindCCDContacts(const PhysicsUpdateContext *ioContext, Ph
 				AABox bounds = body2.GetWorldSpaceBounds();
 				bounds.mMin -= mBody1Extent;
 				bounds.mMax += mBody1Extent;
-				float hit_fraction = RayAABox(Vec3(mShapeCast.mCenterOfMassStart.GetTranslation()), RayInvDirection(direction), bounds.mMin, bounds.mMax);
+				decimal hit_fraction = RayAABox(Vec3(mShapeCast.mCenterOfMassStart.GetTranslation()), RayInvDirection(direction), bounds.mMin, bounds.mMax);
 				if (hit_fraction > max(FLT_MIN, GetEarlyOutFraction())) // If early out fraction <= 0, we have the possibility of finding a deeper hit so we need to clamp the early out fraction
 					return;
 
@@ -1792,16 +1792,16 @@ void PhysicsSystem::JobFindCCDContacts(const PhysicsUpdateContext *ioContext, Ph
 			CCDNarrowPhaseCollector &	mCollector;
 			const BodyManager &			mBodyManager;
 			PhysicsUpdateContext::SubStep *mSubStep;
-			float						mDeltaTime;
+			decimal						mDeltaTime;
 		};
 
 		// Check if we collide with any other body. Note that we use the non-locking interface as we know the broadphase cannot be modified at this point.
-		RShapeCast shape_cast(body.GetShape(), Vec3::sReplicate(1.0f), body.GetCenterOfMassTransform(), ccd_body.mDeltaPosition);
+		RShapeCast shape_cast(body.GetShape(), Vec3::sReplicate(C1), body.GetCenterOfMassTransform(), ccd_body.mDeltaPosition);
 		CCDBroadPhaseCollector bp_collector(ccd_body, body, shape_cast, settings, np_collector, mBodyManager, ioSubStep, ioContext->mSubStepDeltaTime);
 		mBroadPhase->CastAABoxNoLock({ shape_cast.mShapeWorldBounds, shape_cast.mDirection }, bp_collector, broadphase_layer_filter, object_layer_filter);
 
 		// Check if there was a hit
-		if (ccd_body.mFractionPlusSlop < 1.0f)
+		if (ccd_body.mFractionPlusSlop < C1)
 		{
 			const Body &body2 = mBodyManager.GetBody(ccd_body.mBodyID2);
 
@@ -1823,7 +1823,7 @@ void PhysicsSystem::JobFindCCDContacts(const PhysicsUpdateContext *ioContext, Ph
 				Vec3 average_contact_point = Vec3::sZero();
 				for (const Vec3 &v : manifold.mRelativeContactPointsOn2)
 					average_contact_point += v;
-				average_contact_point /= (float)manifold.mRelativeContactPointsOn2.size();
+				average_contact_point /= (decimal)manifold.mRelativeContactPointsOn2.size();
 				ccd_body.mContactPointOn2 = manifold.mBaseOffset + average_contact_point;
 			}
 			else
@@ -1928,14 +1928,14 @@ void PhysicsSystem::JobResolveCCDContacts(PhysicsUpdateContext *ioContext, Physi
 					Vec3 v1 = body1.GetPointVelocityCOM(r1_plus_u); 
 					Vec3 v2 = body2.GetPointVelocityCOM(r2);
 					Vec3 relative_velocity = v2 - v1;
-					float normal_velocity = relative_velocity.Dot(ccd_body->mContactNormal);
+					decimal normal_velocity = relative_velocity.Dot(ccd_body->mContactNormal);
 
 					// Calculate velocity bias due to restitution
-					float normal_velocity_bias;
-					if (ccd_body->mContactSettings.mCombinedRestitution > 0.0f && normal_velocity < -mPhysicsSettings.mMinVelocityForRestitution)
+					decimal normal_velocity_bias;
+					if (ccd_body->mContactSettings.mCombinedRestitution > C0 && normal_velocity < -mPhysicsSettings.mMinVelocityForRestitution)
 						normal_velocity_bias = ccd_body->mContactSettings.mCombinedRestitution * normal_velocity;
 					else
-						normal_velocity_bias = 0.0f;
+						normal_velocity_bias = C0;
 
 					// Solve contact constraint
 					AxisConstraintPart contact_constraint;
@@ -1943,19 +1943,19 @@ void PhysicsSystem::JobResolveCCDContacts(PhysicsUpdateContext *ioContext, Physi
 					contact_constraint.SolveVelocityConstraint(body1, body2, ccd_body->mContactNormal, -FLT_MAX, FLT_MAX);
 
 					// Apply friction
-					if (ccd_body->mContactSettings.mCombinedFriction > 0.0f)
+					if (ccd_body->mContactSettings.mCombinedFriction > C0)
 					{
 						Vec3 tangent1 = ccd_body->mContactNormal.GetNormalizedPerpendicular();
 						Vec3 tangent2 = ccd_body->mContactNormal.Cross(tangent1);
 
-						float max_lambda_f = ccd_body->mContactSettings.mCombinedFriction * contact_constraint.GetTotalLambda();
+						decimal max_lambda_f = ccd_body->mContactSettings.mCombinedFriction * contact_constraint.GetTotalLambda();
 
 						AxisConstraintPart friction1;
-						friction1.CalculateConstraintProperties(ioContext->mSubStepDeltaTime, body1, r1_plus_u, body2, r2, tangent1, 0.0f);
+						friction1.CalculateConstraintProperties(ioContext->mSubStepDeltaTime, body1, r1_plus_u, body2, r2, tangent1, C0);
 						friction1.SolveVelocityConstraint(body1, body2, tangent1, -max_lambda_f, max_lambda_f);
 
 						AxisConstraintPart friction2;
-						friction2.CalculateConstraintProperties(ioContext->mSubStepDeltaTime, body1, r1_plus_u, body2, r2, tangent2, 0.0f);
+						friction2.CalculateConstraintProperties(ioContext->mSubStepDeltaTime, body1, r1_plus_u, body2, r2, tangent2, C0);
 						friction2.SolveVelocityConstraint(body1, body2, tangent2, -max_lambda_f, max_lambda_f);
 					}
 
@@ -1987,11 +1987,11 @@ void PhysicsSystem::JobResolveCCDContacts(PhysicsUpdateContext *ioContext, Physi
 					{
 						// Draw the collision location
 						RMat44 collision_transform = body1.GetCenterOfMassTransform().PostTranslated(ccd_body->mFraction * ccd_body->mDeltaPosition);
-						body1.GetShape()->Draw(DebugRenderer::sInstance, collision_transform, Vec3::sReplicate(1.0f), Color::sYellow, false, true);
+						body1.GetShape()->Draw(DebugRenderer::sInstance, collision_transform, Vec3::sReplicate(C1), Color::sYellow, false, true);
 
 						// Draw the collision location + slop
 						RMat44 collision_transform_plus_slop = body1.GetCenterOfMassTransform().PostTranslated(ccd_body->mFractionPlusSlop * ccd_body->mDeltaPosition);
-						body1.GetShape()->Draw(DebugRenderer::sInstance, collision_transform_plus_slop, Vec3::sReplicate(1.0f), Color::sOrange, false, true);
+						body1.GetShape()->Draw(DebugRenderer::sInstance, collision_transform_plus_slop, Vec3::sReplicate(C1), Color::sOrange, false, true);
 
 						// Draw contact normal
 						DebugRenderer::sInstance->DrawArrow(ccd_body->mContactPointOn2, ccd_body->mContactPointOn2 - ccd_body->mContactNormal, Color::sYellow, 0.1f);
@@ -2072,7 +2072,7 @@ void PhysicsSystem::JobSolvePositionConstraints(PhysicsUpdateContext *ioContext,
 	BodyManager::GrantActiveBodiesAccess grant_active(false, true);
 #endif
 
-	float delta_time = ioContext->mSubStepDeltaTime;
+	decimal delta_time = ioContext->mSubStepDeltaTime;
 	Constraint **active_constraints = ioContext->mActiveConstraints;
 
 	for (;;)
@@ -2095,7 +2095,7 @@ void PhysicsSystem::JobSolvePositionConstraints(PhysicsUpdateContext *ioContext,
 		// Correct positions
 		if (has_contacts || has_constraints)
 		{
-			float baumgarte = mPhysicsSettings.mBaumgarte;
+			decimal baumgarte = mPhysicsSettings.mBaumgarte;
 
 			// First iteration
 			int num_position_steps = mPhysicsSettings.mNumPositionSteps;
@@ -2137,8 +2137,8 @@ void PhysicsSystem::JobSolvePositionConstraints(PhysicsUpdateContext *ioContext,
 			static_assert(int(Body::ECanSleep::CannotSleep) == 0 && int(Body::ECanSleep::CanSleep) == 1, "Loop below makes this assumption");
 			int all_can_sleep = mPhysicsSettings.mAllowSleeping? int(Body::ECanSleep::CanSleep) : int(Body::ECanSleep::CannotSleep);
 
-			float time_before_sleep = mPhysicsSettings.mTimeBeforeSleep;
-			float max_movement = mPhysicsSettings.mPointVelocitySleepThreshold * time_before_sleep;
+			decimal time_before_sleep = mPhysicsSettings.mTimeBeforeSleep;
+			decimal max_movement = mPhysicsSettings.mPointVelocitySleepThreshold * time_before_sleep;
 
 			for (const BodyID *body_id = bodies_begin; body_id < bodies_end; ++body_id)
 			{

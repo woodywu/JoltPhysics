@@ -48,17 +48,17 @@ public:
 		/// Contains the information needed to cast a body through the scene to do continuous collision detection
 		struct CCDBody
 		{
-							CCDBody(BodyID inBodyID1, Vec3Arg inDeltaPosition, float inLinearCastThresholdSq, float inMaxPenetration) : mDeltaPosition(inDeltaPosition), mBodyID1(inBodyID1), mLinearCastThresholdSq(inLinearCastThresholdSq), mMaxPenetration(inMaxPenetration) { }
+							CCDBody(BodyID inBodyID1, Vec3Arg inDeltaPosition, decimal inLinearCastThresholdSq, decimal inMaxPenetration) : mDeltaPosition(inDeltaPosition), mBodyID1(inBodyID1), mLinearCastThresholdSq(inLinearCastThresholdSq), mMaxPenetration(inMaxPenetration) { }
 
 			Vec3			mDeltaPosition;											///< Desired rotation step
 			Vec3			mContactNormal;											///< World space normal of closest hit (only valid if mFractionPlusSlop < 1)
 			RVec3			mContactPointOn2;										///< World space contact point on body 2 of closest hit (only valid if mFractionPlusSlop < 1)
 			BodyID			mBodyID1;												///< Body 1 (the body that is performing collision detection)
 			BodyID			mBodyID2;												///< Body 2 (the body of the closest hit, only valid if mFractionPlusSlop < 1)
-			float			mFraction = 1.0f;										///< Fraction at which the hit occurred
-			float			mFractionPlusSlop = 1.0f;								///< Fraction at which the hit occurred + extra delta to allow body to penetrate by mMaxPenetration
-			float			mLinearCastThresholdSq;									///< Maximum allowed squared movement before doing a linear cast (determined by inner radius of shape)
-			float			mMaxPenetration;										///< Maximum allowed penetration (determined by inner radius of shape)
+			decimal			mFraction = C1;										///< Fraction at which the hit occurred
+			decimal			mFractionPlusSlop = C1;								///< Fraction at which the hit occurred + extra delta to allow body to penetrate by mMaxPenetration
+			decimal			mLinearCastThresholdSq;									///< Maximum allowed squared movement before doing a linear cast (determined by inner radius of shape)
+			decimal			mMaxPenetration;										///< Maximum allowed penetration (determined by inner radius of shape)
 			ContactSettings	mContactSettings;										///< The contact settings for this contact
 		};
 		atomic<uint32>		mIntegrateVelocityReadIdx { 0 };						///< Next active body index to take when integrating velocities
@@ -156,9 +156,9 @@ public:
 	JobSystem *				mJobSystem;												///< Job system that processes jobs
 	JobSystem::Barrier *	mBarrier;												///< Barrier used to wait for all physics jobs to complete
 
-	float					mStepDeltaTime;											///< Delta time for a simulation step (collision step)
-	float					mSubStepDeltaTime;										///< Delta time for a simulation sub step (integration step)
-	float					mWarmStartImpulseRatio;									///< Ratio of this step delta time vs last step
+	decimal					mStepDeltaTime;											///< Delta time for a simulation step (collision step)
+	decimal					mSubStepDeltaTime;										///< Delta time for a simulation sub step (integration step)
+	decimal					mWarmStartImpulseRatio;									///< Ratio of this step delta time vs last step
 
 	Constraint **			mActiveConstraints = nullptr;							///< Constraints that were active at the start of the physics update step (activating bodies can activate constraints and we need a consistent snapshot). Only these constraints will be resolved.
 

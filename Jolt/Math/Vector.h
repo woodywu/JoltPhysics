@@ -21,7 +21,7 @@ public:
 	inline void					SetZero()
 	{
 		for (uint r = 0; r < Rows; ++r)
-			mF32[r] = 0.0f;
+			mF32[r] = C0;
 	}
 
 	inline static Vector		sZero()													{ Vector v; v.SetZero(); return v; }
@@ -181,9 +181,9 @@ public:
 	}
 
 	/// Check if vector is normalized
-	inline bool					IsNormalized(decimal inToleranceSq = 1.0e-6f)
+	inline bool					IsNormalized(decimal inToleranceSq = decimal(1.0e-6f))
 	{
-		return abs(LengthSq() - 1.0f) <= inToleranceSq;
+		return abs(LengthSq() - C1) <= inToleranceSq;
 	}
 
 	/// Normalize vector

@@ -484,7 +484,7 @@ RMat44 BodyInterface::GetCenterOfMassTransform(const BodyID &inBodyID) const
 		return RMat44::sIdentity();
 }
 
-void BodyInterface::MoveKinematic(const BodyID &inBodyID, RVec3Arg inTargetPosition, QuatArg inTargetRotation, float inDeltaTime)
+void BodyInterface::MoveKinematic(const BodyID &inBodyID, RVec3Arg inTargetPosition, QuatArg inTargetRotation, decimal inDeltaTime)
 {
 	BodyLockWrite lock(*mBodyLockInterface, inBodyID);
 	if (lock.Succeeded())
@@ -831,52 +831,52 @@ Mat44 BodyInterface::GetInverseInertia(const BodyID &inBodyID) const
 		return Mat44::sIdentity();
 }
 
-void BodyInterface::SetRestitution(const BodyID &inBodyID, float inRestitution)
+void BodyInterface::SetRestitution(const BodyID &inBodyID, decimal inRestitution)
 {
 	BodyLockWrite lock(*mBodyLockInterface, inBodyID);
 	if (lock.Succeeded())
 		lock.GetBody().SetRestitution(inRestitution);
 }
 
-float BodyInterface::GetRestitution(const BodyID &inBodyID) const
+decimal BodyInterface::GetRestitution(const BodyID &inBodyID) const
 {
 	BodyLockRead lock(*mBodyLockInterface, inBodyID);
 	if (lock.Succeeded())
 		return lock.GetBody().GetRestitution();
 	else
-		return 0.0f;
+		return C0;
 }
 
-void BodyInterface::SetFriction(const BodyID &inBodyID, float inFriction)
+void BodyInterface::SetFriction(const BodyID &inBodyID, decimal inFriction)
 {
 	BodyLockWrite lock(*mBodyLockInterface, inBodyID);
 	if (lock.Succeeded())
 		lock.GetBody().SetFriction(inFriction);
 }
 
-float BodyInterface::GetFriction(const BodyID &inBodyID) const
+decimal BodyInterface::GetFriction(const BodyID &inBodyID) const
 {
 	BodyLockRead lock(*mBodyLockInterface, inBodyID);
 	if (lock.Succeeded())
 		return lock.GetBody().GetFriction();
 	else
-		return 0.0f;
+		return C0;
 }
 
-void BodyInterface::SetGravityFactor(const BodyID &inBodyID, float inGravityFactor)
+void BodyInterface::SetGravityFactor(const BodyID &inBodyID, decimal inGravityFactor)
 {
 	BodyLockWrite lock(*mBodyLockInterface, inBodyID);
 	if (lock.Succeeded() && lock.GetBody().GetMotionPropertiesUnchecked() != nullptr)
 		lock.GetBody().GetMotionPropertiesUnchecked()->SetGravityFactor(inGravityFactor);
 }
 
-float BodyInterface::GetGravityFactor(const BodyID &inBodyID) const
+decimal BodyInterface::GetGravityFactor(const BodyID &inBodyID) const
 {
 	BodyLockRead lock(*mBodyLockInterface, inBodyID);
 	if (lock.Succeeded() && lock.GetBody().GetMotionPropertiesUnchecked() != nullptr)
 		return lock.GetBody().GetMotionPropertiesUnchecked()->GetGravityFactor();
 	else
-		return 1.0f;
+		return C1;
 }
 
 TransformedShape BodyInterface::GetTransformedShape(const BodyID &inBodyID) const

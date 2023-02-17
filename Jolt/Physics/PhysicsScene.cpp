@@ -35,7 +35,7 @@ void PhysicsScene::AddConstraint(const TwoBodyConstraintSettings *inConstraint, 
 
 bool PhysicsScene::FixInvalidScales()
 {
-	const Vec3 unit_scale = Vec3::sReplicate(1.0f);
+	const Vec3 unit_scale = Vec3::sReplicate(C1);
 
 	bool success = true;
 	for (BodyCreationSettings &b : mBodies)

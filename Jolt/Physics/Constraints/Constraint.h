@@ -81,7 +81,7 @@ public:
 	int							mNumPositionStepsOverride = 0;
 
 	/// Size of constraint when drawing it through the debug renderer
-	float						mDrawConstraintSize = 1.0f;
+	decimal						mDrawConstraintSize = 1.0f;
 
 protected:
 	/// This function should not be called directly, it is used by sRestoreFromBinaryState.
@@ -134,10 +134,10 @@ public:
 	///@name Solver interface
 	///@{
 	virtual bool				IsActive() const							{ return mEnabled; }
-	virtual void				SetupVelocityConstraint(float inDeltaTime) = 0;
-	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) = 0;
-	virtual bool				SolveVelocityConstraint(float inDeltaTime) = 0;
-	virtual bool				SolvePositionConstraint(float inDeltaTime, float inBaumgarte) = 0;
+	virtual void				SetupVelocityConstraint(decimal inDeltaTime) = 0;
+	virtual void				WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio) = 0;
+	virtual bool				SolveVelocityConstraint(decimal inDeltaTime) = 0;
+	virtual bool				SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte) = 0;
 	///@}
 
 	/// Link bodies that are connected by this constraint in the island builder
@@ -150,8 +150,8 @@ public:
 	virtual void				DrawConstraintReferenceFrame(DebugRenderer *inRenderer) const { }
 
 	/// Size of constraint when drawing it through the debug renderer
-	float						GetDrawConstraintSize() const				{ return mDrawConstraintSize; }
-	void						SetDrawConstraintSize(float inSize)			{ mDrawConstraintSize = inSize; }
+	decimal						GetDrawConstraintSize() const				{ return mDrawConstraintSize; }
+	void						SetDrawConstraintSize(decimal inSize)			{ mDrawConstraintSize = inSize; }
 #endif // JPH_DEBUG_RENDERER
 
 	/// Saving state for replay
@@ -169,7 +169,7 @@ protected:
 
 #ifdef JPH_DEBUG_RENDERER
 	/// Size of constraint when drawing it through the debug renderer
-	float						mDrawConstraintSize;
+	decimal						mDrawConstraintSize;
 #endif // JPH_DEBUG_RENDERER
 
 private:

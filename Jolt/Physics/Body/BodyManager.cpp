@@ -824,15 +824,15 @@ void BodyManager::Draw(const DrawSettings &inDrawSettings, const PhysicsSettings
 			
 			// Draw the results of GetSupportFunction
 			if (inDrawSettings.mDrawGetSupportFunction)
-				body->mShape->DrawGetSupportFunction(inRenderer, body->GetCenterOfMassTransform(), Vec3::sReplicate(1.0f), color, inDrawSettings.mDrawSupportDirection);
+				body->mShape->DrawGetSupportFunction(inRenderer, body->GetCenterOfMassTransform(), Vec3::sReplicate(C1), color, inDrawSettings.mDrawSupportDirection);
 
 			// Draw the results of GetSupportingFace
 			if (inDrawSettings.mDrawGetSupportingFace)
-				body->mShape->DrawGetSupportingFace(inRenderer, body->GetCenterOfMassTransform(), Vec3::sReplicate(1.0f));
+				body->mShape->DrawGetSupportingFace(inRenderer, body->GetCenterOfMassTransform(), Vec3::sReplicate(C1));
 
 			// Draw the shape
 			if (inDrawSettings.mDrawShape)
-				body->mShape->Draw(inRenderer, body->GetCenterOfMassTransform(), Vec3::sReplicate(1.0f), color, inDrawSettings.mDrawShapeColor == EShapeColor::MaterialColor, inDrawSettings.mDrawShapeWireframe || is_sensor);
+				body->mShape->Draw(inRenderer, body->GetCenterOfMassTransform(), Vec3::sReplicate(C1), color, inDrawSettings.mDrawShapeColor == EShapeColor::MaterialColor, inDrawSettings.mDrawShapeWireframe || is_sensor);
 
 			// Draw bounding box
 			if (inDrawSettings.mDrawBoundingBox)
@@ -859,7 +859,7 @@ void BodyManager::Draw(const DrawSettings &inDrawSettings, const PhysicsSettings
 				const MotionProperties *mp = body->GetMotionProperties();
 
 				// Invert mass again
-				float mass = 1.0f / mp->GetInverseMass();
+				decimal mass = C1 / mp->GetInverseMass();
 
 				// Invert diagonal again
 				Vec3 diagonal = mp->GetInverseInertiaDiagonal().Reciprocal();
@@ -868,7 +868,7 @@ void BodyManager::Draw(const DrawSettings &inDrawSettings, const PhysicsSettings
 				Vec3 box_size = MassProperties::sGetEquivalentSolidBoxSize(mass, diagonal);
 
 				// Draw box with equivalent inertia
-				inRenderer->DrawWireBox(body->GetCenterOfMassTransform() * Mat44::sRotation(mp->GetInertiaRotation()), AABox(-0.5f * box_size, 0.5f * box_size), Color::sOrange);
+				inRenderer->DrawWireBox(body->GetCenterOfMassTransform() * Mat44::sRotation(mp->GetInertiaRotation()), AABox(-C0P5 * box_size, C0P5 * box_size), Color::sOrange);
 
 				// Draw mass
 				inRenderer->DrawText3D(body->GetCenterOfMassPosition(), StringFormat("%.2f", (double)mass), Color::sOrange, 0.2f);
@@ -878,7 +878,7 @@ void BodyManager::Draw(const DrawSettings &inDrawSettings, const PhysicsSettings
 			{
 				// Draw stats to know which bodies could go to sleep
 				String text = StringFormat("t: %.1f", (double)body->mMotionProperties->mSleepTestTimer);
-				uint8 g = uint8(Clamp(255.0f * body->mMotionProperties->mSleepTestTimer / inPhysicsSettings.mTimeBeforeSleep, 0.0f, 255.0f));
+				uint8 g = uint8(Clamp(decimal(255.0f) * body->mMotionProperties->mSleepTestTimer / inPhysicsSettings.mTimeBeforeSleep, C0, decimal(255.0f)));
 				Color sleep_color = Color(0, 255 - g, g);
 				inRenderer->DrawText3D(body->GetCenterOfMassPosition(), text, sleep_color, 0.2f);
 				for (int i = 0; i < 3; ++i)
@@ -923,7 +923,7 @@ void BodyManager::ValidateActiveBodyBounds()
 	{
 		const Body *body = mBodies[id->GetIndex()];
 		AABox cached = body->GetWorldSpaceBounds();
-		AABox calculated = body->GetShape()->GetWorldSpaceBounds(body->GetCenterOfMassTransform(), Vec3::sReplicate(1.0f));
+		AABox calculated = body->GetShape()->GetWorldSpaceBounds(body->GetCenterOfMassTransform(), Vec3::sReplicate(C1));
 		JPH_ASSERT(cached == calculated);
 	}
 }

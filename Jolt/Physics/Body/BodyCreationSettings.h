@@ -93,17 +93,17 @@ public:
 	bool					mUseManifoldReduction = true;									///< If this body should use manifold reduction (see description at Body::SetUseManifoldReduction)
 	EMotionQuality			mMotionQuality = EMotionQuality::Discrete;						///< Motion quality, or how well it detects collisions when it has a high velocity
 	bool					mAllowSleeping = true;											///< If this body can go to sleep or not
-	float					mFriction = 0.2f;												///< Friction of the body (dimensionless number, usually between 0 and 1, 0 = no friction, 1 = friction force equals force that presses the two bodies together)
-	float					mRestitution = 0.0f;											///< Restitution of body (dimensionless number, usually between 0 and 1, 0 = completely inelastic collision response, 1 = completely elastic collision response)
-	float					mLinearDamping = 0.05f;											///< Linear damping: dv/dt = -c * v. c must be between 0 and 1 but is usually close to 0.
-	float					mAngularDamping = 0.05f;										///< Angular damping: dw/dt = -c * w. c must be between 0 and 1 but is usually close to 0.
-	float					mMaxLinearVelocity = 500.0f;									///< Maximum linear velocity that this body can reach (m/s)
-	float					mMaxAngularVelocity = 0.25f * JPH_PI * 60.0f;					///< Maximum angular velocity that this body can reach (rad/s)
-	float					mGravityFactor = 1.0f;											///< Value to multiply gravity with for this body
+	decimal					mFriction = decimal(0.2f);												///< Friction of the body (dimensionless number, usually between 0 and 1, 0 = no friction, 1 = friction force equals force that presses the two bodies together)
+	decimal					mRestitution = C0;											///< Restitution of body (dimensionless number, usually between 0 and 1, 0 = completely inelastic collision response, 1 = completely elastic collision response)
+	decimal					mLinearDamping = decimal(0.05f);											///< Linear damping: dv/dt = -c * v. c must be between 0 and 1 but is usually close to 0.
+	decimal					mAngularDamping = decimal(0.05f);										///< Angular damping: dw/dt = -c * w. c must be between 0 and 1 but is usually close to 0.
+	decimal					mMaxLinearVelocity = decimal(500.0f);									///< Maximum linear velocity that this body can reach (m/s)
+	decimal					mMaxAngularVelocity = decimal(0.25f) * JPH_PI * decimal(60.0f);					///< Maximum angular velocity that this body can reach (rad/s)
+	decimal					mGravityFactor = C1;											///< Value to multiply gravity with for this body
 
 	///@name Mass properties of the body (by default calculated by the shape)
 	EOverrideMassProperties	mOverrideMassProperties = EOverrideMassProperties::CalculateMassAndInertia; ///< Determines how mMassPropertiesOverride will be used
-	float					mInertiaMultiplier = 1.0f;										///< When calculating the inertia (not when it is provided) the calculated inertia will be multiplied by this value
+	decimal					mInertiaMultiplier = C1;										///< When calculating the inertia (not when it is provided) the calculated inertia will be multiplied by this value
 	MassProperties			mMassPropertiesOverride;										///< Contains replacement mass settings which override the automatically calculated values
 
 private:

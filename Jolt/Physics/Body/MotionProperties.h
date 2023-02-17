@@ -42,18 +42,18 @@ public:
 	void					SetAngularVelocityClamped(Vec3Arg inAngularVelocity)			{ mAngularVelocity = inAngularVelocity; ClampAngularVelocity(); }
 
 	/// Set velocity of body such that it will be rotate/translate by inDeltaPosition/Rotation in inDeltaTime seconds.
-	inline void				MoveKinematic(Vec3Arg inDeltaPosition, QuatArg inDeltaRotation, float inDeltaTime);
+	inline void				MoveKinematic(Vec3Arg inDeltaPosition, QuatArg inDeltaRotation, decimal inDeltaTime);
 
 	///@name Velocity limits
 	///@{
 
 	/// Maximum linear velocity that a body can achieve. Used to prevent the system from exploding.
-	inline float			GetMaxLinearVelocity() const									{ return mMaxLinearVelocity; }
-	inline void				SetMaxLinearVelocity(float inLinearVelocity)					{ JPH_ASSERT(inLinearVelocity >= 0.0f); mMaxLinearVelocity = inLinearVelocity; }
+	inline decimal			GetMaxLinearVelocity() const									{ return mMaxLinearVelocity; }
+	inline void				SetMaxLinearVelocity(decimal inLinearVelocity)					{ JPH_ASSERT(inLinearVelocity >= C0); mMaxLinearVelocity = inLinearVelocity; }
 	
 	/// Maximum angular velocity that a body can achieve. Used to prevent the system from exploding.
-	inline float			GetMaxAngularVelocity() const									{ return mMaxAngularVelocity; }
-	inline void				SetMaxAngularVelocity(float inAngularVelocity)					{ JPH_ASSERT(inAngularVelocity >= 0.0f); mMaxAngularVelocity = inAngularVelocity; }
+	inline decimal			GetMaxAngularVelocity() const									{ return mMaxAngularVelocity; }
+	inline void				SetMaxAngularVelocity(decimal inAngularVelocity)					{ JPH_ASSERT(inAngularVelocity >= C0); mMaxAngularVelocity = inAngularVelocity; }
 	///@}
 
 	/// Clamp velocity according to limit
@@ -61,28 +61,28 @@ public:
 	inline void				ClampAngularVelocity();
 
 	/// Get linear damping: dv/dt = -c * v. c must be between 0 and 1 but is usually close to 0.
-	inline float			GetLinearDamping() const										{ return mLinearDamping; }
-	void					SetLinearDamping(float inLinearDamping)							{ JPH_ASSERT(inLinearDamping >= 0.0f); mLinearDamping = inLinearDamping; }
+	inline decimal			GetLinearDamping() const										{ return mLinearDamping; }
+	void					SetLinearDamping(decimal inLinearDamping)							{ JPH_ASSERT(inLinearDamping >= C0); mLinearDamping = inLinearDamping; }
 
 	/// Get angular damping: dw/dt = -c * w. c must be between 0 and 1 but is usually close to 0.
-	inline float			GetAngularDamping() const										{ return mAngularDamping; }
-	void					SetAngularDamping(float inAngularDamping)						{ JPH_ASSERT(inAngularDamping >= 0.0f); mAngularDamping = inAngularDamping; }
+	inline decimal			GetAngularDamping() const										{ return mAngularDamping; }
+	void					SetAngularDamping(decimal inAngularDamping)						{ JPH_ASSERT(inAngularDamping >= C0); mAngularDamping = inAngularDamping; }
 
 	/// Get gravity factor (1 = normal gravity, 0 = no gravity)
-	inline float			GetGravityFactor() const										{ return mGravityFactor; }
-	void					SetGravityFactor(float inGravityFactor)							{ mGravityFactor = inGravityFactor; }
+	inline decimal			GetGravityFactor() const										{ return mGravityFactor; }
+	void					SetGravityFactor(decimal inGravityFactor)							{ mGravityFactor = inGravityFactor; }
 
 	/// Set the mass and inertia tensor
 	inline void				SetMassProperties(const MassProperties &inMassProperties);
 
 	/// Get inverse mass (1 / mass). Should only be called on a dynamic object (static or kinematic bodies have infinite mass so should be treated as 1 / mass = 0)
-	inline float			GetInverseMass() const											{ JPH_ASSERT(mCachedMotionType == EMotionType::Dynamic); return mInvMass; }
-	inline float			GetInverseMassUnchecked() const									{ return mInvMass; }
+	inline decimal			GetInverseMass() const											{ JPH_ASSERT(mCachedMotionType == EMotionType::Dynamic); return mInvMass; }
+	inline decimal			GetInverseMassUnchecked() const									{ return mInvMass; }
 
 	/// Set the inverse mass (1 / mass).
 	/// Note that mass and inertia are linearly related (e.g. inertia of a sphere with mass m and radius r is \f$2/5 \: m \: r^2\f$).
 	/// If you change mass, inertia should probably change as well. See MassProperties::ScaleToMass.
-	void					SetInverseMass(float inInverseMass)								{ mInvMass = inInverseMass; }
+	void					SetInverseMass(decimal inInverseMass)								{ mInvMass = inInverseMass; }
 
 	/// Diagonal of inverse inertia matrix: D. Should only be called on a dynamic object (static or kinematic bodies have infinite mass so should be treated as D = 0)
 	inline Vec3		 		GetInverseInertiaDiagonal() const								{ JPH_ASSERT(mCachedMotionType == EMotionType::Dynamic); return mInvInertiaDiagonal; }
@@ -129,10 +129,10 @@ public:
 	///@}
 
 	/// Apply all accumulated forces, torques and drag (should only be called by the PhysicsSystem)
-	inline void				ApplyForceTorqueAndDragInternal(QuatArg inBodyRotation, Vec3Arg inGravity, float inDeltaTime);
+	inline void				ApplyForceTorqueAndDragInternal(QuatArg inBodyRotation, Vec3Arg inGravity, decimal inDeltaTime);
 
 	/// At the end of a simulation update the forces and torques need to be reset for the next frame
-	inline void				ResetForceAndTorqueInternal()									{ mForce = Float3(0, 0, 0); mTorque = Float3(0, 0, 0); }
+	inline void				ResetForceAndTorqueInternal()									{ mForce = Float3(C0, C0, C0); mTorque = Float3(C0, C0, C0); }
 
 	/// Access to the island index
 	uint32					GetIslandIndexInternal() const									{ return mIslandIndex; }
@@ -167,14 +167,14 @@ private:
 
 	// 2nd cache line
 	// 4 byte aligned
-	Float3					mForce { 0, 0, 0 };												///< Accumulated world space force (N). Note loaded through intrinsics so ensure that the 4 bytes after this are readable!
-	Float3					mTorque { 0, 0, 0 };											///< Accumulated world space torque (N m). Note loaded through intrinsics so ensure that the 4 bytes after this are readable!
-	float					mInvMass;														///< Inverse mass of the object (1/kg)
-	float					mLinearDamping;													///< Linear damping: dv/dt = -c * v. c must be between 0 and 1 but is usually close to 0.
-	float					mAngularDamping;												///< Angular damping: dw/dt = -c * w. c must be between 0 and 1 but is usually close to 0.
-	float					mMaxLinearVelocity;												///< Maximum linear velocity that this body can reach (m/s)
-	float					mMaxAngularVelocity;											///< Maximum angular velocity that this body can reach (rad/s)
-	float					mGravityFactor;													///< Factor to multiply gravity with
+	Float3					mForce { C0, C0, C0 };												///< Accumulated world space force (N). Note loaded through intrinsics so ensure that the 4 bytes after this are readable!
+	Float3					mTorque { C0, C0, C0 };											///< Accumulated world space torque (N m). Note loaded through intrinsics so ensure that the 4 bytes after this are readable!
+	decimal					mInvMass;														///< Inverse mass of the object (1/kg)
+	decimal					mLinearDamping;													///< Linear damping: dv/dt = -c * v. c must be between 0 and 1 but is usually close to 0.
+	decimal					mAngularDamping;												///< Angular damping: dw/dt = -c * w. c must be between 0 and 1 but is usually close to 0.
+	decimal					mMaxLinearVelocity;												///< Maximum linear velocity that this body can reach (m/s)
+	decimal					mMaxAngularVelocity;											///< Maximum angular velocity that this body can reach (rad/s)
+	decimal					mGravityFactor;													///< Factor to multiply gravity with
 	uint32					mIndexInActiveBodies;											///< If the body is active, this is the index in the active body list or cInactiveIndex if it is not active
 	uint32					mIslandIndex;													///< Index of the island that this body is part of, when the body has not yet been updated or is not active this is cInactiveIndex 
 
@@ -185,10 +185,10 @@ private:
 	// 3rd cache line (least frequently used)
 	// 4 byte aligned (or 8 byte if running in double precision)
 #ifdef JPH_DOUBLE_PRECISION
-	Double3					mSleepTestOffset;												///< mSleepTestSpheres are relative to this offset to prevent floating point inaccuracies. Warning: Loaded using sLoadDouble3Unsafe which will read 8 extra bytes.
+	Double3					mSleepTestOffset;												///< mSleepTestSpheres are relative to this offset to prevent decimaling point inaccuracies. Warning: Loaded using sLoadDouble3Unsafe which will read 8 extra bytes.
 #endif // JPH_DOUBLE_PRECISION
 	Sphere					mSleepTestSpheres[3];											///< Measure motion for 3 points on the body to see if it is resting: COM, COM + largest bounding box axis, COM + second largest bounding box axis
-	float					mSleepTestTimer;												///< How long this body has been within the movement tolerance
+	decimal					mSleepTestTimer;												///< How long this body has been within the movement tolerance
 
 #ifdef JPH_ENABLE_ASSERTS
 	EMotionType				mCachedMotionType;												///< Copied from Body::mMotionType and cached for asserting purposes

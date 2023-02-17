@@ -81,8 +81,8 @@ void Body::AddRotationStep(Vec3Arg inAngularVelocityTimesDeltaTime)
 	// But this is a first order approximation and does not work well for kinematic ragdolls that are driven to a new
 	// pose if the poses differ enough. So now we split w(t) * dt into an axis and angle part and create a quaternion with it.
 	// Note that the resulting quaternion is normalized since otherwise numerical drift will eventually make the rotation non-normalized.
-	float len = inAngularVelocityTimesDeltaTime.Length(); 
-	if (len > 1.0e-6f) 
+	decimal len = inAngularVelocityTimesDeltaTime.Length(); 
+	if (len > decimal(1.0e-6f))
 	{
 		mRotation = (Quat::sRotation(inAngularVelocityTimesDeltaTime / len, len) * mRotation).Normalized(); 
 		JPH_ASSERT(!mRotation.IsNaN()); 
@@ -94,8 +94,8 @@ void Body::SubRotationStep(Vec3Arg inAngularVelocityTimesDeltaTime)
 	JPH_ASSERT(BodyAccess::sCheckRights(BodyAccess::sPositionAccess, BodyAccess::EAccess::ReadWrite)); 
 
 	// See comment at Body::AddRotationStep
-	float len = inAngularVelocityTimesDeltaTime.Length(); 
-	if (len > 1.0e-6f) 
+	decimal len = inAngularVelocityTimesDeltaTime.Length(); 
+	if (len > decimal(1.0e-6f))
 	{
 		mRotation = (Quat::sRotation(inAngularVelocityTimesDeltaTime / len, -len) * mRotation).Normalized(); 
 		JPH_ASSERT(!mRotation.IsNaN()); 

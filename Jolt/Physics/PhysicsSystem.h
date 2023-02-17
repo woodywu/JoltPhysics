@@ -101,7 +101,7 @@ public:
 	/// Simulate the system.
 	/// The world steps for a total of inDeltaTime seconds. This is divided in inCollisionSteps iterations. Each iteration
 	/// consists of collision detection followed by inIntegrationSubSteps integration steps.
-	void						Update(float inDeltaTime, int inCollisionSteps, int inIntegrationSubSteps, TempAllocator *inTempAllocator, JobSystem *inJobSystem);
+	void						Update(decimal inDeltaTime, int inCollisionSteps, int inIntegrationSubSteps, TempAllocator *inTempAllocator, JobSystem *inJobSystem);
 
 	/// Saving state for replay
 	void						SaveState(StateRecorder &inStream) const;
@@ -177,7 +177,7 @@ private:
 	void						JobStepListeners(PhysicsUpdateContext::Step *ioStep);
 	void						JobDetermineActiveConstraints(PhysicsUpdateContext::Step *ioStep) const;
 	void						JobApplyGravity(const PhysicsUpdateContext *ioContext, PhysicsUpdateContext::Step *ioStep);	
-	void						JobSetupVelocityConstraints(float inDeltaTime, PhysicsUpdateContext::Step *ioStep) const;
+	void						JobSetupVelocityConstraints(decimal inDeltaTime, PhysicsUpdateContext::Step *ioStep) const;
 	void						JobBuildIslandsFromConstraints(PhysicsUpdateContext *ioContext, PhysicsUpdateContext::Step *ioStep);
 	void						JobFindCollisions(PhysicsUpdateContext::Step *ioStep, int inJobIndex);
 	void						JobFinalizeIslands(PhysicsUpdateContext *ioContext);
@@ -261,10 +261,10 @@ private:
 	StepListeners				mStepListeners;
 
 	/// This is the global gravity vector
-	Vec3						mGravity = Vec3(0, -9.81f, 0);
+	Vec3						mGravity = Vec3(C0, decimal(-9.81f), C0);
 
 	/// Previous frame's delta time of one sub step to allow scaling previous frame's constraint impulses
-	float						mPreviousSubStepDeltaTime = 0.0f;
+	decimal						mPreviousSubStepDeltaTime = C0;
 };
 
 JPH_NAMESPACE_END

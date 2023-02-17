@@ -23,8 +23,8 @@ Body::Body(bool) :
 	mPosition(Vec3::sZero()),
 	mRotation(Quat::sIdentity()),
 	mShape(&sFixedToWorldShape), // Dummy shape
-	mFriction(0.0f),
-	mRestitution(0.0f),
+	mFriction(C0),
+	mRestitution(C0),
 	mObjectLayer(cObjectLayerInvalid),
 	mMotionType(EMotionType::Static)
 {
@@ -57,8 +57,8 @@ void Body::SetMotionType(EMotionType inMotionType)
 
 		case EMotionType::Kinematic:
 			// Cancel forces
-			mMotionProperties->mForce = Float3(0, 0, 0);
-			mMotionProperties->mTorque = Float3(0, 0, 0);
+			mMotionProperties->mForce = Float3(C0, C0, C0);
+			mMotionProperties->mTorque = Float3(C0, C0, C0);
 			break;
 
 		case EMotionType::Dynamic:
@@ -74,7 +74,7 @@ void Body::SetAllowSleeping(bool inAllow)
 		ResetSleepTestSpheres();
 }
 
-void Body::MoveKinematic(RVec3Arg inTargetPosition, QuatArg inTargetRotation, float inDeltaTime)
+void Body::MoveKinematic(RVec3Arg inTargetPosition, QuatArg inTargetRotation, decimal inDeltaTime)
 {
 	JPH_ASSERT(!IsStatic());
 	JPH_ASSERT(BodyAccess::sCheckRights(BodyAccess::sPositionAccess, BodyAccess::EAccess::Read)); 
@@ -91,7 +91,7 @@ void Body::MoveKinematic(RVec3Arg inTargetPosition, QuatArg inTargetRotation, fl
 
 void Body::CalculateWorldSpaceBoundsInternal()
 {
-	mBounds = mShape->GetWorldSpaceBounds(GetCenterOfMassTransform(), Vec3::sReplicate(1.0f));
+	mBounds = mShape->GetWorldSpaceBounds(GetCenterOfMassTransform(), Vec3::sReplicate(C1));
 }
 
 void Body::SetPositionAndRotationInternal(RVec3Arg inPosition, QuatArg inRotation) 
@@ -136,7 +136,7 @@ void Body::SetShapeInternal(const Shape *inShape, bool inUpdateMassProperties)
 	CalculateWorldSpaceBoundsInternal();
 }
 
-Body::ECanSleep Body::UpdateSleepStateInternal(float inDeltaTime, float inMaxMovement, float inTimeBeforeSleep)
+Body::ECanSleep Body::UpdateSleepStateInternal(decimal inDeltaTime, decimal inMaxMovement, decimal inTimeBeforeSleep)
 {
 	// Check override & sensors will never go to sleep (they would stop detecting collisions with sleeping bodies)
 	if (!mMotionProperties->mAllowSleeping || IsSensor())
@@ -178,7 +178,7 @@ Body::ECanSleep Body::UpdateSleepStateInternal(float inDeltaTime, float inMaxMov
 	return mMotionProperties->mSleepTestTimer >= inTimeBeforeSleep? ECanSleep::CanSleep : ECanSleep::CannotSleep;
 }
 
-bool Body::ApplyBuoyancyImpulse(RVec3Arg inSurfacePosition, Vec3Arg inSurfaceNormal, float inBuoyancy, float inLinearDrag, float inAngularDrag, Vec3Arg inFluidVelocity, Vec3Arg inGravity, float inDeltaTime)
+bool Body::ApplyBuoyancyImpulse(RVec3Arg inSurfacePosition, Vec3Arg inSurfaceNormal, decimal inBuoyancy, decimal inLinearDrag, decimal inAngularDrag, Vec3Arg inFluidVelocity, Vec3Arg inGravity, decimal inDeltaTime)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -190,27 +190,27 @@ bool Body::ApplyBuoyancyImpulse(RVec3Arg inSurfacePosition, Vec3Arg inSurfaceNor
 	Plane surface_relative_to_body = Plane::sFromPointAndNormal(inSurfacePosition - mPosition, inSurfaceNormal);
 
 	// Calculate amount of volume that is submerged and what the center of buoyancy is
-	float total_volume, submerged_volume;
+	decimal total_volume, submerged_volume;
 	Vec3 relative_center_of_buoyancy;
-	mShape->GetSubmergedVolume(rotation, Vec3::sReplicate(1.0f), surface_relative_to_body, total_volume, submerged_volume, relative_center_of_buoyancy JPH_IF_DEBUG_RENDERER(, mPosition));
+	mShape->GetSubmergedVolume(rotation, Vec3::sReplicate(C1), surface_relative_to_body, total_volume, submerged_volume, relative_center_of_buoyancy JPH_IF_DEBUG_RENDERER(, mPosition));
 		
 	// If we're not submerged, there's no point in doing the rest of the calculations
-	if (submerged_volume > 0.0f)
+	if (submerged_volume > C0)
 	{
 	#ifdef JPH_DEBUG_RENDERER
 		// Draw submerged volume properties
 		if (Shape::sDrawSubmergedVolumes)
 		{
 			RVec3 center_of_buoyancy = mPosition + relative_center_of_buoyancy;
-			DebugRenderer::sInstance->DrawMarker(center_of_buoyancy, Color::sWhite, 2.0f);
+			DebugRenderer::sInstance->DrawMarker(center_of_buoyancy, Color::sWhite, C2);
 			DebugRenderer::sInstance->DrawText3D(center_of_buoyancy, StringFormat("%.3f / %.3f", (double)submerged_volume, (double)total_volume));
 		}
 	#endif // JPH_DEBUG_RENDERER
 
 		// When buoyancy is 1 we want neutral buoyancy, this means that the density of the liquid is the same as the density of the body at that point.
-		// Buoyancy > 1 should make the object float, < 1 should make it sink.
-		float inverse_mass = mMotionProperties->GetInverseMass();
-		float fluid_density = inBuoyancy / (total_volume * inverse_mass);
+		// Buoyancy > 1 should make the object decimal, < 1 should make it sink.
+		decimal inverse_mass = mMotionProperties->GetInverseMass();
+		decimal fluid_density = inBuoyancy / (total_volume * inverse_mass);
 
 		// Buoyancy force = Density of Fluid * Submerged volume * Magnitude of gravity * Up direction (eq 2.5.1)
 		// Impulse = Force * Delta time
@@ -232,20 +232,20 @@ bool Body::ApplyBuoyancyImpulse(RVec3Arg inSurfacePosition, Vec3Arg inSurfaceNor
 		Vec3 size = mShape->GetLocalBounds().GetSize();
 
 		// Determine area of the local space bounding box in the direction of the relative velocity between the fluid and the center of buoyancy
-		float area = 0.0f;
-		float relative_center_of_buoyancy_velocity_len_sq = relative_center_of_buoyancy_velocity.LengthSq();
-		if (relative_center_of_buoyancy_velocity_len_sq > 1.0e-12f)
+		decimal area = C0;
+		decimal relative_center_of_buoyancy_velocity_len_sq = relative_center_of_buoyancy_velocity.LengthSq();
+		if (relative_center_of_buoyancy_velocity_len_sq > decimal(1.0e-12f))
 		{
 			Vec3 local_relative_center_of_buoyancy_velocity = GetRotation().Conjugated() * relative_center_of_buoyancy_velocity;
 			area = local_relative_center_of_buoyancy_velocity.Abs().Dot(size.Swizzle<SWIZZLE_Y, SWIZZLE_Z, SWIZZLE_X>() * size.Swizzle<SWIZZLE_Z, SWIZZLE_X, SWIZZLE_Y>()) / sqrt(relative_center_of_buoyancy_velocity_len_sq);
 		}
 
 		// Calculate the impulse
-		Vec3 drag_impulse = (0.5f * fluid_density * inLinearDrag * area * inDeltaTime) * relative_center_of_buoyancy_velocity * relative_center_of_buoyancy_velocity.Length();
+		Vec3 drag_impulse = (C0P5 * fluid_density * inLinearDrag * area * inDeltaTime) * relative_center_of_buoyancy_velocity * relative_center_of_buoyancy_velocity.Length();
 
 		// Clamp magnitude against current linear velocity to prevent overshoot
-		float linear_velocity_len_sq = linear_velocity.LengthSq();
-		float drag_delta_linear_velocity_len_sq = (drag_impulse * inverse_mass).LengthSq();
+		decimal linear_velocity_len_sq = linear_velocity.LengthSq();
+		decimal drag_delta_linear_velocity_len_sq = (drag_impulse * inverse_mass).LengthSq();
 		if (drag_delta_linear_velocity_len_sq > linear_velocity_len_sq)
 			drag_impulse *= sqrt(linear_velocity_len_sq / drag_delta_linear_velocity_len_sq);
 
@@ -254,7 +254,7 @@ bool Body::ApplyBuoyancyImpulse(RVec3Arg inSurfacePosition, Vec3Arg inSurfaceNor
 		mMotionProperties->AddLinearVelocityStep(delta_linear_velocity);
 
 		// Determine average width of the body (across the three axis)
-		float l = (size.GetX() + size.GetY() + size.GetZ()) / 3.0f;
+		decimal l = (size.GetX() + size.GetY() + size.GetZ()) / C3;
 
 		// Drag torque = -Angular Drag * Mass * Submerged volume / Total volume * (Average width of body)^2 * Angular velocity (eq 2.5.15)
 		Vec3 drag_angular_impulse = (-inAngularDrag * submerged_volume / total_volume * inDeltaTime * Square(l) / inverse_mass) * angular_velocity;
@@ -262,8 +262,8 @@ bool Body::ApplyBuoyancyImpulse(RVec3Arg inSurfacePosition, Vec3Arg inSurfaceNor
 		Vec3 drag_delta_angular_velocity = inv_inertia * drag_angular_impulse;
 
 		// Clamp magnitude against the current angular velocity to prevent overshoot
-		float angular_velocity_len_sq = angular_velocity.LengthSq();
-		float drag_delta_angular_velocity_len_sq = drag_delta_angular_velocity.LengthSq();
+		decimal angular_velocity_len_sq = angular_velocity.LengthSq();
+		decimal drag_delta_angular_velocity_len_sq = drag_delta_angular_velocity.LengthSq();
 		if (drag_delta_angular_velocity_len_sq > angular_velocity_len_sq)
 			drag_delta_angular_velocity *= sqrt(angular_velocity_len_sq / drag_delta_angular_velocity_len_sq);
 
@@ -327,13 +327,13 @@ BodyCreationSettings Body::GetBodyCreationSettings() const
 	result.mAllowSleeping = mMotionProperties != nullptr? GetAllowSleeping() : true;
 	result.mFriction = GetFriction();
 	result.mRestitution = GetRestitution();
-	result.mLinearDamping = mMotionProperties != nullptr? mMotionProperties->GetLinearDamping() : 0.0f;
-	result.mAngularDamping = mMotionProperties != nullptr? mMotionProperties->GetAngularDamping() : 0.0f;
-	result.mMaxLinearVelocity = mMotionProperties != nullptr? mMotionProperties->GetMaxLinearVelocity() : 0.0f;
-	result.mMaxAngularVelocity = mMotionProperties != nullptr? mMotionProperties->GetMaxAngularVelocity() : 0.0f;
-	result.mGravityFactor = mMotionProperties != nullptr? mMotionProperties->GetGravityFactor() : 1.0f;
+	result.mLinearDamping = mMotionProperties != nullptr? mMotionProperties->GetLinearDamping() : C0;
+	result.mAngularDamping = mMotionProperties != nullptr? mMotionProperties->GetAngularDamping() : C0;
+	result.mMaxLinearVelocity = mMotionProperties != nullptr? mMotionProperties->GetMaxLinearVelocity() : C0;
+	result.mMaxAngularVelocity = mMotionProperties != nullptr? mMotionProperties->GetMaxAngularVelocity() : C0;
+	result.mGravityFactor = mMotionProperties != nullptr? mMotionProperties->GetGravityFactor() : C1;
 	result.mOverrideMassProperties = EOverrideMassProperties::MassAndInertiaProvided;
-	result.mMassPropertiesOverride.mMass = mMotionProperties != nullptr? 1.0f / mMotionProperties->GetInverseMassUnchecked() : FLT_MAX;
+	result.mMassPropertiesOverride.mMass = mMotionProperties != nullptr? C1 / mMotionProperties->GetInverseMassUnchecked() : FIX_MAX;
 	result.mMassPropertiesOverride.mInertia = mMotionProperties != nullptr? mMotionProperties->GetLocalSpaceInverseInertiaUnchecked().Inversed3x3() : Mat44::sIdentity();
 	result.SetShape(GetShape());
 

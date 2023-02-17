@@ -24,13 +24,13 @@ public:
 	bool					DecomposePrincipalMomentsOfInertia(Mat44 &outRotation, Vec3 &outDiagonal) const;
 
 	/// Set the mass and inertia of a box with edge size inBoxSize and density inDensity
-	void					SetMassAndInertiaOfSolidBox(Vec3Arg inBoxSize, float inDensity);
+	void					SetMassAndInertiaOfSolidBox(Vec3Arg inBoxSize, decimal inDensity);
 
 	/// Set the mass and scale the inertia tensor to match the mass
-	void					ScaleToMass(float inMass);
+	void					ScaleToMass(decimal inMass);
 
 	/// Calculates the size of the solid box that has an inertia tensor diagonal inInertiaDiagonal
-	static Vec3				sGetEquivalentSolidBoxSize(float inMass, Vec3Arg inInertiaDiagonal);
+	static Vec3				sGetEquivalentSolidBoxSize(decimal inMass, Vec3Arg inInertiaDiagonal);
 
 	/// Rotate the inertia by 3x3 matrix inRotation
 	void					Rotate(Mat44Arg inRotation);
@@ -48,7 +48,7 @@ public:
 	void					RestoreBinaryState(StreamIn &inStream);
 
 	/// Mass of the shape (kg)
-	float					mMass = 0.0f;
+	decimal					mMass = C0;
 
 	/// Inertia tensor of the shape (kg m^2)
 	Mat44					mInertia = Mat44::sZero();

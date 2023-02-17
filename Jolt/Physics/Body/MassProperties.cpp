@@ -44,7 +44,7 @@ bool MassProperties::DecomposePrincipalMomentsOfInertia(Mat44 &outRotation, Vec3
 	}
 
 	// Make sure that the rotation matrix is a right handed matrix
-	if (outRotation.GetAxisX().Cross(outRotation.GetAxisY()).Dot(outRotation.GetAxisZ()) < 0.0f)
+	if (outRotation.GetAxisX().Cross(outRotation.GetAxisY()).Dot(outRotation.GetAxisZ()) < C0)
 		outRotation.SetAxisZ(-outRotation.GetAxisZ());
 
 #ifdef JPH_ENABLE_ASSERTS
@@ -52,29 +52,29 @@ bool MassProperties::DecomposePrincipalMomentsOfInertia(Mat44 &outRotation, Vec3
 	// smaller than some fraction of the inertia itself in that axis
 	Mat44 new_inertia = outRotation * Mat44::sScale(outDiagonal) * outRotation.Inversed();
 	for (int i = 0; i < 3; ++i)
-		JPH_ASSERT(new_inertia.GetColumn3(i).IsClose(mInertia.GetColumn3(i), mInertia.GetColumn3(i).LengthSq() * 1.0e-10f));
+		JPH_ASSERT(new_inertia.GetColumn3(i).IsClose(mInertia.GetColumn3(i), mInertia.GetColumn3(i).LengthSq() * decimal(1.0e-10f)));
 #endif
 
 	return true;
 }
 
-void MassProperties::SetMassAndInertiaOfSolidBox(Vec3Arg inBoxSize, float inDensity)
+void MassProperties::SetMassAndInertiaOfSolidBox(Vec3Arg inBoxSize, decimal inDensity)
 {
 	// Calculate mass
 	mMass = inBoxSize.GetX() * inBoxSize.GetY() * inBoxSize.GetZ() * inDensity;
 
 	// Calculate inertia
 	Vec3 size_sq = inBoxSize * inBoxSize;
-	Vec3 scale = (size_sq.Swizzle<SWIZZLE_Y, SWIZZLE_X, SWIZZLE_X>() + size_sq.Swizzle<SWIZZLE_Z, SWIZZLE_Z, SWIZZLE_Y>()) * (mMass / 12.0f);
+	Vec3 scale = (size_sq.Swizzle<SWIZZLE_Y, SWIZZLE_X, SWIZZLE_X>() + size_sq.Swizzle<SWIZZLE_Z, SWIZZLE_Z, SWIZZLE_Y>()) * (mMass / decimal(12.0f));
 	mInertia = Mat44::sScale(scale);
 }
 
-void MassProperties::ScaleToMass(float inMass)
+void MassProperties::ScaleToMass(decimal inMass)
 {
-	if (mMass > 0.0f)
+	if (mMass > C0)
 	{
 		// Calculate how much we have to scale the inertia tensor
-		float mass_scale = inMass / mMass;
+		decimal mass_scale = inMass / mMass;
 
 		// Update mass
 		mMass = inMass;
@@ -90,13 +90,13 @@ void MassProperties::ScaleToMass(float inMass)
 	}
 }
 
-Vec3 MassProperties::sGetEquivalentSolidBoxSize(float inMass, Vec3Arg inInertiaDiagonal)
+Vec3 MassProperties::sGetEquivalentSolidBoxSize(decimal inMass, Vec3Arg inInertiaDiagonal)
 {
 	// Moment of inertia of a solid box has diagonal:
 	// mass / 12 * [size_y^2 + size_z^2, size_x^2 + size_z^2, size_x^2 + size_y^2]
 	// Solving for size_x, size_y and size_y (diagonal and mass are known):
-	Vec3 diagonal = inInertiaDiagonal * (12.0f / inMass);
-	return Vec3(sqrt(0.5f * (-diagonal[0] + diagonal[1] + diagonal[2])), sqrt(0.5f * (diagonal[0] - diagonal[1] + diagonal[2])), sqrt(0.5f * (diagonal[0] + diagonal[1] - diagonal[2])));
+	Vec3 diagonal = inInertiaDiagonal * (decimal(12.0f) / inMass);
+	return Vec3(sqrt(C0P5 * (-diagonal[0] + diagonal[1] + diagonal[2])), sqrt(C0P5 * (diagonal[0] - diagonal[1] + diagonal[2])), sqrt(C0P5 * (diagonal[0] + diagonal[1] - diagonal[2])));
 }
 
 void MassProperties::Scale(Vec3Arg inScale)
@@ -111,25 +111,25 @@ void MassProperties::Scale(Vec3Arg inScale)
 	// d = [0.5, 0.5, 0.5].[Ixx, Iyy, Izz]
 	// [sum_{k = 1 to n}(m_k * x_k^2), sum_{k = 1 to n}(m_k * y_k^2), sum_{k = 1 to n}(m_k * z_k^2)] = [d, d, d] - [Ixx, Iyy, Izz]
 	Vec3 diagonal = mInertia.GetDiagonal3();
-	Vec3 xyz_sq = Vec3::sReplicate(Vec3::sReplicate(0.5f).Dot(diagonal)) - diagonal;
+	Vec3 xyz_sq = Vec3::sReplicate(Vec3::sReplicate(C0P5).Dot(diagonal)) - diagonal;
 
 	// When scaling a shape these terms change like this:
 	// sum_{k = 1 to n}(m_k * (scale_x * x_k)^2) = scale_x^2 * sum_{k = 1 to n}(m_k * x_k^2)
 	// Same for y_k and z_k
 	// Using these terms we can calculate the new diagonal of the inertia tensor:
 	Vec3 xyz_scaled_sq = inScale * inScale * xyz_sq;
-	float i_xx = xyz_scaled_sq.GetY() + xyz_scaled_sq.GetZ();
-	float i_yy = xyz_scaled_sq.GetX() + xyz_scaled_sq.GetZ();
-	float i_zz = xyz_scaled_sq.GetX() + xyz_scaled_sq.GetY();
+	decimal i_xx = xyz_scaled_sq.GetY() + xyz_scaled_sq.GetZ();
+	decimal i_yy = xyz_scaled_sq.GetX() + xyz_scaled_sq.GetZ();
+	decimal i_zz = xyz_scaled_sq.GetX() + xyz_scaled_sq.GetY();
 
 	// The off diagonal elements are calculated like:
 	// Ixy = -sum_{k = 1 to n}(x_k y_k)
 	// Ixz = -sum_{k = 1 to n}(x_k z_k)
 	// Iyz = -sum_{k = 1 to n}(y_k z_k)
 	// Scaling these is simple:
-	float i_xy = inScale.GetX() * inScale.GetY() * mInertia(0, 1);
-	float i_xz = inScale.GetX() * inScale.GetZ() * mInertia(0, 2);
-	float i_yz = inScale.GetY() * inScale.GetZ() * mInertia(1, 2);
+	decimal i_xy = inScale.GetX() * inScale.GetY() * mInertia(0, 1);
+	decimal i_xz = inScale.GetX() * inScale.GetZ() * mInertia(0, 2);
+	decimal i_yz = inScale.GetY() * inScale.GetZ() * mInertia(1, 2);
 
 	// Update inertia tensor
 	mInertia(0, 0) = i_xx;
@@ -143,14 +143,14 @@ void MassProperties::Scale(Vec3Arg inScale)
 	mInertia(2, 2) = i_zz;
 
 	// Mass scales linear with volume (note that the scaling can be negative and we don't want the mass to become negative)
-	float mass_scale = abs(inScale.GetX() * inScale.GetY() * inScale.GetZ());
+	decimal mass_scale = abs(inScale.GetX() * inScale.GetY() * inScale.GetZ());
 	mMass *= mass_scale;
 	
 	// Inertia scales linear with mass. This updates the m_k terms above.
 	mInertia *= mass_scale;
 
 	// Ensure that the bottom right element is a 1 again
-	mInertia(3, 3) = 1.0f;
+	mInertia(3, 3) = C1;
 }
 
 void MassProperties::Rotate(Mat44Arg inRotation)
@@ -166,7 +166,7 @@ void MassProperties::Translate(Vec3Arg inTranslation)
 	mInertia += mMass * (Mat44::sScale(inTranslation.Dot(inTranslation)) - Mat44::sOuterProduct(inTranslation, inTranslation));
 
 	// Ensure that inertia is a 3x3 matrix, adding inertias causes the bottom right element to change
-	mInertia.SetColumn4(3, Vec4(0, 0, 0, 1));
+	mInertia.SetColumn4(3, Vec4(C0, C0, C0, C1));
 }
 
 void MassProperties::SaveBinaryState(StreamOut &inStream) const

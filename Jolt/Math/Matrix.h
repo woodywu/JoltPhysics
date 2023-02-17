@@ -48,7 +48,7 @@ public:
 
 		// Set diagonal to 1
 		for (uint rc = 0, min_rc = min(Rows, Cols); rc < min_rc; ++rc)
-			mCol[rc].mF32[rc] = 1.0f;
+			mCol[rc].mF32[rc] = C1;
 	}
 
 	inline static Matrix					sIdentity()												{ Matrix m; m.SetIdentity(); return m; }

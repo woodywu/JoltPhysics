@@ -147,13 +147,13 @@ MassProperties BodyCreationSettings::GetMassProperties() const
 	case EOverrideMassProperties::CalculateMassAndInertia:
 		mass_properties = GetShape()->GetMassProperties();
 		mass_properties.mInertia *= mInertiaMultiplier;
-		mass_properties.mInertia(3, 3) = 1.0f;
+		mass_properties.mInertia(3, 3) = C1;
 		break;
 	case EOverrideMassProperties::CalculateInertia:
 		mass_properties = GetShape()->GetMassProperties();
 		mass_properties.ScaleToMass(mMassPropertiesOverride.mMass);
 		mass_properties.mInertia *= mInertiaMultiplier;
-		mass_properties.mInertia(3, 3) = 1.0f;
+		mass_properties.mInertia(3, 3) = C1;
 		break;
 	case EOverrideMassProperties::MassAndInertiaProvided:
 		mass_properties = mMassPropertiesOverride;

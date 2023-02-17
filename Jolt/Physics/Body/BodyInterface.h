@@ -159,7 +159,7 @@ public:
 	///@}
 
 	/// Set velocity of body such that it will be positioned at inTargetPosition/Rotation in inDeltaTime seconds (will activate body if needed)
-	void						MoveKinematic(const BodyID &inBodyID, RVec3Arg inTargetPosition, QuatArg inTargetRotation, float inDeltaTime);
+	void						MoveKinematic(const BodyID &inBodyID, RVec3Arg inTargetPosition, QuatArg inTargetRotation, decimal inDeltaTime);
 
 	/// Linear or angular velocity (functions will activate body if needed).
 	/// Note that the linear velocity is the velocity of the center of mass, which may not coincide with the position of your object, to correct for this: \f$VelocityCOM = Velocity - AngularVelocity \times ShapeCOM\f$
@@ -209,20 +209,20 @@ public:
 
 	///@name Restitution
 	///@{
-	void						SetRestitution(const BodyID &inBodyID, float inRestitution);
-	float						GetRestitution(const BodyID &inBodyID) const;
+	void						SetRestitution(const BodyID &inBodyID, decimal inRestitution);
+	decimal						GetRestitution(const BodyID &inBodyID) const;
 	///@}
 
 	///@name Friction
 	///@{
-	void						SetFriction(const BodyID &inBodyID, float inFriction);
-	float						GetFriction(const BodyID &inBodyID) const;
+	void						SetFriction(const BodyID &inBodyID, decimal inFriction);
+	decimal						GetFriction(const BodyID &inBodyID) const;
 	///@}
 
 	///@name Gravity factor
 	///@{
-	void						SetGravityFactor(const BodyID &inBodyID, float inGravityFactor);
-	float						GetGravityFactor(const BodyID &inBodyID) const;
+	void						SetGravityFactor(const BodyID &inBodyID, decimal inGravityFactor);
+	decimal						GetGravityFactor(const BodyID &inBodyID) const;
 	///@}
 
 	/// Get transform and shape for this body, used to perform collision detection
