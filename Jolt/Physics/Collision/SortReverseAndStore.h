@@ -11,7 +11,7 @@ JPH_NAMESPACE_BEGIN
 /// @param ioIdentifiers 4 identifiers that will be sorted in the same way as the values
 /// @param outValues The values are stored here from high to low
 /// @return The number of values that were kept
-JPH_INLINE int SortReverseAndStore(Vec4Arg inValues, float inMaxValue, UVec4 &ioIdentifiers, float *outValues)
+JPH_INLINE int SortReverseAndStore(Vec4Arg inValues, decimal inMaxValue, UVec4 &ioIdentifiers, decimal *outValues)
 {	
 	// Sort so that highest values are first (we want to first process closer hits and we process stack top to bottom)
 	Vec4::sSort4Reverse(inValues, ioIdentifiers);

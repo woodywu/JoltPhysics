@@ -107,7 +107,7 @@ bool QuadTree::Node::EncapsulateChildBounds(int inChildIndex, const AABox &inBou
 // QuadTree
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const float QuadTree::cLargeFloat = 1.0e30f;
+const decimal QuadTree::cLargeFloat = decimal(1.0e30f);
 const AABox QuadTree::cInvalidBounds(Vec3::sReplicate(cLargeFloat), Vec3::sReplicate(-cLargeFloat));
 
 void QuadTree::GetBodyLocation(const TrackingVector &inTracking, BodyID inBodyID, uint32 &outNodeIdx, uint32 &outChildIdx) const
@@ -400,7 +400,7 @@ void QuadTree::sPartition(NodeID *ioNodeIDs, Vec3 *ioNodeCenters, int inNumber, 
 
 	// Calculate split plane
 	int dimension = (center_max - center_min).GetHighestComponentIndex();
-	float split = 0.5f * (center_min + center_max)[dimension];
+	decimal split = C0P5 * (center_min + center_max)[dimension];
 
 	// Divide bodies
 	int start = 0, end = inNumber;
@@ -1045,7 +1045,7 @@ void QuadTree::CastRay(const RayCast &inRay, RayCastBodyCollector &ioCollector, 
 			mInvDirection(inRay.mDirection),
 			mCollector(ioCollector)
 		{
-			mFractionStack[0] = -1;
+			mFractionStack[0] = -C1;
 		}
 
 		/// Returns true if further processing of the tree should be aborted
@@ -1082,7 +1082,7 @@ void QuadTree::CastRay(const RayCast &inRay, RayCastBodyCollector &ioCollector, 
 		Vec3					mOrigin;
 		RayInvDirection			mInvDirection;
 		RayCastBodyCollector &	mCollector;
-		float					mFractionStack[cStackSize];
+		decimal					mFractionStack[cStackSize];
 	};
 
 	Visitor visitor(inRay, ioCollector);
@@ -1137,13 +1137,13 @@ void QuadTree::CollideAABox(const AABox &inBox, CollideShapeBodyCollector &ioCol
 	WalkTree(inObjectLayerFilter, inTracking, visitor JPH_IF_TRACK_BROADPHASE_STATS(, mCollideAABoxStats));
 }
 
-void QuadTree::CollideSphere(Vec3Arg inCenter, float inRadius, CollideShapeBodyCollector &ioCollector, const ObjectLayerFilter &inObjectLayerFilter, const TrackingVector &inTracking) const
+void QuadTree::CollideSphere(Vec3Arg inCenter, decimal inRadius, CollideShapeBodyCollector &ioCollector, const ObjectLayerFilter &inObjectLayerFilter, const TrackingVector &inTracking) const
 {
 	class Visitor
 	{
 	public:
 		/// Constructor
-		JPH_INLINE					Visitor(Vec3Arg inCenter, float inRadius, CollideShapeBodyCollector &ioCollector) :
+		JPH_INLINE					Visitor(Vec3Arg inCenter, decimal inRadius, CollideShapeBodyCollector &ioCollector) :
 			mCenterX(inCenter.SplatX()),
 			mCenterY(inCenter.SplatY()),
 			mCenterZ(inCenter.SplatZ()),
@@ -1299,7 +1299,7 @@ void QuadTree::CastAABox(const AABoxCast &inBox, CastShapeBodyCollector &ioColle
 			mInvDirection(inBox.mDirection),
 			mCollector(ioCollector)
 		{
-			mFractionStack[0] = -1;
+			mFractionStack[0] = -C1;
 		}
 
 		/// Returns true if further processing of the tree should be aborted
@@ -1340,14 +1340,14 @@ void QuadTree::CastAABox(const AABoxCast &inBox, CastShapeBodyCollector &ioColle
 		Vec3						mExtent;
 		RayInvDirection				mInvDirection;
 		CastShapeBodyCollector &	mCollector;
-		float						mFractionStack[cStackSize];
+		decimal						mFractionStack[cStackSize];
 	};
 
 	Visitor visitor(inBox, ioCollector);
 	WalkTree(inObjectLayerFilter, inTracking, visitor JPH_IF_TRACK_BROADPHASE_STATS(, mCastAABoxStats));
 }
 
-void QuadTree::FindCollidingPairs(const BodyVector &inBodies, const BodyID *inActiveBodies, int inNumActiveBodies, float inSpeculativeContactDistance, BodyPairCollector &ioPairCollector, const ObjectLayerPairFilter &inObjectLayerPairFilter) const
+void QuadTree::FindCollidingPairs(const BodyVector &inBodies, const BodyID *inActiveBodies, int inNumActiveBodies, decimal inSpeculativeContactDistance, BodyPairCollector &ioPairCollector, const ObjectLayerPairFilter &inObjectLayerPairFilter) const
 {
 	// Note that we don't lock the tree at this point. We know that the tree is not going to be swapped or deleted while finding collision pairs due to the way the jobs are scheduled in the PhysicsSystem::Update.
 	// We double check this at the end of the function.
@@ -1514,7 +1514,7 @@ void QuadTree::ValidateTree(const BodyVector &inBodies, const TrackingVector &in
 					node.GetChildBounds(i, body_bounds);
 					const Body *body = inBodies[child_node_id.GetBodyID().GetIndex()];
 					AABox cached_body_bounds = body->GetWorldSpaceBounds();
-					AABox real_body_bounds = body->GetShape()->GetWorldSpaceBounds(body->GetCenterOfMassTransform(), Vec3::sReplicate(1.0f));
+					AABox real_body_bounds = body->GetShape()->GetWorldSpaceBounds(body->GetCenterOfMassTransform(), Vec3::sReplicate(C1));
 					JPH_ASSERT(cached_body_bounds == real_body_bounds); // Check that cached body bounds are up to date
 					JPH_ASSERT(body_bounds.Contains(real_body_bounds));
 				}

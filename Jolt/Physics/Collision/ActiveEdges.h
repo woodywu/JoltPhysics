@@ -17,12 +17,12 @@ namespace ActiveEdges
 	inline static bool					IsEdgeActive(Vec3Arg inNormal1, Vec3Arg inNormal2, Vec3Arg inEdgeDirection)
 	{
 		// If normals are opposite the edges are active (the triangles are back to back)
-		float cos_angle_normals = inNormal1.Dot(inNormal2);
+		decimal cos_angle_normals = inNormal1.Dot(inNormal2);
 		if (cos_angle_normals < -0.99984769515639123915701155881391f) // cos(179 degrees)
 			return true;
 			
 		// Check if concave edge, if so we are not active
-		if (inNormal1.Cross(inNormal2).Dot(inEdgeDirection) < 0.0f)
+		if (inNormal1.Cross(inNormal2).Dot(inEdgeDirection) < C0)
 			return false;
 
 		// Convex edge, active when angle bigger than threshold
@@ -46,8 +46,8 @@ namespace ActiveEdges
 		// This is done since it is really hard to make a distinction between sliding over a horizontal triangulated grid and hitting an edge (in this case you want to use the triangle normal)
 		// and sliding over a triangulated grid and grazing a vertical triangle with an inactive edge (in this case using the triangle normal will cause the object to bounce back so we want to use the calculated normal).
 		// To solve this we take a movement hint to give an indication of what direction our object is moving. If the edge normal results in less motion difference than the triangle normal we use the edge normal.
-		float normal_length = inNormal.Length();
-		float triangle_normal_length = inTriangleNormal.Length();
+		decimal normal_length = inNormal.Length();
+		decimal triangle_normal_length = inTriangleNormal.Length();
 		if (inMovementDirection.Dot(inNormal) * triangle_normal_length < inMovementDirection.Dot(inTriangleNormal) * normal_length)
 			return inNormal;
 
@@ -60,13 +60,13 @@ namespace ActiveEdges
 		if (inTriangleNormal.Dot(inNormal) > 0.99619469809174553229501040247389f * normal_length * triangle_normal_length) // cos(5 degrees)
 			return inNormal;
 
-		const float cEpsilon = 1.0e-4f;
-		const float cOneMinusEpsilon = 1.0f - cEpsilon;
+		const decimal cEpsilon = decimal(1.0e-4f);
+		const decimal cOneMinusEpsilon = C1 - cEpsilon;
 
 		uint colliding_edge;
 
 		// Test where the contact point is in the triangle
-		float u, v, w;
+		decimal u, v, w;
 		ClosestPoint::GetBaryCentricCoordinates(inV0 - inPoint, inV1 - inPoint, inV2 - inPoint, u, v, w);
 		if (u > cOneMinusEpsilon)
 		{

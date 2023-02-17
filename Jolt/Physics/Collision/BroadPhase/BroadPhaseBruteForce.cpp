@@ -93,7 +93,7 @@ void BroadPhaseBruteForce::CastRay(const RayCast &inRay, RayCastBodyCollector &i
 	RayInvDirection inv_direction(inRay.mDirection);
 
 	// For all bodies
-	float early_out_fraction = ioCollector.GetEarlyOutFraction();
+	decimal early_out_fraction = ioCollector.GetEarlyOutFraction();
 	for (BodyID b : mBodyIDs)
 	{
 		const Body &body = mBodyManager->GetBody(b);
@@ -103,7 +103,7 @@ void BroadPhaseBruteForce::CastRay(const RayCast &inRay, RayCastBodyCollector &i
 		{
 			// Test intersection with ray
 			const AABox &bounds = body.GetWorldSpaceBounds();
-			float fraction = RayAABox(origin, inv_direction, bounds.mMin, bounds.mMax);
+			decimal fraction = RayAABox(origin, inv_direction, bounds.mMin, bounds.mMax);
 			if (fraction < early_out_fraction)
 			{
 				// Store hit
@@ -142,11 +142,11 @@ void BroadPhaseBruteForce::CollideAABox(const AABox &inBox, CollideShapeBodyColl
 	}
 }
 
-void BroadPhaseBruteForce::CollideSphere(Vec3Arg inCenter, float inRadius, CollideShapeBodyCollector &ioCollector, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter) const
+void BroadPhaseBruteForce::CollideSphere(Vec3Arg inCenter, decimal inRadius, CollideShapeBodyCollector &ioCollector, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter) const
 {
 	shared_lock lock(mMutex);
 
-	float radius_sq = Square(inRadius);
+	decimal radius_sq = Square(inRadius);
 
 	// For all bodies
 	for (BodyID b : mBodyIDs)
@@ -229,7 +229,7 @@ void BroadPhaseBruteForce::CastAABoxNoLock(const AABoxCast &inBox, CastShapeBody
 	RayInvDirection inv_direction(inBox.mDirection);
 
 	// For all bodies
-	float early_out_fraction = ioCollector.GetEarlyOutFraction();
+	decimal early_out_fraction = ioCollector.GetEarlyOutFraction();
 	for (BodyID b : mBodyIDs)
 	{
 		const Body &body = mBodyManager->GetBody(b);
@@ -239,7 +239,7 @@ void BroadPhaseBruteForce::CastAABoxNoLock(const AABoxCast &inBox, CastShapeBody
 		{
 			// Test intersection with ray
 			const AABox &bounds = body.GetWorldSpaceBounds();
-			float fraction = RayAABox(origin, inv_direction, bounds.mMin - extent, bounds.mMax + extent);
+			decimal fraction = RayAABox(origin, inv_direction, bounds.mMin - extent, bounds.mMax + extent);
 			if (fraction < early_out_fraction)
 			{
 				// Store hit
@@ -258,7 +258,7 @@ void BroadPhaseBruteForce::CastAABox(const AABoxCast &inBox, CastShapeBodyCollec
 	CastAABoxNoLock(inBox, ioCollector, inBroadPhaseLayerFilter, inObjectLayerFilter);
 }
 
-void BroadPhaseBruteForce::FindCollidingPairs(BodyID *ioActiveBodies, int inNumActiveBodies, float inSpeculativeContactDistance, const ObjectVsBroadPhaseLayerFilter &inObjectVsBroadPhaseLayerFilter, const ObjectLayerPairFilter &inObjectLayerPairFilter, BodyPairCollector &ioPairCollector) const
+void BroadPhaseBruteForce::FindCollidingPairs(BodyID *ioActiveBodies, int inNumActiveBodies, decimal inSpeculativeContactDistance, const ObjectVsBroadPhaseLayerFilter &inObjectVsBroadPhaseLayerFilter, const ObjectLayerPairFilter &inObjectLayerPairFilter, BodyPairCollector &ioPairCollector) const
 {
 	shared_lock lock(mMutex);
 

@@ -115,12 +115,12 @@ private:
 		bool					EncapsulateChildBounds(int inChildIndex, const AABox &inBounds);
 
 		/// Bounding box for child nodes or bodies (all initially set to invalid so no collision test will ever traverse to the leaf)
-		atomic<float>			mBoundsMinX[4];
-		atomic<float>			mBoundsMinY[4];
-		atomic<float>			mBoundsMinZ[4];
-		atomic<float>			mBoundsMaxX[4];
-		atomic<float>			mBoundsMaxY[4];
-		atomic<float>			mBoundsMaxZ[4];
+		atomic<decimal>			mBoundsMinX[4];
+		atomic<decimal>			mBoundsMinY[4];
+		atomic<decimal>			mBoundsMinZ[4];
+		atomic<decimal>			mBoundsMaxX[4];
+		atomic<decimal>			mBoundsMaxY[4];
+		atomic<decimal>			mBoundsMaxZ[4];
 
 		/// Index of child node or body ID.
 		AtomicNodeID			mChildNodeID[4];
@@ -140,7 +140,7 @@ private:
 	// Maximum size of the stack during tree walk
 	static constexpr int		cStackSize = 128;
 
-	static_assert(sizeof(atomic<float>) == 4, "Assuming that an atomic doesn't add any additional storage");
+	static_assert(sizeof(atomic<decimal>) == 4, "Assuming that an atomic doesn't add any additional storage");
 	static_assert(sizeof(atomic<uint32>) == 4, "Assuming that an atomic doesn't add any additional storage");
 	static_assert(is_trivially_destructible<Node>(), "Assuming that we don't have a destructor");
 
@@ -233,7 +233,7 @@ public:
 	void						CollideAABox(const AABox &inBox, CollideShapeBodyCollector &ioCollector, const ObjectLayerFilter &inObjectLayerFilter, const TrackingVector &inTracking) const;
 
 	/// Get bodies intersecting with a sphere in ioCollector
-	void						CollideSphere(Vec3Arg inCenter, float inRadius, CollideShapeBodyCollector &ioCollector, const ObjectLayerFilter &inObjectLayerFilter, const TrackingVector &inTracking) const;
+	void						CollideSphere(Vec3Arg inCenter, decimal inRadius, CollideShapeBodyCollector &ioCollector, const ObjectLayerFilter &inObjectLayerFilter, const TrackingVector &inTracking) const;
 
 	/// Get bodies intersecting with a point and any hits to ioCollector
 	void						CollidePoint(Vec3Arg inPoint, CollideShapeBodyCollector &ioCollector, const ObjectLayerFilter &inObjectLayerFilter, const TrackingVector &inTracking) const;
@@ -245,7 +245,7 @@ public:
 	void						CastAABox(const AABoxCast &inBox, CastShapeBodyCollector &ioCollector, const ObjectLayerFilter &inObjectLayerFilter, const TrackingVector &inTracking) const;
 
 	/// Find all colliding pairs between dynamic bodies, calls ioPairCollector for every pair found
-	void						FindCollidingPairs(const BodyVector &inBodies, const BodyID *inActiveBodies, int inNumActiveBodies, float inSpeculativeContactDistance, BodyPairCollector &ioPairCollector, const ObjectLayerPairFilter &inObjectLayerPairFilter) const;
+	void						FindCollidingPairs(const BodyVector &inBodies, const BodyID *inActiveBodies, int inNumActiveBodies, decimal inSpeculativeContactDistance, BodyPairCollector &ioPairCollector, const ObjectLayerPairFilter &inObjectLayerPairFilter) const;
 
 #ifdef JPH_TRACK_BROADPHASE_STATS
 	/// Trace the stats of this tree to the TTY
@@ -255,7 +255,7 @@ public:
 private:
 	/// Constants
 	static const uint32			cInvalidNodeIndex = 0xffffffff;		///< Value used to indicate node index is invalid
-	static const float			cLargeFloat;						///< A large floating point number that is small enough to not cause any overflows
+	static const decimal			cLargeFloat;						///< A large decimaling point number that is small enough to not cause any overflows
 	static const AABox			cInvalidBounds;						///< Invalid bounding box using cLargeFloat
 
 	/// We alternate between two trees in order to let collision queries complete in parallel to adding/removing objects to the tree
