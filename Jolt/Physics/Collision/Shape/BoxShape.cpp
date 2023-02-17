@@ -29,18 +29,18 @@ JPH_IMPLEMENT_SERIALIZABLE_VIRTUAL(BoxShapeSettings)
 }
 
 static const Vec3 sUnitBoxTriangles[] = {
-	Vec3(-1, 1, -1),	Vec3(-1, 1, 1),		Vec3(1, 1, 1),
-	Vec3(-1, 1, -1),	Vec3(1, 1, 1),		Vec3(1, 1, -1),
-	Vec3(-1, -1, -1),	Vec3(1, -1, -1),	Vec3(1, -1, 1),
-	Vec3(-1, -1, -1),	Vec3(1, -1, 1),		Vec3(-1, -1, 1),
-	Vec3(-1, 1, -1),	Vec3(-1, -1, -1),	Vec3(-1, -1, 1),
-	Vec3(-1, 1, -1),	Vec3(-1, -1, 1),	Vec3(-1, 1, 1),
-	Vec3(1, 1, 1),		Vec3(1, -1, 1),		Vec3(1, -1, -1),
-	Vec3(1, 1, 1),		Vec3(1, -1, -1),	Vec3(1, 1, -1),
-	Vec3(-1, 1, 1),		Vec3(-1, -1, 1),	Vec3(1, -1, 1),
-	Vec3(-1, 1, 1),		Vec3(1, -1, 1),		Vec3(1, 1, 1),
-	Vec3(-1, 1, -1),	Vec3(1, 1, -1),		Vec3(1, -1, -1),
-	Vec3(-1, 1, -1),	Vec3(1, -1, -1),	Vec3(-1, -1, -1)
+	Vec3(-C1, C1, -C1),	Vec3(-C1, C1, C1),		Vec3(C1, C1, C1),
+	Vec3(-C1, C1, -C1),	Vec3(C1, C1, C1),		Vec3(C1, C1, -C1),
+	Vec3(-C1, -C1, -C1),	Vec3(C1, -C1, -C1),	Vec3(C1, -C1, C1),
+	Vec3(-C1, -C1, -C1),	Vec3(C1, -C1, C1),		Vec3(-C1, -C1, C1),
+	Vec3(-C1, C1, -C1),	Vec3(-C1, -C1, -C1),	Vec3(-C1, -C1, C1),
+	Vec3(-C1, C1, -C1),	Vec3(-C1, -C1, C1),	Vec3(-C1, C1, C1),
+	Vec3(C1, C1, C1),		Vec3(C1, -C1, C1),		Vec3(C1, -C1, -C1),
+	Vec3(C1, C1, C1),		Vec3(C1, -C1, -C1),	Vec3(C1, C1, -C1),
+	Vec3(-C1, C1, C1),		Vec3(-C1, -C1, C1),	Vec3(C1, -C1, C1),
+	Vec3(-C1, C1, C1),		Vec3(C1, -C1, C1),		Vec3(C1, C1, C1),
+	Vec3(-C1, C1, -C1),	Vec3(C1, C1, -C1),		Vec3(C1, -C1, -C1),
+	Vec3(-C1, C1, -C1),	Vec3(C1, -C1, -C1),	Vec3(-C1, -C1, -C1)
 };
 
 ShapeSettings::ShapeResult BoxShapeSettings::Create() const
@@ -56,7 +56,7 @@ BoxShape::BoxShape(const BoxShapeSettings &inSettings, ShapeResult &outResult) :
 	mConvexRadius(inSettings.mConvexRadius) 
 { 
 	// Check convex radius
-	if (inSettings.mConvexRadius < 0.0f
+	if (inSettings.mConvexRadius < C0
 		|| inSettings.mHalfExtent.ReduceMin() <= inSettings.mConvexRadius)
 	{
 		outResult.SetError("Invalid convex radius");
@@ -70,7 +70,7 @@ BoxShape::BoxShape(const BoxShapeSettings &inSettings, ShapeResult &outResult) :
 class BoxShape::Box final : public Support
 {
 public:
-					Box(const AABox &inBox, float inConvexRadius) : 
+					Box(const AABox &inBox, decimal inConvexRadius) : 
 		mBox(inBox),
 		mConvexRadius(inConvexRadius)
 	{ 
@@ -83,14 +83,14 @@ public:
 		return mBox.GetSupport(inDirection); 
 	}
 
-	virtual float	GetConvexRadius() const override
+	virtual decimal	GetConvexRadius() const override
 	{
 		return mConvexRadius;
 	}
 
 private:
 	AABox			mBox;
-	float			mConvexRadius;
+	decimal			mConvexRadius;
 };
 
 const ConvexShape::Support *BoxShape::GetSupportFunction(ESupportMode inMode, SupportBuffer &inBuffer, Vec3Arg inScale) const
@@ -105,13 +105,13 @@ const ConvexShape::Support *BoxShape::GetSupportFunction(ESupportMode inMode, Su
 			// Make box out of our half extents
 			AABox box = AABox(-scaled_half_extent, scaled_half_extent);
 			JPH_ASSERT(box.IsValid());
-			return new (&inBuffer) Box(box, 0.0f);
+			return new (&inBuffer) Box(box, C0);
 		}
 
 	case ESupportMode::ExcludeConvexRadius:
 		{
 			// Reduce the box by our convex radius
-			float convex_radius = ScaleHelpers::ScaleConvexRadius(mConvexRadius, inScale);
+			decimal convex_radius = ScaleHelpers::ScaleConvexRadius(mConvexRadius, inScale);
 			Vec3 convex_radius3 = Vec3::sReplicate(convex_radius);
 			Vec3 reduced_half_extent = scaled_half_extent - convex_radius3;
 			AABox box = AABox(-reduced_half_extent, reduced_half_extent);
@@ -140,7 +140,7 @@ void BoxShape::GetSupportingFace(const SubShapeID &inSubShapeID, Vec3Arg inDirec
 MassProperties BoxShape::GetMassProperties() const
 {
 	MassProperties p;
-	p.SetMassAndInertiaOfSolidBox(2.0f * mHalfExtent, GetDensity());
+	p.SetMassAndInertiaOfSolidBox(C2 * mHalfExtent, GetDensity());
 	return p;
 }
 
@@ -153,7 +153,7 @@ Vec3 BoxShape::GetSurfaceNormal(const SubShapeID &inSubShapeID, Vec3Arg inLocalS
 
 	// Calculate normal
 	Vec3 normal = Vec3::sZero();
-	normal.SetComponent(index, inLocalSurfacePosition[index] > 0.0f? 1.0f : -1.0f);
+	normal.SetComponent(index, inLocalSurfacePosition[index] > C0? C1 : -C1);
 	return normal;
 }
 
@@ -168,7 +168,7 @@ void BoxShape::Draw(DebugRenderer *inRenderer, RMat44Arg inCenterOfMassTransform
 bool BoxShape::CastRay(const RayCast &inRay, const SubShapeIDCreator &inSubShapeIDCreator, RayCastResult &ioHit) const
 {
 	// Test hit against box
-	float fraction = max(RayAABox(inRay.mOrigin, RayInvDirection(inRay.mDirection), -mHalfExtent, mHalfExtent), 0.0f);
+	decimal fraction = max(RayAABox(inRay.mOrigin, RayInvDirection(inRay.mDirection), -mHalfExtent, mHalfExtent), C0);
 	if (fraction < ioHit.mFraction)
 	{
 		ioHit.mFraction = fraction;
@@ -184,10 +184,10 @@ void BoxShape::CastRay(const RayCast &inRay, const RayCastSettings &inRayCastSet
 	if (!inShapeFilter.ShouldCollide(inSubShapeIDCreator.GetID()))
 		return;
 
-	float min_fraction, max_fraction;
+	decimal min_fraction, max_fraction;
 	RayAABox(inRay.mOrigin, RayInvDirection(inRay.mDirection), -mHalfExtent, mHalfExtent, min_fraction, max_fraction);
 	if (min_fraction <= max_fraction // Ray should intersect
-		&& max_fraction >= 0.0f // End of ray should be inside box
+		&& max_fraction >= C0 // End of ray should be inside box
 		&& min_fraction < ioCollector.GetEarlyOutFraction()) // Start of ray should be before early out fraction
 	{
 		// Better hit than the current hit
@@ -196,9 +196,9 @@ void BoxShape::CastRay(const RayCast &inRay, const RayCastSettings &inRayCastSet
 		hit.mSubShapeID2 = inSubShapeIDCreator.GetID();
 
 		// Check front side
-		if (inRayCastSettings.mTreatConvexAsSolid || min_fraction > 0.0f)
+		if (inRayCastSettings.mTreatConvexAsSolid || min_fraction > C0)
 		{
-			hit.mFraction = max(0.0f, min_fraction);
+			hit.mFraction = max(C0, min_fraction);
 			ioCollector.AddHit(hit);
 		}
 

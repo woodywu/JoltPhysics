@@ -41,9 +41,9 @@ protected:
 	Mat44							mTransform2;							///< Transform of the shape we're colliding against
 	Vec3							mSphereCenterIn2;						///< The center of the sphere in the space of 2
 	SubShapeID						mSubShapeID1;							///< Sub shape ID of colliding shape
-	float							mScaleSign2;							///< Sign of the scale of object 2, -1 if object is inside out, 1 if not
-	float							mRadius;								///< Radius of the sphere
-	float							mRadiusPlusMaxSeparationSq;				///< (Radius + Max SeparationDistance)^2
+	decimal							mScaleSign2;							///< Sign of the scale of object 2, -1 if object is inside out, 1 if not
+	decimal							mRadius;								///< Radius of the sphere
+	decimal							mRadiusPlusMaxSeparationSq;				///< (Radius + Max SeparationDistance)^2
 };
 
 JPH_NAMESPACE_END

@@ -18,7 +18,7 @@ class CollideShapeSettings;
 namespace HeightFieldShapeConstants
 {
 	/// Value used to create gaps in the height field
-	constexpr float			cNoCollisionValue = FLT_MAX;
+	constexpr decimal			cNoCollisionValue = FIX_MAX;
 
 	/// Stack size to use during WalkHeightField
 	constexpr int			cStackSize = 128;
@@ -48,7 +48,7 @@ public:
 	/// inSampleCount: inSampleCount / mBlockSize must be a power of 2 and minimally 2.
 	/// inSamples: inSampleCount^2 vertices.
 	/// inMaterialIndices: (inSampleCount - 1)^2 indices that index into inMaterialList.
-									HeightFieldShapeSettings(const float *inSamples, Vec3Arg inOffset, Vec3Arg inScale, uint32 inSampleCount, const uint8 *inMaterialIndices = nullptr, const PhysicsMaterialList &inMaterialList = PhysicsMaterialList());
+									HeightFieldShapeSettings(const decimal *inSamples, Vec3Arg inOffset, Vec3Arg inScale, uint32 inSampleCount, const uint8 *inMaterialIndices = nullptr, const PhysicsMaterialList &inMaterialList = PhysicsMaterialList());
 
 	// See: ShapeSettings
 	virtual ShapeResult				Create() const override;
@@ -57,17 +57,17 @@ public:
 	/// @param outMinValue The minimal value fo mHeightSamples or FLT_MAX if no samples have collision
 	/// @param outMaxValue The maximal value fo mHeightSamples or -FLT_MAX if no samples have collision
 	/// @param outQuantizationScale (value - outMinValue) * outQuantizationScale quantizes a height sample to 16 bits
-	void							DetermineMinAndMaxSample(float &outMinValue, float &outMaxValue, float &outQuantizationScale) const;
+	void							DetermineMinAndMaxSample(decimal &outMinValue, decimal &outMaxValue, decimal &outQuantizationScale) const;
 
 	/// Given mBlockSize, mSampleCount and mHeightSamples, calculate the amount of bits needed to stay below absolute error inMaxError
 	/// @param inMaxError Maximum allowed error in mHeightSamples after compression (note that this does not take mScale.Y into account)
 	/// @return Needed bits per sample in the range [1, 8].
-	uint32							CalculateBitsPerSampleForError(float inMaxError) const;
+	uint32							CalculateBitsPerSampleForError(decimal inMaxError) const;
 
 	/// The height field is a surface defined by: mOffset + mScale * (x, mHeightSamples[y * mSampleCount + x], y).
 	/// where x and y are integers in the range x and y e [0, mSampleCount - 1].
 	Vec3							mOffset = Vec3::sZero();
-	Vec3							mScale = Vec3::sReplicate(1.0f);
+	Vec3							mScale = Vec3::sReplicate(C1);
 	uint32							mSampleCount = 0;
 
 	/// The heightfield is divided in blocks of mBlockSize * mBlockSize * 2 triangles and the acceleration structure culls blocks only, 
@@ -80,7 +80,7 @@ public:
 	/// Also note that increasing mBlockSize saves more memory than reducing the amount of bits per sample.
 	uint32							mBitsPerSample = 8;
 
-	Array<float>					mHeightSamples;
+	Array<decimal>					mHeightSamples;
 	Array<uint8>					mMaterialIndices;
 
 	/// The materials of square at (x, y) is: mMaterials[mMaterialIndices[x + y * (mSampleCount - 1)]]
@@ -107,7 +107,7 @@ public:
 	virtual uint					GetSubShapeIDBitsRecursive() const override							{ return GetSubShapeIDBits(); }
 
 	// See Shape::GetInnerRadius
-	virtual float					GetInnerRadius() const override										{ return 0.0f; }
+	virtual decimal					GetInnerRadius() const override										{ return C0; }
 
 	// See Shape::GetMassProperties
 	virtual MassProperties			GetMassProperties() const override;
@@ -125,7 +125,7 @@ public:
 	virtual void					GetSupportingFace(const SubShapeID &inSubShapeID, Vec3Arg inDirection, Vec3Arg inScale, Mat44Arg inCenterOfMassTransform, SupportingFace &outVertices) const override;
 
 	// See Shape::GetSubmergedVolume
-	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override { JPH_ASSERT(false, "Not supported"); }
+	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override { JPH_ASSERT(false, "Not supported"); }
 
 #ifdef JPH_DEBUG_RENDERER
 	// See Shape::Draw
@@ -165,7 +165,7 @@ public:
 	virtual Stats					GetStats() const override;
 
 	// See Shape::GetVolume
-	virtual float					GetVolume() const override											{ return 0; }
+	virtual decimal					GetVolume() const override											{ return C0; }
 
 #ifdef JPH_DEBUG_RENDERER
 	// Settings
@@ -202,13 +202,13 @@ private:
 	static inline void				sGetRangeBlockOffsetAndStride(uint inNumBlocks, uint inMaxLevel, uint &outRangeBlockOffset, uint &outRangeBlockStride);
 
 	/// For block (inBlockX, inBlockY) get the offset and scale needed to decode a uint8 height sample to a uint16
-	inline void						GetBlockOffsetAndScale(uint inBlockX, uint inBlockY, uint inRangeBlockOffset, uint inRangeBlockStride, float &outBlockOffset, float &outBlockScale) const;
+	inline void						GetBlockOffsetAndScale(uint inBlockX, uint inBlockY, uint inRangeBlockOffset, uint inRangeBlockStride, decimal &outBlockOffset, decimal &outBlockScale) const;
 
 	/// Get the height sample at position (inX, inY)
 	inline uint8					GetHeightSample(uint inX, uint inY) const;
 
 	/// Faster version of GetPosition when block offset and scale are already known
-	inline Vec3						GetPosition(uint inX, uint inY, float inBlockOffset, float inBlockScale, bool &outNoCollision) const;
+	inline Vec3						GetPosition(uint inX, uint inY, decimal inBlockOffset, decimal inBlockScale, bool &outNoCollision) const;
 		
 	/// Determine amount of bits needed to encode sub shape id
 	uint							GetSubShapeIDBits() const;
@@ -243,7 +243,7 @@ private:
 	/// The height field is a surface defined by: mOffset + mScale * (x, mHeightSamples[y * mSampleCount + x], y).
 	/// where x and y are integers in the range x and y e [0, mSampleCount - 1].
 	Vec3							mOffset = Vec3::sZero();
-	Vec3							mScale = Vec3::sReplicate(1.0f);
+	Vec3							mScale = Vec3::sReplicate(C1);
 
 	/// Height data
 	uint32							mSampleCount = 0;					///< See HeightFieldShapeSettings::mSampleCount

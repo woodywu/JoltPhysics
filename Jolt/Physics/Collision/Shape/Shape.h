@@ -196,7 +196,7 @@ public:
 
 	/// Returns the radius of the biggest sphere that fits entirely in the shape. In case this shape consists of multiple sub shapes, it returns the smallest sphere of the parts. 
 	/// This can be used as a measure of how far the shape can be moved without risking going through geometry.
-	virtual float					GetInnerRadius() const = 0;
+	virtual decimal					GetInnerRadius() const = 0;
 
 	/// Calculate the mass and inertia of this shape
 	virtual MassProperties			GetMassProperties() const = 0;
@@ -242,7 +242,7 @@ public:
 #ifdef JPH_DEBUG_RENDERER
 	/// @param inBaseOffset The offset to transform inCenterOfMassTransform to world space (in double precision mode this can be used to shift the whole operation closer to the origin). Only used for debug drawing.
 #endif
-	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy
+	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy
 #ifdef JPH_DEBUG_RENDERER // Not using JPH_IF_DEBUG_RENDERER for Doxygen
 		, RVec3Arg inBaseOffset
 #endif
@@ -368,7 +368,7 @@ public:
 	virtual Stats					GetStatsRecursive(VisitedShapes &ioVisitedShapes) const;
 
 	///< Volume of this shape (m^3). Note that for compound shapes the volume may be incorrect since child shapes can overlap which is not accounted for.
-	virtual float					GetVolume() const = 0;
+	virtual decimal					GetVolume() const = 0;
 
 	/// Test if inScale is a valid scale for this shape. Some shapes can only be scaled uniformly, compound shapes cannot handle shapes
 	/// being rotated and scaled (this would cause shearing). In this case this function will return false.

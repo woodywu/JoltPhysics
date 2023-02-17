@@ -73,13 +73,13 @@ const uint HeightFieldShape::sGridOffsets[] =
 	89478485,	// level: 14, max x/y: 16383, offset: 1 + 4 + 64 + 256 + 1024 + 4096 + ...
 };
 
-HeightFieldShapeSettings::HeightFieldShapeSettings(const float *inSamples, Vec3Arg inOffset, Vec3Arg inScale, uint32 inSampleCount, const uint8 *inMaterialIndices, const PhysicsMaterialList &inMaterialList) :
+HeightFieldShapeSettings::HeightFieldShapeSettings(const decimal *inSamples, Vec3Arg inOffset, Vec3Arg inScale, uint32 inSampleCount, const uint8 *inMaterialIndices, const PhysicsMaterialList &inMaterialList) :
 	mOffset(inOffset),
 	mScale(inScale),
 	mSampleCount(inSampleCount)
 {
 	mHeightSamples.resize(inSampleCount * inSampleCount);
-	memcpy(&mHeightSamples[0], inSamples, inSampleCount * inSampleCount * sizeof(float));
+	memcpy(&mHeightSamples[0], inSamples, inSampleCount * inSampleCount * sizeof(decimal));
 
 	if (!inMaterialList.empty() && inMaterialIndices != nullptr)
 	{
@@ -101,12 +101,12 @@ ShapeSettings::ShapeResult HeightFieldShapeSettings::Create() const
 	return mCachedResult;
 }
 
-void HeightFieldShapeSettings::DetermineMinAndMaxSample(float &outMinValue, float &outMaxValue, float &outQuantizationScale) const
+void HeightFieldShapeSettings::DetermineMinAndMaxSample(decimal &outMinValue, decimal &outMaxValue, decimal &outQuantizationScale) const
 {
 	// Determine min and max value
-	outMinValue = FLT_MAX;
-	outMaxValue = -FLT_MAX;
-	for (float h : mHeightSamples)
+	outMinValue = FIX_MAX;
+	outMaxValue = FIX_MIN;
+	for (decimal h : mHeightSamples)
 		if (h != cNoCollisionValue)
 		{
 			outMinValue = min(outMinValue, h);
@@ -114,19 +114,19 @@ void HeightFieldShapeSettings::DetermineMinAndMaxSample(float &outMinValue, floa
 		}
 
 	// Prevent dividing by zero by setting a minimal height difference
-	float height_diff = max(outMaxValue - outMinValue, 1.0e-6f);
+	decimal height_diff = max(outMaxValue - outMinValue, decimal(1.0e-6f));
 
 	// Calculate the scale factor to quantize to 16 bits
-	outQuantizationScale = float(cMaxHeightValue16) / height_diff;
+	outQuantizationScale = decimal(cMaxHeightValue16) / height_diff;
 }
 
-uint32 HeightFieldShapeSettings::CalculateBitsPerSampleForError(float inMaxError) const
+uint32 HeightFieldShapeSettings::CalculateBitsPerSampleForError(decimal inMaxError) const
 {
 	// Start with 1 bit per sample
 	uint32 bits_per_sample = 1;
 
 	// Determine total range
-	float min_value, max_value, scale;
+	decimal min_value, max_value, scale;
 	DetermineMinAndMaxSample(min_value, max_value, scale);
 	if (min_value < max_value)
 	{
@@ -135,11 +135,11 @@ uint32 HeightFieldShapeSettings::CalculateBitsPerSampleForError(float inMaxError
 			for (uint x = 0; x < mSampleCount; x += mBlockSize)
 			{
 				// Determine min and max block value + take 1 sample border just like we do while building the hierarchical grids
-				float block_min_value = FLT_MAX, block_max_value = -FLT_MAX;
+				decimal block_min_value = FIX_MAX, block_max_value = FIX_MIN;
 				for (uint bx = x; bx < min(x + mBlockSize + 1, mSampleCount); ++bx)
 					for (uint by = y; by < min(y + mBlockSize + 1, mSampleCount); ++by)
 					{
-						float h = mHeightSamples[by * mSampleCount + bx];
+						decimal h = mHeightSamples[by * mSampleCount + bx];
 						if (h != cNoCollisionValue)
 						{
 							block_min_value = min(block_min_value, h);
@@ -152,14 +152,14 @@ uint32 HeightFieldShapeSettings::CalculateBitsPerSampleForError(float inMaxError
 					// Quantize then dequantize block min/max value
 					block_min_value = min_value + floor((block_min_value - min_value) * scale) / scale;
 					block_max_value = min_value + ceil((block_max_value - min_value) * scale) / scale;
-					float block_height = block_max_value - block_min_value;
+					decimal block_height = block_max_value - block_min_value;
 
 					// Loop over the block again
 					for (uint bx = x; bx < x + mBlockSize; ++bx)
 						for (uint by = y; by < y + mBlockSize; ++by)
 						{
 							// Get the height
-							float height = mHeightSamples[by * mSampleCount + bx];
+							decimal height = mHeightSamples[by * mSampleCount + bx];
 							if (height != cNoCollisionValue)
 							{
 								for (;;)
@@ -168,11 +168,11 @@ uint32 HeightFieldShapeSettings::CalculateBitsPerSampleForError(float inMaxError
 									uint32 sample_mask = (1 << bits_per_sample) - 1;
 
 									// Quantize
-									float quantized_height = floor((height - block_min_value) * float(sample_mask) / block_height);
-									quantized_height = Clamp(quantized_height, 0.0f, float(sample_mask - 1));
+									decimal quantized_height = floor((height - block_min_value) * decimal(sample_mask) / block_height);
+									quantized_height = Clamp(quantized_height, C0, decimal(sample_mask - 1));
 
 									// Dequantize and check error
-									float dequantized_height = block_min_value + (quantized_height + 0.5f) * block_height / float(sample_mask);
+									decimal dequantized_height = block_min_value + (quantized_height + C0P5) * block_height / decimal(sample_mask);
 									if (abs(dequantized_height - height) <= inMaxError)
 										break;
 
@@ -390,7 +390,7 @@ HeightFieldShape::HeightFieldShape(const HeightFieldShapeSettings &inSettings, S
 	}
 
 	// Determine range
-	float min_value, max_value, scale;
+	decimal min_value, max_value, scale;
 	inSettings.DetermineMinAndMaxSample(min_value, max_value, scale);
 	if (min_value > max_value)
 	{
@@ -403,7 +403,7 @@ HeightFieldShape::HeightFieldShape(const HeightFieldShapeSettings &inSettings, S
 	// Quantize to uint16
 	Array<uint16> quantized_samples;
 	quantized_samples.reserve(mSampleCount * mSampleCount);
-	for (float h : inSettings.mHeightSamples)
+	for (decimal h : inSettings.mHeightSamples)
 		if (h == cNoCollisionValue)
 		{
 			quantized_samples.push_back(cNoCollisionValue16);
@@ -424,7 +424,7 @@ HeightFieldShape::HeightFieldShape(const HeightFieldShapeSettings &inSettings, S
 	{
 		// In GetPosition we always add 0.5 to the quantized sample in order to reduce the average error.
 		// We want to be able to exactly quantize min_value (this is important in case the heightfield is entirely flat) so we subtract that value from min_value.
-		min_value -= 0.5f / (scale * mSampleMask);
+		min_value -= C0P5 / (scale * mSampleMask);
 
 		mOffset.SetY(mOffset.GetY() + mScale.GetY() * min_value);
 	}
@@ -557,7 +557,7 @@ HeightFieldShape::HeightFieldShape(const HeightFieldShapeSettings &inSettings, S
 		{
 			uint32 output_value;
 
-			float h = inSettings.mHeightSamples[y * mSampleCount + x];
+			decimal h = inSettings.mHeightSamples[y * mSampleCount + x];
 			if (h == cNoCollisionValue)
 			{
 				// No collision
@@ -574,9 +574,9 @@ HeightFieldShape::HeightFieldShape(const HeightFieldShapeSettings &inSettings, S
 				// Quantize to mBitsPerSample bits, note that mSampleMask is reserved for indicating that there's no collision.
 				// We divide the range into mSampleMask segments and use the mid points of these segments as the quantized values.
 				// This results in a lower error than if we had quantized our data using the lowest point of all these segments.
-				float h_min = min_value + range.mMin / scale;
-				float h_delta = float(range.mMax - range.mMin) / scale;
-				float quantized_height = floor((h - h_min) * float(mSampleMask) / h_delta);
+				decimal h_min = min_value + range.mMin / scale;
+				decimal h_delta = decimal(range.mMax - range.mMin) / scale;
+				decimal quantized_height = floor((h - h_min) * decimal(mSampleMask) / h_delta);
 				output_value = uint32(Clamp((int)quantized_height, 0, int(mSampleMask) - 1)); // mSampleMask is reserved as 'no collision value'
 			}
 
@@ -605,7 +605,7 @@ inline void HeightFieldShape::sGetRangeBlockOffsetAndStride(uint inNumBlocks, ui
 	outRangeBlockStride = inNumBlocks >> 1;
 }
 
-inline void HeightFieldShape::GetBlockOffsetAndScale(uint inBlockX, uint inBlockY, uint inRangeBlockOffset, uint inRangeBlockStride, float &outBlockOffset, float &outBlockScale) const
+inline void HeightFieldShape::GetBlockOffsetAndScale(uint inBlockX, uint inBlockY, uint inRangeBlockOffset, uint inRangeBlockStride, decimal &outBlockOffset, decimal &outBlockScale) const
 {
 	JPH_ASSERT(inBlockX < GetNumBlocks() && inBlockY < GetNumBlocks());
 
@@ -616,8 +616,8 @@ inline void HeightFieldShape::GetBlockOffsetAndScale(uint inBlockX, uint inBlock
 
 	// Calculate offset and scale
 	const RangeBlock &block = mRangeBlocks[inRangeBlockOffset + rby * inRangeBlockStride + rbx];
-	outBlockOffset = float(block.mMin[n]);
-	outBlockScale = float(block.mMax[n] - block.mMin[n]) / float(mSampleMask);
+	outBlockOffset = decimal(block.mMin[n]);
+	outBlockScale = decimal(block.mMax[n] - block.mMin[n]) / decimal(mSampleMask);
 }
 
 inline uint8 HeightFieldShape::GetHeightSample(uint inX, uint inY) const
@@ -637,21 +637,21 @@ inline uint8 HeightFieldShape::GetHeightSample(uint inX, uint inY) const
 	return uint8(height_sample >> bit_pos) & mSampleMask; 
 }
 
-inline Vec3 HeightFieldShape::GetPosition(uint inX, uint inY, float inBlockOffset, float inBlockScale, bool &outNoCollision) const
+inline Vec3 HeightFieldShape::GetPosition(uint inX, uint inY, decimal inBlockOffset, decimal inBlockScale, bool &outNoCollision) const
 { 
 	// Get quantized value
 	uint8 height_sample = GetHeightSample(inX, inY);
 	outNoCollision = height_sample == mSampleMask;
 
 	// Add 0.5 to the quantized value to minimize the error (see constructor)
-	return mOffset + mScale * Vec3(float(inX), inBlockOffset + (0.5f + height_sample) * inBlockScale, float(inY)); 
+	return mOffset + mScale * Vec3(decimal(inX), inBlockOffset + (C0P5 + height_sample) * inBlockScale, decimal(inY)); 
 }
 
 Vec3 HeightFieldShape::GetPosition(uint inX, uint inY) const
 {
 	// Test if there are any samples
 	if (mHeightSamples.empty())
-		return mOffset + mScale * Vec3(float(inX), 0.0f, float(inY));
+		return mOffset + mScale * Vec3(decimal(inX), C0, decimal(inY));
 
 	// Get block location
 	uint bx = inX / mBlockSize;
@@ -662,7 +662,7 @@ Vec3 HeightFieldShape::GetPosition(uint inX, uint inY) const
 	uint range_block_offset, range_block_stride;
 	sGetRangeBlockOffsetAndStride(num_blocks, sGetMaxLevel(num_blocks), range_block_offset, range_block_stride);
 
-	float offset, scale;
+	decimal offset, scale;
 	GetBlockOffsetAndScale(bx, by, range_block_offset, range_block_stride, offset, scale);
 
 	bool no_collision;
@@ -684,15 +684,15 @@ bool HeightFieldShape::ProjectOntoSurface(Vec3Arg inLocalPosition, Vec3 &outSurf
 	Vec3 integer_space = (inLocalPosition - mOffset) / mScale;
 
 	// Get x coordinate and fraction
-	float x_frac = integer_space.GetX();
-	if (x_frac < 0.0f || x_frac >= mSampleCount - 1)
+	decimal x_frac = integer_space.GetX();
+	if (x_frac < C0 || x_frac >= mSampleCount - 1)
 		return false;
 	uint x = (uint)floor(x_frac);
 	x_frac -= x;
 
 	// Get y coordinate and fraction
-	float y_frac = integer_space.GetZ();
-	if (y_frac < 0.0f || y_frac >= mSampleCount - 1)
+	decimal y_frac = integer_space.GetZ();
+	if (y_frac < C0 || y_frac >= mSampleCount - 1)
 		return false;
 	uint y = (uint)floor(y_frac);
 	y_frac -= y;
@@ -888,14 +888,14 @@ AABox HeightFieldShape::GetLocalBounds() const
 	if (mMinSample == cNoCollisionValue16)
 	{
 		// This whole height field shape doesn't have any collision, return the center point
-		Vec3 center = mOffset + 0.5f * mScale * Vec3(float(mSampleCount - 1), 0.0f, float(mSampleCount - 1));
+		Vec3 center = mOffset + C0P5 * mScale * Vec3(decimal(mSampleCount - 1), C0, decimal(mSampleCount - 1));
 		return AABox(center, center);
 	}
 	else
 	{
 		// Bounding box based on min and max sample height
-		Vec3 bmin = mOffset + mScale * Vec3(0.0f, float(mMinSample), 0.0f);
-		Vec3 bmax = mOffset + mScale * Vec3(float(mSampleCount - 1), float(mMaxSample), float(mSampleCount - 1));
+		Vec3 bmin = mOffset + mScale * Vec3(C0, decimal(mMinSample), C0);
+		Vec3 bmax = mOffset + mScale * Vec3(decimal(mSampleCount - 1), decimal(mMaxSample), decimal(mSampleCount - 1));
 		return AABox(bmin, bmax);
 	}
 }
@@ -945,7 +945,7 @@ void HeightFieldShape::Draw(DebugRenderer *inRenderer, RMat44Arg inCenterOfMassT
 								for (DebugRenderer::Vertex &v : out_tri->mV)
 								{
 									v.mColor = color;
-									v.mUV = Float2(0, 0);
+									v.mUV = Float2(C0, C0);
 									normal.StoreFloat3(&v.mNormal);
 								}
 
@@ -964,7 +964,7 @@ void HeightFieldShape::Draw(DebugRenderer *inRenderer, RMat44Arg inCenterOfMassT
 								for (DebugRenderer::Vertex &v : out_tri->mV)
 								{
 									v.mColor = color;
-									v.mUV = Float2(0, 0);
+									v.mUV = Float2(C0, C0);
 									normal.StoreFloat3(&v.mNormal);
 								}
 
@@ -1036,7 +1036,7 @@ void HeightFieldShape::Draw(DebugRenderer *inRenderer, RMat44Arg inCenterOfMassT
 
 					// Draw active edge as a green arrow, other edges as grey
 					if (active_edges & (1 << edge_idx))
-						mRenderer->DrawArrow(v1, v2, Color::sGreen, 0.01f);
+						mRenderer->DrawArrow(v1, v2, Color::sGreen, decimal(0.01f));
 					else
 						mRenderer->DrawLine(v1, v2, Color::sGrey);
 				}
@@ -1121,7 +1121,7 @@ public:
 				// Decompress vertices of block at (x, y)
 				Vec3 *dst_vertex = vertices;
 				bool *dst_no_collision = no_collision;
-				float block_offset, block_scale;
+				decimal block_offset, block_scale;
 				mShape->GetBlockOffsetAndScale(x, y, range_block_offset, range_block_stride, block_offset, block_scale);
 				for (uint32 v_y = min_y; v_y < max_y; ++v_y)
 				{
@@ -1421,7 +1421,7 @@ bool HeightFieldShape::CastRay(const RayCast &inRay, const SubShapeIDCreator &in
 
 		JPH_INLINE bool			ShouldAbort() const
 		{
-			return mHit.mFraction <= 0.0f;
+			return mHit.mFraction <= C0;
 		}
 
 		JPH_INLINE bool			ShouldVisitRangeBlock(int inStackTop) const
@@ -1440,7 +1440,7 @@ bool HeightFieldShape::CastRay(const RayCast &inRay, const SubShapeIDCreator &in
 
 		JPH_INLINE void			VisitTriangle(uint inX, uint inY, uint inTriangle, Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2) 
 		{			
-			float fraction = RayTriangle(mRayOrigin, mRayDirection, inV0, inV1, inV2);
+			decimal fraction = RayTriangle(mRayOrigin, mRayDirection, inV0, inV1, inV2);
 			if (fraction < mHit.mFraction)
 			{
 				// It's a closer hit
@@ -1457,7 +1457,7 @@ bool HeightFieldShape::CastRay(const RayCast &inRay, const SubShapeIDCreator &in
 		const HeightFieldShape *mShape;
 		SubShapeIDCreator		mSubShapeIDCreator;
 		bool					mReturnValue = false;
-		float					mDistanceStack[cStackSize];
+		decimal					mDistanceStack[cStackSize];
 	};
 
 	Visitor visitor(this, inRay, inSubShapeIDCreator, ioHit);
@@ -1509,11 +1509,11 @@ void HeightFieldShape::CastRay(const RayCast &inRay, const RayCastSettings &inRa
 		JPH_INLINE void			VisitTriangle(uint inX, uint inY, uint inTriangle, Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2) const
 		{			
 			// Back facing check
-			if (mBackFaceMode == EBackFaceMode::IgnoreBackFaces && (inV2 - inV0).Cross(inV1 - inV0).Dot(mRayDirection) < 0)
+			if (mBackFaceMode == EBackFaceMode::IgnoreBackFaces && (inV2 - inV0).Cross(inV1 - inV0).Dot(mRayDirection) < C0)
 				return;
 
 			// Check the triangle
-			float fraction = RayTriangle(mRayOrigin, mRayDirection, inV0, inV1, inV2);
+			decimal fraction = RayTriangle(mRayOrigin, mRayDirection, inV0, inV1, inV2);
 			if (fraction < mCollector.GetEarlyOutFraction())
 			{
 				RayCastResult hit;
@@ -1531,7 +1531,7 @@ void HeightFieldShape::CastRay(const RayCast &inRay, const RayCastSettings &inRa
 		EBackFaceMode			mBackFaceMode;
 		const HeightFieldShape *mShape;
 		SubShapeIDCreator		mSubShapeIDCreator;
-		float					mDistanceStack[cStackSize];
+		decimal					mDistanceStack[cStackSize];
 	};
 
 	Visitor visitor(this, inRay, inRayCastSettings, inSubShapeIDCreator, ioCollector);
@@ -1593,7 +1593,7 @@ void HeightFieldShape::sCastConvexVsHeightField(const ShapeCast &inShapeCast, co
 		Vec3						mBoxCenter;
 		Vec3						mBoxExtent;
 		SubShapeIDCreator			mSubShapeIDCreator2;
-		float						mDistanceStack[cStackSize];
+		decimal						mDistanceStack[cStackSize];
 	};
 
 	JPH_ASSERT(inShape->GetSubType() == EShapeSubType::HeightField);
@@ -1656,7 +1656,7 @@ void HeightFieldShape::sCastSphereVsHeightField(const ShapeCast &inShapeCast, co
 		const HeightFieldShape *	mShape2;
 		RayInvDirection				mInvDirection;
 		SubShapeIDCreator			mSubShapeIDCreator2;
-		float						mDistanceStack[cStackSize];
+		decimal						mDistanceStack[cStackSize];
 	};
 
 	JPH_ASSERT(inShape->GetSubType() == EShapeSubType::HeightField);

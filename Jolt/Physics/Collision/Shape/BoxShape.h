@@ -19,13 +19,13 @@ public:
 
 	/// Create a box with half edge length inHalfExtent and convex radius inConvexRadius.
 	/// (internally the convex radius will be subtracted from the half extent so the total box will not grow with the convex radius).
-							BoxShapeSettings(Vec3Arg inHalfExtent, float inConvexRadius = cDefaultConvexRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShapeSettings(inMaterial), mHalfExtent(inHalfExtent), mConvexRadius(inConvexRadius) { }
+							BoxShapeSettings(Vec3Arg inHalfExtent, decimal inConvexRadius = cDefaultConvexRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShapeSettings(inMaterial), mHalfExtent(inHalfExtent), mConvexRadius(inConvexRadius) { }
 
 	// See: ShapeSettings
 	virtual ShapeResult		Create() const override;
 
 	Vec3					mHalfExtent = Vec3::sZero();								///< Half the size of the box (including convex radius)
-	float					mConvexRadius = 0.0f;
+	decimal					mConvexRadius = C0;
 };
 
 /// A box, centered around the origin
@@ -40,7 +40,7 @@ public:
 
 	/// Create a box with half edge length inHalfExtent and convex radius inConvexRadius.
 	/// (internally the convex radius will be subtracted from the half extent so the total box will not grow with the convex radius).
-							BoxShape(Vec3Arg inHalfExtent, float inConvexRadius = cDefaultConvexRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShape(EShapeSubType::Box, inMaterial), mHalfExtent(inHalfExtent), mConvexRadius(inConvexRadius) { JPH_ASSERT(inConvexRadius >= 0.0f); JPH_ASSERT(inHalfExtent.ReduceMin() >= inConvexRadius); }
+							BoxShape(Vec3Arg inHalfExtent, decimal inConvexRadius = cDefaultConvexRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShape(EShapeSubType::Box, inMaterial), mHalfExtent(inHalfExtent), mConvexRadius(inConvexRadius) { JPH_ASSERT(inConvexRadius >= C0); JPH_ASSERT(inHalfExtent.ReduceMin() >= inConvexRadius); }
 
 	/// Get half extent of box
 	Vec3		 			GetHalfExtent() const										{ return mHalfExtent; }
@@ -49,7 +49,7 @@ public:
 	virtual AABox			GetLocalBounds() const override								{ return AABox(-mHalfExtent, mHalfExtent); }
 
 	// See Shape::GetInnerRadius
-	virtual float			GetInnerRadius() const override								{ return mHalfExtent.ReduceMin(); }
+	virtual decimal			GetInnerRadius() const override								{ return mHalfExtent.ReduceMin(); }
 
 	// See Shape::GetMassProperties
 	virtual MassProperties	GetMassProperties() const override;
@@ -88,10 +88,10 @@ public:
 	virtual Stats			GetStats() const override									{ return Stats(sizeof(*this), 12); }
 
 	// See Shape::GetVolume
-	virtual float			GetVolume() const override									{ return GetLocalBounds().GetVolume(); }
+	virtual decimal			GetVolume() const override									{ return GetLocalBounds().GetVolume(); }
 
 	/// Get the convex radius of this box
-	float					GetConvexRadius() const										{ return mConvexRadius; }
+	decimal					GetConvexRadius() const										{ return mConvexRadius; }
 
 	// Register shape functions with the registry
 	static void				sRegister();
@@ -105,7 +105,7 @@ private:
 	class					Box;
 
 	Vec3					mHalfExtent = Vec3::sZero();								///< Half the size of the box (including convex radius)
-	float					mConvexRadius = 0.0f;
+	decimal					mConvexRadius = C0;
 };
 
 JPH_NAMESPACE_END

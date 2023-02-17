@@ -81,7 +81,7 @@ void ScaledShape::GetSupportingFace(const SubShapeID &inSubShapeID, Vec3Arg inDi
 	mInnerShape->GetSupportingFace(inSubShapeID, inDirection, inScale * mScale, inCenterOfMassTransform, outVertices);
 }
 
-void ScaledShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const
+void ScaledShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const
 {
 	mInnerShape->GetSubmergedVolume(inCenterOfMassTransform, inScale * mScale, inSurface, outTotalVolume, outSubmergedVolume, outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, inBaseOffset));
 }
@@ -159,7 +159,7 @@ void ScaledShape::RestoreBinaryState(StreamIn &inStream)
 	inStream.Read(mScale);
 }
 
-float ScaledShape::GetVolume() const
+decimal ScaledShape::GetVolume() const
 {
 	return abs(mScale.GetX() * mScale.GetY() * mScale.GetZ()) * mInnerShape->GetVolume();
 }

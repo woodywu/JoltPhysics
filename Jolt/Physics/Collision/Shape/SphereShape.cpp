@@ -39,7 +39,7 @@ SphereShape::SphereShape(const SphereShapeSettings &inSettings, ShapeResult &out
 	ConvexShape(EShapeSubType::Sphere, inSettings, outResult), 
 	mRadius(inSettings.mRadius) 
 { 
-	if (inSettings.mRadius <= 0.0f)
+	if (inSettings.mRadius <= C0)
 	{
 		outResult.SetError("Invalid radius");
 		return;
@@ -48,7 +48,7 @@ SphereShape::SphereShape(const SphereShapeSettings &inSettings, ShapeResult &out
 	outResult.Set(this);
 }
 
-float SphereShape::GetScaledRadius(Vec3Arg inScale) const
+decimal SphereShape::GetScaledRadius(Vec3Arg inScale) const
 {
 	JPH_ASSERT(IsValidScale(inScale));
 
@@ -64,7 +64,7 @@ AABox SphereShape::GetLocalBounds() const
 		
 AABox SphereShape::GetWorldSpaceBounds(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale) const
 { 
-	float scaled_radius = GetScaledRadius(inScale);
+	decimal scaled_radius = GetScaledRadius(inScale);
 	Vec3 half_extent = Vec3::sReplicate(scaled_radius);
 	AABox bounds(-half_extent, half_extent); 
 	bounds.Translate(inCenterOfMassTransform.GetTranslation()); 
@@ -74,7 +74,7 @@ AABox SphereShape::GetWorldSpaceBounds(Mat44Arg inCenterOfMassTransform, Vec3Arg
 class SphereShape::SphereNoConvex final : public Support
 {
 public:
-	explicit		SphereNoConvex(float inRadius) :
+	explicit		SphereNoConvex(decimal inRadius) :
 		mRadius(inRadius)
 	{ 
 		static_assert(sizeof(SphereNoConvex) <= sizeof(SupportBuffer), "Buffer size too small"); 
@@ -86,19 +86,19 @@ public:
 		return Vec3::sZero();
 	}
 
-	virtual float	GetConvexRadius() const override
+	virtual decimal	GetConvexRadius() const override
 	{
 		return mRadius;
 	}
 
 private:
-	float			mRadius;
+	decimal			mRadius;
 };
 
 class SphereShape::SphereWithConvex final : public Support
 {
 public:
-	explicit		SphereWithConvex(float inRadius) :
+	explicit		SphereWithConvex(decimal inRadius) :
 		mRadius(inRadius)
 	{ 
 		static_assert(sizeof(SphereWithConvex) <= sizeof(SupportBuffer), "Buffer size too small"); 
@@ -107,22 +107,22 @@ public:
 
 	virtual Vec3	GetSupport(Vec3Arg inDirection) const override
 	{ 
-		float len = inDirection.Length();
-		return len > 0.0f? (mRadius / len) * inDirection : Vec3::sZero();
+		decimal len = inDirection.Length();
+		return len > C0? (mRadius / len) * inDirection : Vec3::sZero();
 	}
 
-	virtual float	GetConvexRadius() const override
+	virtual decimal	GetConvexRadius() const override
 	{
-		return 0.0f;
+		return C0;
 	}
 
 private:
-	float			mRadius;
+	decimal			mRadius;
 };
 
 const ConvexShape::Support *SphereShape::GetSupportFunction(ESupportMode inMode, SupportBuffer &inBuffer, Vec3Arg inScale) const
 {
-	float scaled_radius = GetScaledRadius(inScale);
+	decimal scaled_radius = GetScaledRadius(inScale);
 
 	switch (inMode)
 	{
@@ -142,11 +142,11 @@ MassProperties SphereShape::GetMassProperties() const
 	MassProperties p;
 
 	// Calculate mass
-	float r2 = mRadius * mRadius;
-	p.mMass = (4.0f / 3.0f * JPH_PI) * mRadius * r2 * GetDensity();
+	decimal r2 = mRadius * mRadius;
+	p.mMass = (decimal(4.0f) / C3 * JPH_PI) * mRadius * r2 * GetDensity();
 
 	// Calculate inertia
-	float inertia = (2.0f / 5.0f) * p.mMass * r2;
+	decimal inertia = (C2 / decimal(5.0f)) * p.mMass * r2;
 	p.mInertia = Mat44::sScale(inertia);
 
 	return p;
@@ -156,20 +156,20 @@ Vec3 SphereShape::GetSurfaceNormal(const SubShapeID &inSubShapeID, Vec3Arg inLoc
 { 
 	JPH_ASSERT(inSubShapeID.IsEmpty(), "Invalid subshape ID"); 
 
-	float len = inLocalSurfacePosition.Length(); 
-	return len != 0.0f? inLocalSurfacePosition / len : Vec3::sAxisY();
+	decimal len = inLocalSurfacePosition.Length(); 
+	return len != C0? inLocalSurfacePosition / len : Vec3::sAxisY();
 }
 
-void SphereShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const
+void SphereShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const
 {
-	float scaled_radius = GetScaledRadius(inScale);
-	outTotalVolume = (4.0f / 3.0f * JPH_PI) * Cubed(scaled_radius);
+	decimal scaled_radius = GetScaledRadius(inScale);
+	outTotalVolume = (decimal(4.0f) / C3 * JPH_PI) * Cubed(scaled_radius);
 
-	float distance_to_surface = inSurface.SignedDistance(inCenterOfMassTransform.GetTranslation());
+	decimal distance_to_surface = inSurface.SignedDistance(inCenterOfMassTransform.GetTranslation());
 	if (distance_to_surface >= scaled_radius)
 	{
 		// Above surface
-		outSubmergedVolume = 0.0f;
+		outSubmergedVolume = C0;
 		outCenterOfBuoyancy = Vec3::sZero();
 	}
 	else if (distance_to_surface <= -scaled_radius)
@@ -183,11 +183,11 @@ void SphereShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg i
 		// Intersecting surface
 
 		// Calculate submerged volume, see: https://en.wikipedia.org/wiki/Spherical_cap
-		float h = scaled_radius - distance_to_surface;
-		outSubmergedVolume = (JPH_PI / 3.0f) * Square(h) * (3.0f * scaled_radius - h);
+		decimal h = scaled_radius - distance_to_surface;
+		outSubmergedVolume = (JPH_PI / C3) * Square(h) * (C3 * scaled_radius - h);
 
 		// Calculate center of buoyancy, see: http://mathworld.wolfram.com/SphericalCap.html (eq 10)
-		float z = (3.0f / 4.0f) * Square(2.0f * scaled_radius - h) / (3.0f * scaled_radius - h);
+		decimal z = (C3 / decimal(4.0f)) * Square(C2 * scaled_radius - h) / (C3 * scaled_radius - h);
 		outCenterOfBuoyancy = inCenterOfMassTransform.GetTranslation() - z * inSurface.GetNormal(); // Negative normal since we want the portion under the water
 
 	#ifdef JPH_DEBUG_RENDERER
@@ -195,7 +195,7 @@ void SphereShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg i
 		if (sDrawSubmergedVolumes)
 		{
 			Vec3 circle_center = inCenterOfMassTransform.GetTranslation() - distance_to_surface * inSurface.GetNormal();
-			float circle_radius = sqrt(Square(scaled_radius) - Square(distance_to_surface));
+			decimal circle_radius = sqrt(Square(scaled_radius) - Square(distance_to_surface));
 			DebugRenderer::sInstance->DrawPie(inBaseOffset + circle_center, circle_radius, inSurface.GetNormal(), inSurface.GetNormal().GetNormalizedPerpendicular(), -JPH_PI, JPH_PI, Color::sGreen, DebugRenderer::ECastShadow::Off);
 		}
 	#endif // JPH_DEBUG_RENDERER
@@ -204,7 +204,7 @@ void SphereShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg i
 #ifdef JPH_DEBUG_RENDERER
 	// Draw center of buoyancy
 	if (sDrawSubmergedVolumes)
-		DebugRenderer::sInstance->DrawWireSphere(inBaseOffset + outCenterOfBuoyancy, 0.05f, Color::sRed, 1);
+		DebugRenderer::sInstance->DrawWireSphere(inBaseOffset + outCenterOfBuoyancy, decimal(0.05f), Color::sRed, 1);
 #endif // JPH_DEBUG_RENDERER
 }
 
@@ -218,7 +218,7 @@ void SphereShape::Draw(DebugRenderer *inRenderer, RMat44Arg inCenterOfMassTransf
 
 bool SphereShape::CastRay(const RayCast &inRay, const SubShapeIDCreator &inSubShapeIDCreator, RayCastResult &ioHit) const
 {
-	float fraction = RaySphere(inRay.mOrigin, inRay.mDirection, Vec3::sZero(), mRadius);
+	decimal fraction = RaySphere(inRay.mOrigin, inRay.mDirection, Vec3::sZero(), mRadius);
 	if (fraction < ioHit.mFraction)
 	{
 		ioHit.mFraction = fraction;
@@ -234,10 +234,10 @@ void SphereShape::CastRay(const RayCast &inRay, const RayCastSettings &inRayCast
 	if (!inShapeFilter.ShouldCollide(inSubShapeIDCreator.GetID()))
 		return;
 
-	float min_fraction, max_fraction;
+	decimal min_fraction, max_fraction;
 	int num_results = RaySphere(inRay.mOrigin, inRay.mDirection, Vec3::sZero(), mRadius, min_fraction, max_fraction);
 	if (num_results > 0 // Ray should intersect
-		&& max_fraction >= 0.0f // End of ray should be inside sphere
+		&& max_fraction >= C0 // End of ray should be inside sphere
 		&& min_fraction < ioCollector.GetEarlyOutFraction()) // Start of ray should be before early out fraction
 	{
 		// Better hit than the current hit
@@ -246,9 +246,9 @@ void SphereShape::CastRay(const RayCast &inRay, const RayCastSettings &inRayCast
 		hit.mSubShapeID2 = inSubShapeIDCreator.GetID();
 
 		// Check front side hit
-		if (inRayCastSettings.mTreatConvexAsSolid || min_fraction > 0.0f)
+		if (inRayCastSettings.mTreatConvexAsSolid || min_fraction > C0)
 		{
-			hit.mFraction = max(0.0f, min_fraction);
+			hit.mFraction = max(C0, min_fraction);
 			ioCollector.AddHit(hit);
 		}
 
@@ -284,8 +284,8 @@ void SphereShape::TransformShape(Mat44Arg inCenterOfMassTransform, TransformedSh
 
 void SphereShape::GetTrianglesStart(GetTrianglesContext &ioContext, const AABox &inBox, Vec3Arg inPositionCOM, QuatArg inRotation, Vec3Arg inScale) const
 {
-	float scaled_radius = GetScaledRadius(inScale);
-	new (&ioContext) GetTrianglesContextVertexList(inPositionCOM, inRotation, Vec3::sReplicate(1.0f), Mat44::sScale(scaled_radius), sUnitSphereTriangles.data(), sUnitSphereTriangles.size(), GetMaterial());
+	decimal scaled_radius = GetScaledRadius(inScale);
+	new (&ioContext) GetTrianglesContextVertexList(inPositionCOM, inRotation, Vec3::sReplicate(C1), Mat44::sScale(scaled_radius), sUnitSphereTriangles.data(), sUnitSphereTriangles.size(), GetMaterial());
 }
 
 int SphereShape::GetTrianglesNext(GetTrianglesContext &ioContext, int inMaxTrianglesRequested, Float3 *outTriangleVertices, const PhysicsMaterial **outMaterials) const

@@ -19,14 +19,14 @@ public:
 
 	/// Create a shape centered around the origin with one top at (0, -inHalfHeight, 0) and the other at (0, inHalfHeight, 0) and radius inRadius.
 	/// (internally the convex radius will be subtracted from the cylinder the total cylinder will not grow with the convex radius, but the edges of the cylinder will be rounded a bit).
-							CylinderShapeSettings(float inHalfHeight, float inRadius, float inConvexRadius = cDefaultConvexRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShapeSettings(inMaterial), mHalfHeight(inHalfHeight), mRadius(inRadius), mConvexRadius(inConvexRadius) { }
+							CylinderShapeSettings(decimal inHalfHeight, decimal inRadius, decimal inConvexRadius = cDefaultConvexRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShapeSettings(inMaterial), mHalfHeight(inHalfHeight), mRadius(inRadius), mConvexRadius(inConvexRadius) { }
 
 	// See: ShapeSettings
 	virtual ShapeResult		Create() const override;
 
-	float					mHalfHeight = 0.0f;
-	float					mRadius = 0.0f;
-	float					mConvexRadius = 0.0f;
+	decimal					mHalfHeight = C0;
+	decimal					mRadius = C0;
+	decimal					mConvexRadius = C0;
 };
 
 /// A cylinder
@@ -41,19 +41,19 @@ public:
 
 	/// Create a shape centered around the origin with one top at (0, -inHalfHeight, 0) and the other at (0, inHalfHeight, 0) and radius inRadius.
 	/// (internally the convex radius will be subtracted from the cylinder the total cylinder will not grow with the convex radius, but the edges of the cylinder will be rounded a bit).
-							CylinderShape(float inHalfHeight, float inRadius, float inConvexRadius = cDefaultConvexRadius, const PhysicsMaterial *inMaterial = nullptr);
+							CylinderShape(decimal inHalfHeight, decimal inRadius, decimal inConvexRadius = cDefaultConvexRadius, const PhysicsMaterial *inMaterial = nullptr);
 
 	/// Get half height of cylinder
-	float					GetHalfHeight() const														{ return mHalfHeight; }
+	decimal					GetHalfHeight() const														{ return mHalfHeight; }
 
 	/// Get radius of cylinder
-	float					GetRadius() const															{ return mRadius; }
+	decimal					GetRadius() const															{ return mRadius; }
 
 	// See Shape::GetLocalBounds
 	virtual AABox			GetLocalBounds() const override;
 
 	// See Shape::GetInnerRadius
-	virtual float			GetInnerRadius() const override												{ return min(mHalfHeight, mRadius); }
+	virtual decimal			GetInnerRadius() const override												{ return min(mHalfHeight, mRadius); }
 
 	// See Shape::GetMassProperties
 	virtual MassProperties	GetMassProperties() const override;
@@ -95,10 +95,10 @@ public:
 	virtual Stats			GetStats() const override												{ return Stats(sizeof(*this), 0); }
 
 	// See Shape::GetVolume
-	virtual float			GetVolume() const override												{ return 2.0f * JPH_PI * mHalfHeight * Square(mRadius); }
+	virtual decimal			GetVolume() const override												{ return C2 * JPH_PI * mHalfHeight * Square(mRadius); }
 
 	/// Get the convex radius of this cylinder
-	float					GetConvexRadius() const													{ return mConvexRadius; }
+	decimal					GetConvexRadius() const													{ return mConvexRadius; }
 
 	// See Shape::IsValidScale
 	virtual bool			IsValidScale(Vec3Arg inScale) const override;
@@ -114,9 +114,9 @@ private:
 	// Class for GetSupportFunction
 	class					Cylinder;
 
-	float					mHalfHeight = 0.0f;
-	float					mRadius = 0.0f;
-	float					mConvexRadius = 0.0f;
+	decimal					mHalfHeight = C0;
+	decimal					mRadius = C0;
+	decimal					mConvexRadius = C0;
 };
 
 JPH_NAMESPACE_END

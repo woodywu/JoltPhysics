@@ -16,19 +16,19 @@ class CapsuleShapeSettings final : public ConvexShapeSettings
 							CapsuleShapeSettings() = default;
 
 	/// Create a capsule centered around the origin with one sphere cap at (0, -inHalfHeightOfCylinder, 0) and the other at (0, inHalfHeightOfCylinder, 0)
-							CapsuleShapeSettings(float inHalfHeightOfCylinder, float inRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShapeSettings(inMaterial), mRadius(inRadius), mHalfHeightOfCylinder(inHalfHeightOfCylinder) { }
+							CapsuleShapeSettings(decimal inHalfHeightOfCylinder, decimal inRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShapeSettings(inMaterial), mRadius(inRadius), mHalfHeightOfCylinder(inHalfHeightOfCylinder) { }
 
 	/// Check if this is a valid capsule shape
-	bool					IsValid() const															{ return mRadius > 0.0f && mHalfHeightOfCylinder >= 0.0f; }
+	bool					IsValid() const															{ return mRadius > C0 && mHalfHeightOfCylinder >= C0; }
 
 	/// Checks if the settings of this capsule make this shape a sphere
-	bool					IsSphere() const														{ return mHalfHeightOfCylinder == 0.0f; }
+	bool					IsSphere() const														{ return mHalfHeightOfCylinder == C0; }
 
 	// See: ShapeSettings
 	virtual ShapeResult		Create() const override;
 
-	float					mRadius = 0.0f;
-	float					mHalfHeightOfCylinder = 0.0f;
+	decimal					mRadius = C0;
+	decimal					mHalfHeightOfCylinder = C0;
 };
 
 /// A capsule, implemented as a line segment with convex radius
@@ -42,13 +42,13 @@ public:
 							CapsuleShape(const CapsuleShapeSettings &inSettings, ShapeResult &outResult);
 
 	/// Create a capsule centered around the origin with one sphere cap at (0, -inHalfHeightOfCylinder, 0) and the other at (0, inHalfHeightOfCylinder, 0)
-							CapsuleShape(float inHalfHeightOfCylinder, float inRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShape(EShapeSubType::Capsule, inMaterial), mRadius(inRadius), mHalfHeightOfCylinder(inHalfHeightOfCylinder) { JPH_ASSERT(inHalfHeightOfCylinder > 0.0f); JPH_ASSERT(inRadius > 0.0f); }
+							CapsuleShape(decimal inHalfHeightOfCylinder, decimal inRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShape(EShapeSubType::Capsule, inMaterial), mRadius(inRadius), mHalfHeightOfCylinder(inHalfHeightOfCylinder) { JPH_ASSERT(inHalfHeightOfCylinder > C0); JPH_ASSERT(inRadius > C0); }
 
 	/// Radius of the cylinder
-	float					GetRadius() const														{ return mRadius; }
+	decimal					GetRadius() const														{ return mRadius; }
 
 	/// Get half of the height of the cylinder
-	float					GetHalfHeightOfCylinder() const											{ return mHalfHeightOfCylinder; }
+	decimal					GetHalfHeightOfCylinder() const											{ return mHalfHeightOfCylinder; }
 
 	// See Shape::GetLocalBounds
 	virtual AABox			GetLocalBounds() const override;
@@ -58,7 +58,7 @@ public:
 	using Shape::GetWorldSpaceBounds;
 
 	// See Shape::GetInnerRadius
-	virtual float			GetInnerRadius() const override											{ return mRadius; }
+	virtual decimal			GetInnerRadius() const override											{ return mRadius; }
 
 	// See Shape::GetMassProperties
 	virtual MassProperties	GetMassProperties() const override;
@@ -100,7 +100,7 @@ public:
 	virtual Stats			GetStats() const override												{ return Stats(sizeof(*this), 0); }
 
 	// See Shape::GetVolume
-	virtual float			GetVolume() const override												{ return 4.0f / 3.0f * JPH_PI * Cubed(mRadius) + 2.0f * JPH_PI * mHalfHeightOfCylinder * Square(mRadius); }
+	virtual decimal			GetVolume() const override												{ return decimal(4.0f) / C3 * JPH_PI * Cubed(mRadius) + C2 * JPH_PI * mHalfHeightOfCylinder * Square(mRadius); }
 
 	// See Shape::IsValidScale
 	virtual bool			IsValidScale(Vec3Arg inScale) const override;
@@ -117,8 +117,8 @@ private:
 	class					CapsuleNoConvex;
 	class					CapsuleWithConvex;
 
-	float					mRadius = 0.0f;
-	float					mHalfHeightOfCylinder = 0.0f;
+	decimal					mRadius = C0;
+	decimal					mHalfHeightOfCylinder = C0;
 };
 
 JPH_NAMESPACE_END

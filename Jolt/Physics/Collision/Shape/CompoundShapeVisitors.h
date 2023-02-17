@@ -31,7 +31,7 @@ struct CompoundShape::CastRayVisitor
 	/// Returns true when collision detection should abort because it's not possible to find a better hit
 	JPH_INLINE bool		ShouldAbort() const
 	{
-		return mHit.mFraction <= 0.0f;
+		return mHit.mFraction <= C0;
 	}
 
 	/// Test ray against 4 bounding boxes and returns the distance where the ray enters the bounding box

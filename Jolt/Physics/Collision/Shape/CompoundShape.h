@@ -70,7 +70,7 @@ public:
 	using Shape::GetWorldSpaceBounds;
 
 	// See Shape::GetInnerRadius
-	virtual float					GetInnerRadius() const override							{ return mInnerRadius; }
+	virtual decimal					GetInnerRadius() const override							{ return mInnerRadius; }
 
 	// See Shape::GetMassProperties
 	virtual MassProperties			GetMassProperties() const override;
@@ -91,7 +91,7 @@ public:
 	virtual void					GetSupportingFace(const SubShapeID &inSubShapeID, Vec3Arg inDirection, Vec3Arg inScale, Mat44Arg inCenterOfMassTransform, SupportingFace &outVertices) const override;
 
 	// See Shape::GetSubmergedVolume
-	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override;
+	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override;
 
 #ifdef JPH_DEBUG_RENDERER
 	// See Shape::Draw
@@ -289,7 +289,7 @@ public:
 	virtual Stats					GetStatsRecursive(VisitedShapes &ioVisitedShapes) const override;
 
 	// See Shape::GetVolume
-	virtual float					GetVolume() const override;
+	virtual decimal					GetVolume() const override;
 
 	// See Shape::IsValidScale
 	virtual bool					IsValidScale(Vec3Arg inScale) const override;
@@ -322,7 +322,7 @@ protected:
 	/// Determine the inner radius of this shape
 	inline void						CalculateInnerRadius()
 	{
-		mInnerRadius = FLT_MAX;
+		mInnerRadius = FIX_MAX;
 		for (const SubShape &s : mSubShapes)
 			mInnerRadius = min(mInnerRadius, s.mShape->GetInnerRadius());
 	}
@@ -330,7 +330,7 @@ protected:
 	Vec3							mCenterOfMass { Vec3::sZero() };						///< Center of mass of the compound
 	AABox							mLocalBounds;
 	SubShapes						mSubShapes;
-	float							mInnerRadius = FLT_MAX;									///< Smallest radius of GetInnerRadius() of child shapes
+	decimal							mInnerRadius = FIX_MAX;									///< Smallest radius of GetInnerRadius() of child shapes
 
 private:
 	// Helper functions called by CollisionDispatch

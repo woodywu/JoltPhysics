@@ -87,15 +87,15 @@ public:
 	/// Helper function that creates an open cyclinder of half height 1 and radius 1
 	static void		sCreateUnitOpenCylinder(std::vector<Vec3> &ioVertices, int inDetailLevel)
 	{
-		const Vec3 bottom_offset(0.0f, -2.0f, 0.0f);
+		const Vec3 bottom_offset(C0, -C2, C0);
 		int num_verts = 4 * (1 << inDetailLevel);
 		for (int i = 0; i < num_verts; ++i)
 		{
-			float angle1 = 2.0f * JPH_PI * (float(i) / num_verts);
-			float angle2 = 2.0f * JPH_PI * (float(i + 1) / num_verts);
+			decimal angle1 = C2 * JPH_PI * (decimal(i) / num_verts);
+			decimal angle2 = C2 * JPH_PI * (decimal(i + 1) / num_verts);
 
-			Vec3 t1(Sin(angle1), 1.0f, Cos(angle1));
-			Vec3 t2(Sin(angle2), 1.0f, Cos(angle2));
+			Vec3 t1(fpm::sin(angle1), C1, fpm::cos(angle1));
+			Vec3 t2(fpm::sin(angle2), C1, fpm::cos(angle2));
 			Vec3 b1 = t1 + bottom_offset;
 			Vec3 b2 = t2 + bottom_offset;
 

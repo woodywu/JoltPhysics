@@ -623,7 +623,7 @@ void MeshShape::Draw(DebugRenderer *inRenderer, RMat44Arg inCenterOfMassTransfor
 
 						// Draw active edge as a green arrow, other edges as grey
 						if (*f & (1 << (edge_idx + FLAGS_ACTIVE_EGDE_SHIFT)))
-							mRenderer->DrawArrow(v1, v2, Color::sGreen, 0.01f);
+							mRenderer->DrawArrow(v1, v2, Color::sGreen, decimal(0.01f));
 						else
 							mRenderer->DrawLine(v1, v2, Color::sGrey);
 					}
@@ -653,7 +653,7 @@ bool MeshShape::CastRay(const RayCast &inRay, const SubShapeIDCreator &inSubShap
 
 		JPH_INLINE bool		ShouldAbort() const
 		{
-			return mHit.mFraction <= 0.0f;
+			return mHit.mFraction <= C0;
 		}
 
 		JPH_INLINE bool		ShouldVisitNode(int inStackTop) const
@@ -674,7 +674,7 @@ bool MeshShape::CastRay(const RayCast &inRay, const SubShapeIDCreator &inSubShap
 		{
 			// Test against triangles
 			uint32 triangle_idx;
-			float fraction = ioContext.TestRay(mRayOrigin, mRayDirection, inTriangles, inNumTriangles, mHit.mFraction, triangle_idx);
+			decimal fraction = ioContext.TestRay(mRayOrigin, mRayDirection, inTriangles, inNumTriangles, mHit.mFraction, triangle_idx);
 			if (fraction < mHit.mFraction)
 			{
 				mHit.mFraction = fraction;
@@ -690,7 +690,7 @@ bool MeshShape::CastRay(const RayCast &inRay, const SubShapeIDCreator &inSubShap
 		uint				mTriangleBlockIDBits;
 		SubShapeIDCreator	mSubShapeIDCreator;
 		bool				mReturnValue = false;
-		float				mDistanceStack[NodeCodec::StackSize];
+		decimal				mDistanceStack[NodeCodec::StackSize];
 	};
 
 	Visitor visitor(ioHit);
@@ -741,11 +741,11 @@ void MeshShape::CastRay(const RayCast &inRay, const RayCastSettings &inRayCastSe
 		JPH_INLINE void		VisitTriangle(Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2, [[maybe_unused]] uint8 inActiveEdges, SubShapeID inSubShapeID2) 
 		{
 			// Back facing check
-			if (mBackFaceMode == EBackFaceMode::IgnoreBackFaces && (inV2 - inV0).Cross(inV1 - inV0).Dot(mRayDirection) < 0)
+			if (mBackFaceMode == EBackFaceMode::IgnoreBackFaces && (inV2 - inV0).Cross(inV1 - inV0).Dot(mRayDirection) < C0)
 				return;
 
 			// Check the triangle
-			float fraction = RayTriangle(mRayOrigin, mRayDirection, inV0, inV1, inV2);
+			decimal fraction = RayTriangle(mRayOrigin, mRayDirection, inV0, inV1, inV2);
 			if (fraction < mCollector.GetEarlyOutFraction())
 			{
 				RayCastResult hit;
@@ -761,7 +761,7 @@ void MeshShape::CastRay(const RayCast &inRay, const RayCastSettings &inRayCastSe
 		Vec3				mRayDirection;
 		RayInvDirection		mRayInvDirection;
 		EBackFaceMode		mBackFaceMode;
-		float				mDistanceStack[NodeCodec::StackSize];
+		decimal				mDistanceStack[NodeCodec::StackSize];
 	};
 
 	Visitor visitor(ioCollector);
@@ -800,7 +800,7 @@ void MeshShape::CollidePoint(Vec3Arg inPoint, const SubShapeIDCreator &inSubShap
 		settings.mBackFaceMode = EBackFaceMode::CollideWithBackFaces;
 
 		// Cast a ray that's 10% longer than the heigth of our bounding box
-		CastRay(RayCast { inPoint, 1.1f * bounds.GetSize().GetY() * Vec3::sAxisY() }, settings, inSubShapeIDCreator, collector, inShapeFilter);
+		CastRay(RayCast { inPoint, decimal(1.1f) * bounds.GetSize().GetY() * Vec3::sAxisY() }, settings, inSubShapeIDCreator, collector, inShapeFilter);
 
 		// Odd amount of hits means inside
 		if ((collector.mHitCount & 1) == 1)
@@ -850,7 +850,7 @@ void MeshShape::sCastConvexVsMesh(const ShapeCast &inShapeCast, const ShapeCastS
 		RayInvDirection		mInvDirection;
 		Vec3				mBoxCenter;
 		Vec3				mBoxExtent;
-		float				mDistanceStack[NodeCodec::StackSize];
+		decimal				mDistanceStack[NodeCodec::StackSize];
 	};
 
 	JPH_ASSERT(inShape->GetSubType() == EShapeSubType::Mesh);
@@ -903,7 +903,7 @@ void MeshShape::sCastSphereVsMesh(const ShapeCast &inShapeCast, const ShapeCastS
 		}
 
 		RayInvDirection		mInvDirection;
-		float				mDistanceStack[NodeCodec::StackSize];
+		decimal				mDistanceStack[NodeCodec::StackSize];
 	};
 
 	JPH_ASSERT(inShape->GetSubType() == EShapeSubType::Mesh);

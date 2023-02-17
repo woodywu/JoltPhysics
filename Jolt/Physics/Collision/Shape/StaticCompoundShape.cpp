@@ -88,8 +88,8 @@ void StaticCompoundShape::sPartition(uint *ioBodyIdx, AABox *ioBounds, int inNum
 	}
 
 	// Calculate bounding box of box centers
-	Vec3 center_min = Vec3::sReplicate(FLT_MAX);
-	Vec3 center_max = Vec3::sReplicate(-FLT_MAX);
+	Vec3 center_min = Vec3::sReplicate(FIX_MAX);
+	Vec3 center_max = Vec3::sReplicate(FIX_MIN);
 	for (const AABox *b = ioBounds, *b_end = ioBounds + inNumber; b < b_end; ++b)
 	{
 		Vec3 center = b->GetCenter();
@@ -99,7 +99,7 @@ void StaticCompoundShape::sPartition(uint *ioBodyIdx, AABox *ioBounds, int inNum
 
 	// Calculate split plane
 	int dimension = (center_max - center_min).GetHighestComponentIndex();
-	float split = 0.5f * (center_min + center_max)[dimension];
+	decimal split = C0P5 * (center_min + center_max)[dimension];
 
 	// Divide bodies
 	int start = 0, end = inNumber;
@@ -171,7 +171,7 @@ StaticCompoundShape::StaticCompoundShape(const StaticCompoundShapeSettings &inSe
 	}
 
 	// Keep track of total mass to calculate center of mass
-	float mass = 0.0f;
+	decimal mass = C0;
 
 	mSubShapes.resize(num_subshapes);
 	for (uint i = 0; i < num_subshapes; ++i)
@@ -191,7 +191,7 @@ StaticCompoundShape::StaticCompoundShape(const StaticCompoundShapeSettings &inSe
 		mCenterOfMass += out_shape.GetPositionCOM() * child.mMass;
 	}
 
-	if (mass > 0.0f)
+	if (mass > C0)
 		mCenterOfMass /= mass;
 
 	// Cache the inner radius as it can take a while to recursively iterate over all sub shapes
@@ -215,7 +215,7 @@ StaticCompoundShape::StaticCompoundShape(const StaticCompoundShapeSettings &inSe
 
 		// Transform the shape's bounds into our local space
 		Mat44 transform = Mat44::sRotationTranslation(shape.GetRotation(), shape.GetPositionCOM());
-		AABox shape_bounds = shape.mShape->GetWorldSpaceBounds(transform, Vec3::sReplicate(1.0f));
+		AABox shape_bounds = shape.mShape->GetWorldSpaceBounds(transform, Vec3::sReplicate(C1));
 
 		// Store bounds and body index for tree construction
 		bounds[i] = shape_bounds;
@@ -427,7 +427,7 @@ bool StaticCompoundShape::CastRay(const RayCast &inRay, const SubShapeIDCreator 
 			return SortReverseAndStore(distance, mHit.mFraction, ioProperties, &mDistanceStack[inStackTop]);
 		}
 
-		float				mDistanceStack[cStackSize];
+		decimal				mDistanceStack[cStackSize];
 	};
 
 	Visitor visitor(inRay, this, inSubShapeIDCreator, ioHit);
@@ -461,7 +461,7 @@ void StaticCompoundShape::CastRay(const RayCast &inRay, const RayCastSettings &i
 			return SortReverseAndStore(distance, mCollector.GetEarlyOutFraction(), ioProperties, &mDistanceStack[inStackTop]);
 		}
 
-		float				mDistanceStack[cStackSize];
+		decimal				mDistanceStack[cStackSize];
 	};
 
 	Visitor visitor(inRay, inRayCastSettings, this, inSubShapeIDCreator, ioCollector, inShapeFilter);
@@ -515,7 +515,7 @@ void StaticCompoundShape::sCastShapeVsCompound(const ShapeCast &inShapeCast, con
 			return SortReverseAndStore(distance, mCollector.GetEarlyOutFraction(), ioProperties, &mDistanceStack[inStackTop]);
 		}
 
-		float				mDistanceStack[cStackSize];
+		decimal				mDistanceStack[cStackSize];
 	};
 
 	JPH_ASSERT(inShape->GetSubType() == EShapeSubType::StaticCompound);

@@ -61,7 +61,7 @@ public:
 	using Shape::GetWorldSpaceBounds;
 
 	// See Shape::GetInnerRadius
-	virtual float					GetInnerRadius() const override							{ return mInnerShape->GetInnerRadius(); }
+	virtual decimal					GetInnerRadius() const override							{ return mInnerShape->GetInnerRadius(); }
 
 	// See Shape::GetMassProperties
 	virtual MassProperties			GetMassProperties() const override;
@@ -76,7 +76,7 @@ public:
 	virtual void					GetSupportingFace(const SubShapeID &inSubShapeID, Vec3Arg inDirection, Vec3Arg inScale, Mat44Arg inCenterOfMassTransform, SupportingFace &outVertices) const override;
 
 	// See Shape::GetSubmergedVolume
-	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override;
+	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override;
 
 #ifdef JPH_DEBUG_RENDERER
 	// See Shape::Draw
@@ -115,7 +115,7 @@ public:
 	virtual Stats					GetStats() const override								{ return Stats(sizeof(*this), 0); }
 
 	// See Shape::GetVolume
-	virtual float					GetVolume() const override								{ return mInnerShape->GetVolume(); }
+	virtual decimal					GetVolume() const override								{ return mInnerShape->GetVolume(); }
 
 	// See Shape::IsValidScale
 	virtual bool					IsValidScale(Vec3Arg inScale) const override;

@@ -23,11 +23,11 @@ public:
 	explicit						ConvexShapeSettings(const PhysicsMaterial *inMaterial)		: mMaterial(inMaterial) { }
 
 	/// Set the density of the object in kg / m^3
-	void							SetDensity(float inDensity)									{ mDensity = inDensity; }
+	void							SetDensity(decimal inDensity)									{ mDensity = inDensity; }
 
 	// Properties
 	RefConst<PhysicsMaterial>		mMaterial;													///< Material assigned to this shape
-	float							mDensity = 1000.0f;											///< Uniform density of the interior of the convex object (kg / m^3)
+	decimal							mDensity = decimal(1000.0f);											///< Uniform density of the interior of the convex object (kg / m^3)
 };
 
 /// Base class for all convex shapes. Defines a virtual interface.
@@ -61,7 +61,7 @@ public:
 	virtual int						GetTrianglesNext(GetTrianglesContext &ioContext, int inMaxTrianglesRequested, Float3 *outTriangleVertices, const PhysicsMaterial **outMaterials = nullptr) const override;
 
 	// See Shape::GetSubmergedVolume
-	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override;
+	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override;
 
 	/// Function that provides an interface for GJK
 	class Support
@@ -76,7 +76,7 @@ public:
 
 		/// Convex radius of shape. Collision detection on penetrating shapes is much more expensive, 
 		/// so you can add a radius around objects to increase the shape. This makes it far less likely that they will actually penetrate.
-		virtual float				GetConvexRadius() const = 0;
+		virtual decimal				GetConvexRadius() const = 0;
 	};
 
 	/// Buffer to hold a Support object, used to avoid dynamic memory allocations
@@ -104,10 +104,10 @@ public:
 	const PhysicsMaterial *			GetMaterial() const											{ return mMaterial != nullptr? mMaterial : PhysicsMaterial::sDefault; }
 
 	/// Set density of the shape (kg / m^3)
-	void							SetDensity(float inDensity)									{ mDensity = inDensity; }
+	void							SetDensity(decimal inDensity)									{ mDensity = inDensity; }
 
 	/// Get density of the shape (kg / m^3)
-	float							GetDensity() const											{ return mDensity; }
+	decimal							GetDensity() const											{ return mDensity; }
 
 #ifdef JPH_DEBUG_RENDERER
 	// See Shape::DrawGetSupportFunction
@@ -142,7 +142,7 @@ private:
 
 	// Properties
 	RefConst<PhysicsMaterial>		mMaterial;													///< Material assigned to this shape
-	float							mDensity = 1000.0f;											///< Uniform density of the interior of the convex object (kg / m^3)
+	decimal							mDensity = decimal(1000.0f);											///< Uniform density of the interior of the convex object (kg / m^3)
 };
 
 JPH_NAMESPACE_END

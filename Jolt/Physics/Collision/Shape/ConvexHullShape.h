@@ -23,16 +23,16 @@ public:
 
 	/// Create a convex hull from inPoints and maximum convex radius inMaxConvexRadius, the radius is automatically lowered if the hull requires it. 
 	/// (internally this will be subtracted so the total size will not grow with the convex radius).
-							ConvexHullShapeSettings(const Vec3 *inPoints, int inNumPoints, float inMaxConvexRadius = cDefaultConvexRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShapeSettings(inMaterial), mPoints(inPoints, inPoints + inNumPoints), mMaxConvexRadius(inMaxConvexRadius) { }
-							ConvexHullShapeSettings(const Array<Vec3> &inPoints, float inConvexRadius = cDefaultConvexRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShapeSettings(inMaterial), mPoints(inPoints), mMaxConvexRadius(inConvexRadius) { }
+							ConvexHullShapeSettings(const Vec3 *inPoints, int inNumPoints, decimal inMaxConvexRadius = cDefaultConvexRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShapeSettings(inMaterial), mPoints(inPoints, inPoints + inNumPoints), mMaxConvexRadius(inMaxConvexRadius) { }
+							ConvexHullShapeSettings(const Array<Vec3> &inPoints, decimal inConvexRadius = cDefaultConvexRadius, const PhysicsMaterial *inMaterial = nullptr) : ConvexShapeSettings(inMaterial), mPoints(inPoints), mMaxConvexRadius(inConvexRadius) { }
 
 	// See: ShapeSettings
 	virtual ShapeResult		Create() const override;
 	
 	Array<Vec3>				mPoints;															///< Points to create the hull from
-	float					mMaxConvexRadius = 0.0f;											///< Convex radius as supplied by the constructor. Note that during hull creation the convex radius can be made smaller if the value is too big for the hull.
-	float					mMaxErrorConvexRadius = 0.05f;										///< Maximum distance between the shrunk hull + convex radius and the actual hull.
-	float					mHullTolerance = 1.0e-3f;											///< Points are allowed this far outside of the hull (increasing this yields a hull with less vertices). Note that the actual used value can be larger if the points of the hull are far apart.
+	decimal					mMaxConvexRadius = C0;											///< Convex radius as supplied by the constructor. Note that during hull creation the convex radius can be made smaller if the value is too big for the hull.
+	decimal					mMaxErrorConvexRadius = decimal(0.05f);										///< Maximum distance between the shrunk hull + convex radius and the actual hull.
+	decimal					mHullTolerance = decimal(1.0e-3f);											///< Points are allowed this far outside of the hull (increasing this yields a hull with less vertices). Note that the actual used value can be larger if the points of the hull are far apart.
 };
 
 /// A convex hull
@@ -56,7 +56,7 @@ public:
 	virtual AABox			GetLocalBounds() const override										{ return mLocalBounds; }
 
 	// See Shape::GetInnerRadius
-	virtual float			GetInnerRadius() const override										{ return mInnerRadius; }
+	virtual decimal			GetInnerRadius() const override										{ return mInnerRadius; }
 
 	// See Shape::GetMassProperties
 	virtual MassProperties	GetMassProperties() const override;
@@ -71,7 +71,7 @@ public:
 	virtual const Support *	GetSupportFunction(ESupportMode inMode, SupportBuffer &inBuffer, Vec3Arg inScale) const override;
 
 	// See Shape::GetSubmergedVolume
-	virtual void			GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override;
+	virtual void			GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override;
 
 #ifdef JPH_DEBUG_RENDERER
 	// See Shape::Draw
@@ -101,10 +101,10 @@ public:
 	virtual Stats			GetStats() const override;
 
 	// See Shape::GetVolume
-	virtual float			GetVolume() const override											{ return mVolume; }
+	virtual decimal			GetVolume() const override											{ return mVolume; }
 
 	/// Get the convex radius of this convex hull
-	float					GetConvexRadius() const												{ return mConvexRadius; }
+	decimal					GetConvexRadius() const												{ return mConvexRadius; }
 
 	/// Get the planes of this convex hull
 	const Array<Plane> &	GetPlanes() const													{ return mPlanes; }
@@ -129,7 +129,7 @@ protected:
 
 private:
 	/// Helper function that returns the min and max fraction along the ray that hits the convex hull. Returns false if there is no hit.
-	bool					CastRayHelper(const RayCast &inRay, float &outMinFraction, float &outMaxFraction) const;
+	bool					CastRayHelper(const RayCast &inRay, decimal &outMinFraction, decimal &outMaxFraction) const;
 
 	/// Class for GetTrianglesStart/Next
 	class					CHSGetTrianglesContext;
@@ -165,9 +165,9 @@ private:
 	Array<Face>				mFaces;						///< Faces of the convex hull surface
 	Array<Plane>			mPlanes;					///< Planes for the faces (1-on-1 with mFaces array, separate because they need to be 16 byte aligned)
 	Array<uint8>			mVertexIdx;					///< A list of vertex indices (indexing in mPoints) for each of the faces
-	float					mConvexRadius = 0.0f;		///< Convex radius
-	float					mVolume;					///< Total volume of the convex hull
-	float					mInnerRadius = FLT_MAX;		///< Radius of the biggest sphere that fits entirely in the convex hull
+	decimal					mConvexRadius = C0;		///< Convex radius
+	decimal					mVolume;					///< Total volume of the convex hull
+	decimal					mInnerRadius = FLT_MAX;		///< Radius of the biggest sphere that fits entirely in the convex hull
 
 #ifdef JPH_DEBUG_RENDERER
 	mutable DebugRenderer::GeometryRef mGeometry;

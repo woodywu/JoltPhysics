@@ -51,7 +51,7 @@ TriangleShape::TriangleShape(const TriangleShapeSettings &inSettings, ShapeResul
 	mV3(inSettings.mV3), 
 	mConvexRadius(inSettings.mConvexRadius) 
 { 
-	if (inSettings.mConvexRadius < 0.0f)
+	if (inSettings.mConvexRadius < C0)
 	{
 		outResult.SetError("Invalid convex radius");
 		return;
@@ -99,9 +99,9 @@ public:
 		return mTriangleSuport.GetSupport(inDirection);
 	}
 
-	virtual float			GetConvexRadius() const override
+	virtual decimal			GetConvexRadius() const override
 	{
-		return 0.0f;
+		return C0;
 	}
 
 private:
@@ -111,7 +111,7 @@ private:
 class TriangleShape::TriangleWithConvex final : public Support
 {
 public:
-							TriangleWithConvex(Vec3Arg inV1, Vec3Arg inV2, Vec3Arg inV3, float inConvexRadius) :
+							TriangleWithConvex(Vec3Arg inV1, Vec3Arg inV2, Vec3Arg inV3, decimal inConvexRadius) :
 		mConvexRadius(inConvexRadius),
 		mTriangleSuport(inV1, inV2, inV3)
 	{ 
@@ -122,19 +122,19 @@ public:
 	virtual Vec3			GetSupport(Vec3Arg inDirection) const override
 	{ 
 		Vec3 support = mTriangleSuport.GetSupport(inDirection);
-		float len = inDirection.Length();
-		if (len > 0.0f)
+		decimal len = inDirection.Length();
+		if (len > C0)
 			support += (mConvexRadius / len) * inDirection;
 		return support;
 	}
 
-	virtual float			GetConvexRadius() const override
+	virtual decimal			GetConvexRadius() const override
 	{
 		return mConvexRadius;
 	}
 
 private:
-	float					mConvexRadius;
+	decimal					mConvexRadius;
 	TriangleConvexSupport	mTriangleSuport;
 };
 
@@ -143,7 +143,7 @@ const ConvexShape::Support *TriangleShape::GetSupportFunction(ESupportMode inMod
 	switch (inMode)
 	{
 	case ESupportMode::IncludeConvexRadius:
-		if (mConvexRadius > 0.0f)
+		if (mConvexRadius > C0)
 			return new (&inBuffer) TriangleWithConvex(inScale * mV1, inScale * mV2, inScale * mV3, mConvexRadius);
 		[[fallthrough]];
 
@@ -188,14 +188,14 @@ Vec3 TriangleShape::GetSurfaceNormal(const SubShapeID &inSubShapeID, Vec3Arg inL
 	JPH_ASSERT(inSubShapeID.IsEmpty(), "Invalid subshape ID"); 
 
 	Vec3 cross = (mV2 - mV1).Cross(mV3 - mV1);
-	float len = cross.Length(); 
-	return len != 0.0f? cross / len : Vec3::sAxisY();
+	decimal len = cross.Length(); 
+	return len != C0? cross / len : Vec3::sAxisY();
 }
 
-void TriangleShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const
+void TriangleShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const
 {
 	// A triangle has no volume
-	outTotalVolume = outSubmergedVolume = 0.0f;
+	outTotalVolume = outSubmergedVolume = C0;
 	outCenterOfBuoyancy = Vec3::sZero();
 }
 
@@ -218,7 +218,7 @@ void TriangleShape::Draw(DebugRenderer *inRenderer, RMat44Arg inCenterOfMassTran
 
 bool TriangleShape::CastRay(const RayCast &inRay, const SubShapeIDCreator &inSubShapeIDCreator, RayCastResult &ioHit) const
 {
-	float fraction = RayTriangle(inRay.mOrigin, inRay.mDirection, mV1, mV2, mV3);
+	decimal fraction = RayTriangle(inRay.mOrigin, inRay.mDirection, mV1, mV2, mV3);
 	if (fraction < ioHit.mFraction)
 	{
 		ioHit.mFraction = fraction;
@@ -235,11 +235,11 @@ void TriangleShape::CastRay(const RayCast &inRay, const RayCastSettings &inRayCa
 		return;
 
 	// Back facing check
-	if (inRayCastSettings.mBackFaceMode == EBackFaceMode::IgnoreBackFaces && (mV2 - mV1).Cross(mV3 - mV1).Dot(inRay.mDirection) > 0.0f)
+	if (inRayCastSettings.mBackFaceMode == EBackFaceMode::IgnoreBackFaces && (mV2 - mV1).Cross(mV3 - mV1).Dot(inRay.mDirection) > C0)
 		return;
 
 	// Test ray against triangle
-	float fraction = RayTriangle(inRay.mOrigin, inRay.mDirection, mV1, mV2, mV3);
+	decimal fraction = RayTriangle(inRay.mOrigin, inRay.mDirection, mV1, mV2, mV3);
 	if (fraction < ioCollector.GetEarlyOutFraction())
 	{
 		// Better hit than the current hit
@@ -301,7 +301,7 @@ void TriangleShape::TransformShape(Mat44Arg inCenterOfMassTransform, Transformed
 	Vec3 scale;
 	Mat44 transform = inCenterOfMassTransform.Decompose(scale);
 	TransformedShape ts(RVec3(transform.GetTranslation()), transform.GetRotation().GetQuaternion(), this, BodyID(), SubShapeIDCreator());
-	ts.SetShapeScale(mConvexRadius == 0.0f? scale : scale.GetSign() * ScaleHelpers::MakeUniformScale(scale.Abs()));
+	ts.SetShapeScale(mConvexRadius == C0? scale : scale.GetSign() * ScaleHelpers::MakeUniformScale(scale.Abs()));
 	ioCollector.AddHit(ts);
 }
 
@@ -373,7 +373,7 @@ void TriangleShape::RestoreBinaryState(StreamIn &inStream)
 
 bool TriangleShape::IsValidScale(Vec3Arg inScale) const
 {
-	return ConvexShape::IsValidScale(inScale) && (mConvexRadius == 0.0f || ScaleHelpers::IsUniformScale(inScale.Abs()));
+	return ConvexShape::IsValidScale(inScale) && (mConvexRadius == C0 || ScaleHelpers::IsUniformScale(inScale.Abs()));
 }
 
 void TriangleShape::sRegister()

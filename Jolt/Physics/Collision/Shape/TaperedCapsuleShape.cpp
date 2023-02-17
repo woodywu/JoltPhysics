@@ -29,7 +29,7 @@ JPH_IMPLEMENT_SERIALIZABLE_VIRTUAL(TaperedCapsuleShapeSettings)
 
 bool TaperedCapsuleShapeSettings::IsSphere() const
 {
-	return max(mTopRadius, mBottomRadius) >= 2.0f * mHalfHeightOfTaperedCylinder + min(mTopRadius, mBottomRadius);
+	return max(mTopRadius, mBottomRadius) >= C2 * mHalfHeightOfTaperedCylinder + min(mTopRadius, mBottomRadius);
 }
 
 ShapeSettings::ShapeResult TaperedCapsuleShapeSettings::Create() const
@@ -40,7 +40,7 @@ ShapeSettings::ShapeResult TaperedCapsuleShapeSettings::Create() const
 		if (IsValid() && IsSphere())
 		{
 			// Determine sphere center and radius
-			float radius, center;
+			decimal radius, center;
 			if (mTopRadius > mBottomRadius)
 			{
 				radius = mTopRadius;
@@ -56,9 +56,9 @@ ShapeSettings::ShapeResult TaperedCapsuleShapeSettings::Create() const
 			shape = new SphereShape(radius, mMaterial);
 
 			// Offset sphere if needed
-			if (abs(center) > 1.0e-6f)
+			if (abs(center) > decimal(1.0e-6f))
 			{
-				RotatedTranslatedShapeSettings rot_trans(Vec3(0, center, 0), Quat::sIdentity(), shape);
+				RotatedTranslatedShapeSettings rot_trans(Vec3(C0, center, C0), Quat::sIdentity(), shape);
 				mCachedResult = rot_trans.Create();
 			}
 			else
@@ -73,7 +73,7 @@ ShapeSettings::ShapeResult TaperedCapsuleShapeSettings::Create() const
 	return mCachedResult;
 }
 
-TaperedCapsuleShapeSettings::TaperedCapsuleShapeSettings(float inHalfHeightOfTaperedCylinder, float inTopRadius, float inBottomRadius, const PhysicsMaterial *inMaterial) : 
+TaperedCapsuleShapeSettings::TaperedCapsuleShapeSettings(decimal inHalfHeightOfTaperedCylinder, decimal inTopRadius, decimal inBottomRadius, const PhysicsMaterial *inMaterial) : 
 	ConvexShapeSettings(inMaterial),
 	mHalfHeightOfTaperedCylinder(inHalfHeightOfTaperedCylinder),
 	mTopRadius(inTopRadius), 
@@ -86,19 +86,19 @@ TaperedCapsuleShape::TaperedCapsuleShape(const TaperedCapsuleShapeSettings &inSe
 	mTopRadius(inSettings.mTopRadius), 
 	mBottomRadius(inSettings.mBottomRadius)
 { 
-	if (mTopRadius <= 0.0f)
+	if (mTopRadius <= C0)
 	{
 		outResult.SetError("Invalid top radius");
 		return;
 	}
 
-	if (mBottomRadius <= 0.0f)
+	if (mBottomRadius <= C0)
 	{
 		outResult.SetError("Invalid bottom radius");
 		return;
 	}
 
-	if (inSettings.mHalfHeightOfTaperedCylinder <= 0.0f)
+	if (inSettings.mHalfHeightOfTaperedCylinder <= C0)
 	{
 		outResult.SetError("Invalid height");
 		return;
@@ -112,20 +112,20 @@ TaperedCapsuleShape::TaperedCapsuleShape(const TaperedCapsuleShapeSettings &inSe
 	}
 
 	// Approximation: The center of mass is exactly half way between the top and bottom cap of the tapered capsule
-	mTopCenter = inSettings.mHalfHeightOfTaperedCylinder + 0.5f * (mBottomRadius - mTopRadius);
-	mBottomCenter = -inSettings.mHalfHeightOfTaperedCylinder + 0.5f * (mBottomRadius - mTopRadius);
+	mTopCenter = inSettings.mHalfHeightOfTaperedCylinder + C0P5 * (mBottomRadius - mTopRadius);
+	mBottomCenter = -inSettings.mHalfHeightOfTaperedCylinder + C0P5 * (mBottomRadius - mTopRadius);
 
 	// Calculate center of mass
-	mCenterOfMass = Vec3(0, inSettings.mHalfHeightOfTaperedCylinder - mTopCenter, 0);
+	mCenterOfMass = Vec3(C0, inSettings.mHalfHeightOfTaperedCylinder - mTopCenter, C0);
 
 	// Calculate convex radius
 	mConvexRadius = min(mTopRadius, mBottomRadius);
-	JPH_ASSERT(mConvexRadius > 0.0f);
+	JPH_ASSERT(mConvexRadius > C0);
 
 	// Calculate the sin and tan of the angle that the cone surface makes with the Y axis
 	// See: TaperedCapsuleShape.gliffy
 	mSinAlpha = (mBottomRadius - mTopRadius) / (mTopCenter - mBottomCenter);
-	JPH_ASSERT(mSinAlpha >= -1.0f && mSinAlpha <= 1.0f);
+	JPH_ASSERT(mSinAlpha >= -C1 && mSinAlpha <= C1);
 	mTanAlpha = Tan(ASin(mSinAlpha));
 
 	outResult.Set(this);
@@ -134,7 +134,7 @@ TaperedCapsuleShape::TaperedCapsuleShape(const TaperedCapsuleShapeSettings &inSe
 class TaperedCapsuleShape::TaperedCapsule final : public Support
 {
 public:
-					TaperedCapsule(Vec3Arg inTopCenter, Vec3Arg inBottomCenter, float inTopRadius, float inBottomRadius, float inConvexRadius) : 
+					TaperedCapsule(Vec3Arg inTopCenter, Vec3Arg inBottomCenter, decimal inTopRadius, decimal inBottomRadius, decimal inConvexRadius) : 
 		mTopCenter(inTopCenter),
 		mBottomCenter(inBottomCenter),
 		mTopRadius(inTopRadius),
@@ -148,9 +148,9 @@ public:
 	virtual Vec3	GetSupport(Vec3Arg inDirection) const override
 	{ 
 		// Check zero vector
-		float len = inDirection.Length();
-		if (len == 0.0f)
-			return mTopCenter + Vec3(0, mTopRadius, 0); // Return top
+		decimal len = inDirection.Length();
+		if (len == C0)
+			return mTopCenter + Vec3(C0, mTopRadius, C0); // Return top
 
 		// Check if the support of the top sphere or bottom sphere is bigger
 		Vec3 support_top = mTopCenter + (mTopRadius / len) * inDirection;
@@ -161,7 +161,7 @@ public:
 			return support_bottom;
 	}
 
-	virtual float	GetConvexRadius() const override
+	virtual decimal	GetConvexRadius() const override
 	{
 		return mConvexRadius;
 	}
@@ -169,9 +169,9 @@ public:
 private:
 	Vec3			mTopCenter;
 	Vec3			mBottomCenter;
-	float			mTopRadius;
-	float			mBottomRadius;
-	float			mConvexRadius;
+	decimal			mTopRadius;
+	decimal			mBottomRadius;
+	decimal			mConvexRadius;
 };
 
 const ConvexShape::Support *TaperedCapsuleShape::GetSupportFunction(ESupportMode inMode, SupportBuffer &inBuffer, Vec3Arg inScale) const
@@ -180,26 +180,26 @@ const ConvexShape::Support *TaperedCapsuleShape::GetSupportFunction(ESupportMode
 
 	// Get scaled tapered capsule
 	Vec3 abs_scale = inScale.Abs();
-	float scale_xz = abs_scale.GetX();
-	float scale_y = inScale.GetY(); // The sign of y is important as it flips the tapered capsule
-	Vec3 scaled_top_center = Vec3(0, scale_y * mTopCenter, 0);
-	Vec3 scaled_bottom_center = Vec3(0, scale_y * mBottomCenter, 0);
-	float scaled_top_radius = scale_xz * mTopRadius;
-	float scaled_bottom_radius = scale_xz * mBottomRadius;
-	float scaled_convex_radius = scale_xz * mConvexRadius;
+	decimal scale_xz = abs_scale.GetX();
+	decimal scale_y = inScale.GetY(); // The sign of y is important as it flips the tapered capsule
+	Vec3 scaled_top_center = Vec3(C0, scale_y * mTopCenter, C0);
+	Vec3 scaled_bottom_center = Vec3(C0, scale_y * mBottomCenter, C0);
+	decimal scaled_top_radius = scale_xz * mTopRadius;
+	decimal scaled_bottom_radius = scale_xz * mBottomRadius;
+	decimal scaled_convex_radius = scale_xz * mConvexRadius;
 
 	switch (inMode)
 	{
 	case ESupportMode::IncludeConvexRadius:
-		return new (&inBuffer) TaperedCapsule(scaled_top_center, scaled_bottom_center, scaled_top_radius, scaled_bottom_radius, 0.0f);
+		return new (&inBuffer) TaperedCapsule(scaled_top_center, scaled_bottom_center, scaled_top_radius, scaled_bottom_radius, C0);
 
 	case ESupportMode::ExcludeConvexRadius:
 		{
 			// Get radii reduced by convex radius
-			float tr = scaled_top_radius - scaled_convex_radius;
-			float br = scaled_bottom_radius - scaled_convex_radius;
-			JPH_ASSERT(tr >= 0.0f && br >= 0.0f);
-			JPH_ASSERT(tr == 0.0f || br == 0.0f, "Convex radius should be that of the smallest sphere");
+			decimal tr = scaled_top_radius - scaled_convex_radius;
+			decimal br = scaled_bottom_radius - scaled_convex_radius;
+			JPH_ASSERT(tr >= C0 && br >= C0);
+			JPH_ASSERT(tr == C0 || br == C0, "Convex radius should be that of the smallest sphere");
 			return new (&inBuffer) TaperedCapsule(scaled_top_center, scaled_bottom_center, tr, br, scaled_convex_radius);
 		}
 	}
@@ -214,26 +214,26 @@ void TaperedCapsuleShape::GetSupportingFace(const SubShapeID &inSubShapeID, Vec3
 	JPH_ASSERT(IsValidScale(inScale));
 
 	// Check zero vector
-	float len = inDirection.Length();
-	if (len == 0.0f)
+	decimal len = inDirection.Length();
+	if (len == C0)
 		return;
 
 	// Get scaled tapered capsule
 	Vec3 abs_scale = inScale.Abs();
-	float scale_xz = abs_scale.GetX();
-	float scale_y = inScale.GetY(); // The sign of y is important as it flips the tapered capsule
-	Vec3 scaled_top_center = Vec3(0, scale_y * mTopCenter, 0);
-	Vec3 scaled_bottom_center = Vec3(0, scale_y * mBottomCenter, 0);
-	float scaled_top_radius = scale_xz * mTopRadius;
-	float scaled_bottom_radius = scale_xz * mBottomRadius;
+	decimal scale_xz = abs_scale.GetX();
+	decimal scale_y = inScale.GetY(); // The sign of y is important as it flips the tapered capsule
+	Vec3 scaled_top_center = Vec3(C0, scale_y * mTopCenter, C0);
+	Vec3 scaled_bottom_center = Vec3(C0, scale_y * mBottomCenter, C0);
+	decimal scaled_top_radius = scale_xz * mTopRadius;
+	decimal scaled_bottom_radius = scale_xz * mBottomRadius;
 
 	// Get support point for top and bottom sphere in the opposite of inDirection (including convex radius)
 	Vec3 support_top = scaled_top_center - (scaled_top_radius / len) * inDirection;
 	Vec3 support_bottom = scaled_bottom_center - (scaled_bottom_radius / len) * inDirection;
 
 	// Get projection on inDirection
-	float proj_top = support_top.Dot(inDirection);
-	float proj_bottom = support_bottom.Dot(inDirection);
+	decimal proj_top = support_top.Dot(inDirection);
+	decimal proj_bottom = support_bottom.Dot(inDirection);
 
 	// If projection is roughly equal then return line, otherwise we return nothing as there's only 1 point
 	if (abs(proj_top - proj_bottom) < cCapsuleProjectionSlop * len)
@@ -262,13 +262,13 @@ Vec3 TaperedCapsuleShape::GetSurfaceNormal(const SubShapeID &inSubShapeID, Vec3A
 	// => by = sin(alpha) * br, ty = sin(alpha) * tr
 
 	if (inLocalSurfacePosition.GetY() > mTopCenter + mSinAlpha * mTopRadius)
-		return (inLocalSurfacePosition - Vec3(0, mTopCenter, 0)).Normalized();
+		return (inLocalSurfacePosition - Vec3(C0, mTopCenter, C0)).Normalized();
 	else if (inLocalSurfacePosition.GetY() < mBottomCenter + mSinAlpha * mBottomRadius)
-		return (inLocalSurfacePosition - Vec3(0, mBottomCenter, 0)).Normalized();
+		return (inLocalSurfacePosition - Vec3(C0, mBottomCenter, C0)).Normalized();
 	else
 	{
 		// Get perpendicular vector to the surface in the xz plane
-		Vec3 perpendicular = Vec3(inLocalSurfacePosition.GetX(), 0, inLocalSurfacePosition.GetZ()).NormalizedOr(Vec3::sAxisX());
+		Vec3 perpendicular = Vec3(inLocalSurfacePosition.GetX(), C0, inLocalSurfacePosition.GetZ()).NormalizedOr(Vec3::sAxisX());
 
 		// We know that the perpendicular has length 1 and that it needs a y component where tan(alpha) = y / 1 in order to align it to the surface
 		perpendicular.SetY(mTanAlpha);
@@ -278,7 +278,7 @@ Vec3 TaperedCapsuleShape::GetSurfaceNormal(const SubShapeID &inSubShapeID, Vec3A
 
 AABox TaperedCapsuleShape::GetLocalBounds() const
 {
-	float max_radius = max(mTopRadius, mBottomRadius);
+	decimal max_radius = max(mTopRadius, mBottomRadius);
 	return AABox(Vec3(-max_radius, mBottomCenter - mBottomRadius, -max_radius), Vec3(max_radius, mTopCenter + mTopRadius, max_radius));
 }
 
@@ -287,12 +287,12 @@ AABox TaperedCapsuleShape::GetWorldSpaceBounds(Mat44Arg inCenterOfMassTransform,
 	JPH_ASSERT(IsValidScale(inScale));
 
 	Vec3 abs_scale = inScale.Abs();
-	float scale_xz = abs_scale.GetX();
-	float scale_y = inScale.GetY(); // The sign of y is important as it flips the tapered capsule
+	decimal scale_xz = abs_scale.GetX();
+	decimal scale_y = inScale.GetY(); // The sign of y is important as it flips the tapered capsule
 	Vec3 bottom_extent = Vec3::sReplicate(scale_xz * mBottomRadius);
-	Vec3 bottom_center = inCenterOfMassTransform * Vec3(0, scale_y * mBottomCenter, 0);
+	Vec3 bottom_center = inCenterOfMassTransform * Vec3(C0, scale_y * mBottomCenter, C0);
 	Vec3 top_extent = Vec3::sReplicate(scale_xz * mTopRadius);
-	Vec3 top_center = inCenterOfMassTransform * Vec3(0, scale_y * mTopCenter, 0);
+	Vec3 top_center = inCenterOfMassTransform * Vec3(C0, scale_y * mTopCenter, C0);
 	Vec3 p1 = Vec3::sMin(top_center - top_extent, bottom_center - bottom_extent);
 	Vec3 p2 = Vec3::sMax(top_center + top_extent, bottom_center + bottom_extent);
 	return AABox(p1, p2);
@@ -304,17 +304,17 @@ void TaperedCapsuleShape::Draw(DebugRenderer *inRenderer, RMat44Arg inCenterOfMa
 	if (mGeometry == nullptr)
 	{
 		SupportBuffer buffer;
-		const Support *support = GetSupportFunction(ESupportMode::IncludeConvexRadius, buffer, Vec3::sReplicate(1.0f));
+		const Support *support = GetSupportFunction(ESupportMode::IncludeConvexRadius, buffer, Vec3::sReplicate(C1));
 		mGeometry = inRenderer->CreateTriangleGeometryForConvex([support](Vec3Arg inDirection) { return support->GetSupport(inDirection); });
 	}
 
 	// Preserve flip along y axis but make sure we're not inside out
-	Vec3 scale = ScaleHelpers::IsInsideOut(inScale)? Vec3(-1, 1, 1) * inScale : inScale;
+	Vec3 scale = ScaleHelpers::IsInsideOut(inScale)? Vec3(-C1, C1, C1) * inScale : inScale;
 	RMat44 world_transform = inCenterOfMassTransform * Mat44::sScale(scale);
 
 	AABox bounds = Shape::GetWorldSpaceBounds(inCenterOfMassTransform, inScale);
 
-	float lod_scale_sq = Square(max(mTopRadius, mBottomRadius));
+	decimal lod_scale_sq = Square(max(mTopRadius, mBottomRadius));
 
 	Color color = inUseMaterialColors? GetMaterial()->GetDebugColor() : inColor;
 
@@ -327,7 +327,7 @@ void TaperedCapsuleShape::Draw(DebugRenderer *inRenderer, RMat44Arg inCenterOfMa
 AABox TaperedCapsuleShape::GetInertiaApproximation() const
 {
 	// TODO: For now the mass and inertia is that of a box
-	float avg_radius = 0.5f * (mTopRadius + mBottomRadius);
+	decimal avg_radius = C0P5 * (mTopRadius + mBottomRadius);
 	return AABox(Vec3(-avg_radius, mBottomCenter - mBottomRadius, -avg_radius), Vec3(avg_radius, mTopCenter + mTopRadius, avg_radius));
 }
 

@@ -18,7 +18,7 @@ public:
 
 	/// Create a triangle with points (inV1, inV2, inV3) (counter clockwise) and convex radius inConvexRadius.
 	/// Note that the convex radius is currently only used for shape vs shape collision, for all other purposes the triangle is infinitely thin.
-							TriangleShapeSettings(Vec3Arg inV1, Vec3Arg inV2, Vec3Arg inV3, float inConvexRadius = 0.0f, const PhysicsMaterial *inMaterial = nullptr) : ConvexShapeSettings(inMaterial), mV1(inV1), mV2(inV2), mV3(inV3), mConvexRadius(inConvexRadius) { }
+							TriangleShapeSettings(Vec3Arg inV1, Vec3Arg inV2, Vec3Arg inV3, decimal inConvexRadius = C0, const PhysicsMaterial *inMaterial = nullptr) : ConvexShapeSettings(inMaterial), mV1(inV1), mV2(inV2), mV3(inV3), mConvexRadius(inConvexRadius) { }
 
 	// See: ShapeSettings
 	virtual ShapeResult		Create() const override;
@@ -26,7 +26,7 @@ public:
 	Vec3					mV1;
 	Vec3					mV2;
 	Vec3					mV3;
-	float					mConvexRadius = 0.0f;
+	decimal					mConvexRadius = C0;
 };
 
 /// A single triangle, not the most efficient way of creating a world filled with triangles but can be used as a query shape for example.
@@ -41,10 +41,10 @@ public:
 
 	/// Create a triangle with points (inV1, inV2, inV3) (counter clockwise) and convex radius inConvexRadius.
 	/// Note that the convex radius is currently only used for shape vs shape collision, for all other purposes the triangle is infinitely thin.
-							TriangleShape(Vec3Arg inV1, Vec3Arg inV2, Vec3Arg inV3, float inConvexRadius = 0.0f, const PhysicsMaterial *inMaterial = nullptr) : ConvexShape(EShapeSubType::Triangle, inMaterial), mV1(inV1), mV2(inV2), mV3(inV3), mConvexRadius(inConvexRadius) { JPH_ASSERT(inConvexRadius >= 0.0f); }
+							TriangleShape(Vec3Arg inV1, Vec3Arg inV2, Vec3Arg inV3, decimal inConvexRadius = C0, const PhysicsMaterial *inMaterial = nullptr) : ConvexShape(EShapeSubType::Triangle, inMaterial), mV1(inV1), mV2(inV2), mV3(inV3), mConvexRadius(inConvexRadius) { JPH_ASSERT(inConvexRadius >= C0); }
 
 	/// Convex radius
-	float					GetConvexRadius() const																{ return mConvexRadius; }
+	decimal					GetConvexRadius() const																{ return mConvexRadius; }
 
 	// See Shape::GetLocalBounds
 	virtual AABox			GetLocalBounds() const override;
@@ -54,7 +54,7 @@ public:
 	using Shape::GetWorldSpaceBounds;
 
 	// See Shape::GetInnerRadius
-	virtual float			GetInnerRadius() const override														{ return mConvexRadius; }
+	virtual decimal			GetInnerRadius() const override														{ return mConvexRadius; }
 
 	// See Shape::GetMassProperties
 	virtual MassProperties	GetMassProperties() const override;
@@ -69,7 +69,7 @@ public:
 	virtual const Support *	GetSupportFunction(ESupportMode inMode, SupportBuffer &inBuffer, Vec3Arg inScale) const override;
 
 	// See Shape::GetSubmergedVolume
-	virtual void			GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override;
+	virtual void			GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override;
 
 #ifdef JPH_DEBUG_RENDERER
 	// See Shape::Draw
@@ -99,7 +99,7 @@ public:
 	virtual Stats			GetStats() const override															{ return Stats(sizeof(*this), 1); }
 
 	// See Shape::GetVolume
-	virtual float			GetVolume() const override															{ return 0; }
+	virtual decimal			GetVolume() const override															{ return C0; }
 
 	// See Shape::IsValidScale
 	virtual bool			IsValidScale(Vec3Arg inScale) const override;
@@ -128,7 +128,7 @@ private:
 	Vec3					mV1;
 	Vec3					mV2;
 	Vec3					mV3;
-	float					mConvexRadius = 0.0f;
+	decimal					mConvexRadius = C0;
 };
 
 JPH_NAMESPACE_END

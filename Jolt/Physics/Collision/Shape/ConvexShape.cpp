@@ -123,13 +123,13 @@ void ConvexShape::sCollideConvexVsConvex(const Shape *inShape1, const Shape *inS
 	}
 
 	// Check if the penetration is bigger than the early out fraction
-	float penetration_depth = (point2 - point1).Length() - inCollideShapeSettings.mMaxSeparationDistance;
+	decimal penetration_depth = (point2 - point1).Length() - inCollideShapeSettings.mMaxSeparationDistance;
 	if (-penetration_depth >= ioCollector.GetEarlyOutFraction())
 		return;
 
 	// Correct point1 for the added separation distance
-	float penetration_axis_len = penetration_axis.Length();
-	if (penetration_axis_len > 0.0f)
+	decimal penetration_axis_len = penetration_axis.Length();
+	if (penetration_axis_len > C0)
 		point1 -= penetration_axis * (inCollideShapeSettings.mMaxSeparationDistance / penetration_axis_len);
 
 	// Convert to world space
@@ -163,7 +163,7 @@ bool ConvexShape::CastRay(const RayCast &inRay, const SubShapeIDCreator &inSubSh
 
 	// Create support function
 	SupportBuffer buffer;
-	const Support *support = GetSupportFunction(ConvexShape::ESupportMode::IncludeConvexRadius, buffer, Vec3::sReplicate(1.0f));
+	const Support *support = GetSupportFunction(ConvexShape::ESupportMode::IncludeConvexRadius, buffer, Vec3::sReplicate(C1));
 
 	// Cast ray
 	GJKClosestPoint gjk;
@@ -190,7 +190,7 @@ void ConvexShape::CastRay(const RayCast &inRay, const RayCastSettings &inRayCast
 	if (CastRay(inRay, inSubShapeIDCreator, hit))
 	{
 		// Check front side
-		if (inRayCastSettings.mTreatConvexAsSolid || hit.mFraction > 0.0f)
+		if (inRayCastSettings.mTreatConvexAsSolid || hit.mFraction > C0)
 		{
 			hit.mBodyID = TransformedShape::sGetBodyID(ioCollector.GetContext());
 			ioCollector.AddHit(hit);
@@ -200,20 +200,20 @@ void ConvexShape::CastRay(const RayCast &inRay, const RayCastSettings &inRayCast
 		if (inRayCastSettings.mBackFaceMode == EBackFaceMode::CollideWithBackFaces && !ioCollector.ShouldEarlyOut())
 		{
 			// Invert the ray, going from the early out fraction back to the fraction where we found our forward hit
-			float start_fraction = min(1.0f, ioCollector.GetEarlyOutFraction());
-			float delta_fraction = hit.mFraction - start_fraction;
-			if (delta_fraction < 0.0f)
+			decimal start_fraction = min(C1, ioCollector.GetEarlyOutFraction());
+			decimal delta_fraction = hit.mFraction - start_fraction;
+			if (delta_fraction < C0)
 			{
 				RayCast inverted_ray { inRay.mOrigin + start_fraction * inRay.mDirection, delta_fraction * inRay.mDirection };
 
 				// Cast another ray
 				RayCastResult inverted_hit;
-				inverted_hit.mFraction = 1.0f;
+				inverted_hit.mFraction = C1;
 				if (CastRay(inverted_ray, inSubShapeIDCreator, inverted_hit) 
-					&& inverted_hit.mFraction > 0.0f) // Ignore hits with fraction 0, this means the ray ends inside the object and we don't want to report it as a back facing hit
+					&& inverted_hit.mFraction > C0) // Ignore hits with fraction 0, this means the ray ends inside the object and we don't want to report it as a back facing hit
 				{
 					// Invert fraction and rescale it to the fraction of the original ray
-					inverted_hit.mFraction = hit.mFraction + (inverted_hit.mFraction - 1.0f) * delta_fraction;
+					inverted_hit.mFraction = hit.mFraction + (inverted_hit.mFraction - C1) * delta_fraction;
 					inverted_hit.mBodyID = TransformedShape::sGetBodyID(ioCollector.GetContext());
 					ioCollector.AddHit(inverted_hit);
 				}
@@ -233,7 +233,7 @@ void ConvexShape::CollidePoint(Vec3Arg inPoint, const SubShapeIDCreator &inSubSh
 	{
 		// Create support function
 		SupportBuffer buffer;
-		const Support *support = GetSupportFunction(ConvexShape::ESupportMode::IncludeConvexRadius, buffer, Vec3::sReplicate(1.0f));
+		const Support *support = GetSupportFunction(ConvexShape::ESupportMode::IncludeConvexRadius, buffer, Vec3::sReplicate(C1));
 
 		// Create support function for point
 		PointConvexSupport point { inPoint };
@@ -270,11 +270,11 @@ void ConvexShape::sCastConvexVsConvex(const ShapeCast &inShapeCast, const ShapeC
 
 	// Do a raycast against the result
 	EPAPenetrationDepth epa;
-	float fraction = ioCollector.GetEarlyOutFraction();
+	decimal fraction = ioCollector.GetEarlyOutFraction();
 	Vec3 contact_point_a, contact_point_b, contact_normal;
 	if (epa.CastShape(inShapeCast.mCenterOfMassStart, inShapeCast.mDirection, inShapeCastSettings.mCollisionTolerance, inShapeCastSettings.mPenetrationTolerance, *cast_support, *target_support, cast_support->GetConvexRadius(), target_support->GetConvexRadius(), inShapeCastSettings.mReturnDeepestPoint, fraction, contact_point_a, contact_point_b, contact_normal)
 		&& (inShapeCastSettings.mBackFaceModeConvex == EBackFaceMode::CollideWithBackFaces 
-			|| contact_normal.Dot(inShapeCast.mDirection) > 0.0f)) // Test if backfacing
+			|| contact_normal.Dot(inShapeCast.mDirection) > C0)) // Test if backfacing
 	{
 		// Convert to world space
 		contact_point_a = inCenterOfMassTransform2 * contact_point_a;
@@ -307,7 +307,7 @@ public:
 		mLocalToWorld(Mat44::sRotationTranslation(inRotation, inPositionCOM) * Mat44::sScale(inScale)), 
 		mIsInsideOut(ScaleHelpers::IsInsideOut(inScale)) 
 	{ 
-		mSupport = inShape->GetSupportFunction(ESupportMode::IncludeConvexRadius, mSupportBuffer, Vec3::sReplicate(1.0f));
+		mSupport = inShape->GetSupportFunction(ESupportMode::IncludeConvexRadius, mSupportBuffer, Vec3::sReplicate(C1));
 	}
 
 	SupportBuffer		mSupportBuffer;
@@ -368,24 +368,24 @@ int ConvexShape::GetTrianglesNext(GetTrianglesContext &ioContext, int inMaxTrian
 	return total_num_triangles;
 }
 
-void ConvexShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const
+void ConvexShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const
 {
 	// Calculate total volume
 	Vec3 abs_scale = inScale.Abs();
 	Vec3 extent = GetLocalBounds().GetExtent() * abs_scale;
-	outTotalVolume = 8.0f * extent.GetX() * extent.GetY() * extent.GetZ();
+	outTotalVolume = decimal(8.0f) * extent.GetX() * extent.GetY() * extent.GetZ();
 
 	// Points of the bounding box
 	Vec3 points[] =
 	{
-		Vec3(-1, -1, -1),
-		Vec3( 1, -1, -1),
-		Vec3(-1,  1, -1),
-		Vec3( 1,  1, -1),
-		Vec3(-1, -1,  1),
-		Vec3( 1, -1,  1),
-		Vec3(-1,  1,  1),
-		Vec3( 1,  1,  1),
+		Vec3(-C1, -C1, -C1),
+		Vec3( C1, -C1, -C1),
+		Vec3(-C1,  C1, -C1),
+		Vec3( C1,  C1, -C1),
+		Vec3(-C1, -C1,  C1),
+		Vec3( C1, -C1,  C1),
+		Vec3(-C1,  C1,  C1),
+		Vec3( C1,  C1,  C1),
 	};
 
 	// Faces of the bounding box
@@ -407,7 +407,7 @@ void ConvexShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg i
 	if (submerged_vol_calc.AreAllAbove())
 	{
 		// We're above the water
-		outSubmergedVolume = 0.0f;
+		outSubmergedVolume = C0;
 		outCenterOfBuoyancy = Vec3::sZero();
 	}
 	else if (submerged_vol_calc.AreAllBelow())
@@ -446,7 +446,7 @@ void ConvexShape::DrawGetSupportFunction(DebugRenderer *inRenderer, RMat44Arg in
 	// Draw the shape
 	DebugRenderer::GeometryRef geometry = inRenderer->CreateTriangleGeometryForConvex([&add_convex](Vec3Arg inDirection) { return add_convex.GetSupport(inDirection); });
 	AABox bounds = geometry->mBounds.Transformed(inCenterOfMassTransform);
-	float lod_scale_sq = geometry->mBounds.GetExtent().LengthSq();
+	decimal lod_scale_sq = geometry->mBounds.GetExtent().LengthSq();
 	inRenderer->DrawGeometry(inCenterOfMassTransform, bounds, lod_scale_sq, inColor, geometry);
 
 	if (inDrawSupportDirection)
@@ -454,12 +454,12 @@ void ConvexShape::DrawGetSupportFunction(DebugRenderer *inRenderer, RMat44Arg in
 		// Iterate on all directions and draw the support point and an arrow in the direction that was sampled to test if the support points make sense
 		for (Vec3 v : Vec3::sUnitSphere)
 		{
-			Vec3 direction = 0.05f * v;
+			Vec3 direction = decimal(0.05f) * v;
 			Vec3 pos = add_convex.GetSupport(direction);
 			RVec3 from = inCenterOfMassTransform * pos;
 			RVec3 to = inCenterOfMassTransform * (pos + direction);
-			inRenderer->DrawMarker(from, Color::sWhite, 0.001f);
-			inRenderer->DrawArrow(from, to, Color::sWhite, 0.001f);
+			inRenderer->DrawMarker(from, Color::sWhite, decimal(0.001f));
+			inRenderer->DrawArrow(from, to, Color::sWhite, decimal(0.001f));
 		}
 	}
 }
@@ -471,7 +471,7 @@ void ConvexShape::DrawGetSupportingFace(DebugRenderer *inRenderer, RMat44Arg inC
 	FaceToDirection faces;
 	for (Vec3 v : Vec3::sUnitSphere)
 	{
-		Vec3 direction = 0.05f * v;
+		Vec3 direction = decimal(0.05f) * v;
 			
 		SupportingFace face;
 		GetSupportingFace(SubShapeID(), direction, inScale, Mat44::sIdentity(), face);
@@ -494,7 +494,7 @@ void ConvexShape::DrawGetSupportingFace(DebugRenderer *inRenderer, RMat44Arg inC
 
 		// Displace the face a little bit forward so it is easier to see
 		Vec3 normal = face.size() >= 3? (face[2] - face[1]).Cross(face[0] - face[1]).Normalized() : Vec3::sZero();
-		Vec3 displacement = 0.001f * normal;
+		Vec3 displacement = decimal(0.001f) * normal;
 		
 		// Transform face to world space and calculate center of mass
 		Vec3 com_ls = Vec3::sZero();
@@ -503,14 +503,14 @@ void ConvexShape::DrawGetSupportingFace(DebugRenderer *inRenderer, RMat44Arg inC
 			v = inCenterOfMassTransform.Multiply3x3(v + displacement);
 			com_ls += v;
 		}
-		RVec3 com = inCenterOfMassTransform.GetTranslation() + com_ls / (float)face.size();
+		RVec3 com = inCenterOfMassTransform.GetTranslation() + com_ls / (decimal)face.size();
 		
 		// Draw the polygon and directions
-		inRenderer->DrawWirePolygon(RMat44::sTranslation(inCenterOfMassTransform.GetTranslation()), face, color, face.size() >= 3? 0.001f : 0.0f);
+		inRenderer->DrawWirePolygon(RMat44::sTranslation(inCenterOfMassTransform.GetTranslation()), face, color, face.size() >= 3? decimal(0.001f) : C0);
 		if (face.size() >= 3)
-			inRenderer->DrawArrow(com, com + inCenterOfMassTransform.Multiply3x3(normal), color, 0.01f);
+			inRenderer->DrawArrow(com, com + inCenterOfMassTransform.Multiply3x3(normal), color, decimal(0.01f));
 		for (Vec3 &v : ftd.second)
-			inRenderer->DrawArrow(com, com + inCenterOfMassTransform.Multiply3x3(-v), color, 0.001f);
+			inRenderer->DrawArrow(com, com + inCenterOfMassTransform.Multiply3x3(-v), color, decimal(0.001f));
 	}
 }
 #endif // JPH_DEBUG_RENDERER

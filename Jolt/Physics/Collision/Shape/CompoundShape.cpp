@@ -69,7 +69,7 @@ MassProperties CompoundShape::GetMassProperties() const
 	MassProperties p;
 
 	// Calculate mass and inertia
-	p.mMass = 0.0f;
+	p.mMass = C0;
 	p.mInertia = Mat44::sZero();
 	for (const SubShape &shape : mSubShapes)
 	{
@@ -84,7 +84,7 @@ MassProperties CompoundShape::GetMassProperties() const
 	}
 
 	// Ensure that inertia is a 3x3 matrix, adding inertias causes the bottom right element to change
-	p.mInertia.SetColumn4(3, Vec4(0, 0, 0, 1));
+	p.mInertia.SetColumn4(3, Vec4(C0, C0, C0, C1));
 	
 	return p;
 }
@@ -182,10 +182,10 @@ void CompoundShape::GetSupportingFace(const SubShapeID &inSubShapeID, Vec3Arg in
 	shape.mShape->GetSupportingFace(remainder, transform.Multiply3x3Transposed(inDirection), shape.TransformScale(inScale), inCenterOfMassTransform * transform, outVertices);
 }
 
-void CompoundShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const
+void CompoundShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const
 {
-	outTotalVolume = 0.0f;
-	outSubmergedVolume = 0.0f;
+	outTotalVolume = C0;
+	outSubmergedVolume = C0;
 	outCenterOfBuoyancy = Vec3::sZero();
 
 	for (const SubShape &shape : mSubShapes)
@@ -194,7 +194,7 @@ void CompoundShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg
 		Mat44 transform = inCenterOfMassTransform * shape.GetLocalTransformNoScale(inScale);
 
 		// Recurse to child
-		float total_volume, submerged_volume;
+		decimal total_volume, submerged_volume;
 		Vec3 center_of_buoyancy;
 		shape.mShape->GetSubmergedVolume(transform, shape.TransformScale(inScale), inSurface, total_volume, submerged_volume, center_of_buoyancy JPH_IF_DEBUG_RENDERER(, inBaseOffset));
 
@@ -206,13 +206,13 @@ void CompoundShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg
 		outCenterOfBuoyancy += submerged_volume * center_of_buoyancy;
 	}
 
-	if (outSubmergedVolume > 0.0f)
+	if (outSubmergedVolume > C0)
 		outCenterOfBuoyancy /= outSubmergedVolume;
 
 #ifdef JPH_DEBUG_RENDERER
 	// Draw senter of buoyancy
 	if (sDrawSubmergedVolumes)
-		DebugRenderer::sInstance->DrawWireSphere(inBaseOffset + outCenterOfBuoyancy, 0.05f, Color::sRed, 1);
+		DebugRenderer::sInstance->DrawWireSphere(inBaseOffset + outCenterOfBuoyancy, decimal(0.05f), Color::sRed, 1);
 #endif // JPH_DEBUG_RENDERER
 }
 
@@ -328,7 +328,7 @@ void CompoundShape::RestoreBinaryState(StreamIn &inStream)
 			inStream.Read(s.mUserData);
 			inStream.Read(s.mPositionCOM);
 			inStream.Read(s.mRotation);
-			s.mIsRotationIdentity = s.mRotation == Float3(0, 0, 0);
+			s.mIsRotationIdentity = s.mRotation == Float3(C0, C0, C0);
 		}
 	}
 }
@@ -364,9 +364,9 @@ Shape::Stats CompoundShape::GetStatsRecursive(VisitedShapes &ioVisitedShapes) co
 	return stats;
 }
 
-float CompoundShape::GetVolume() const
+decimal CompoundShape::GetVolume() const
 {
-	float volume = 0.0f;
+	decimal volume = C0;
 	for (const SubShape &shape : mSubShapes)
 		volume += shape.mShape->GetVolume();
 	return volume;

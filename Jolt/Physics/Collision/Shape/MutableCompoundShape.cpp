@@ -57,7 +57,7 @@ MutableCompoundShape::MutableCompoundShape(const MutableCompoundShapeSettings &i
 void MutableCompoundShape::AdjustCenterOfMass()
 {
 	// First calculate the delta of the center of mass
-	float mass = 0.0f;
+	decimal mass = C0;
 	Vec3 center_of_mass = Vec3::sZero();
 	for (const CompoundShape::SubShape &sub_shape : mSubShapes)
 	{
@@ -65,7 +65,7 @@ void MutableCompoundShape::AdjustCenterOfMass()
 		mass += child.mMass;
 		center_of_mass += sub_shape.GetPositionCOM() * child.mMass;
 	}
-	if (mass > 0.0f)
+	if (mass > C0)
 		center_of_mass /= mass;
 
 	// Now adjust all shapes to recenter around center of mass
@@ -151,7 +151,7 @@ void MutableCompoundShape::CalculateSubShapeBounds(uint inStartIdx, uint inNumbe
 				Mat44 transform = Mat44::sRotationTranslation(sub_shape.GetRotation(), sub_shape.GetPositionCOM());
 
 				// Get the bounding box
-				sub_shape_bounds = sub_shape.mShape->GetWorldSpaceBounds(transform, Vec3::sReplicate(1.0f));
+				sub_shape_bounds = sub_shape.mShape->GetWorldSpaceBounds(transform, Vec3::sReplicate(C1));
 			}
 
 			// Put the bounds as columns in a matrix

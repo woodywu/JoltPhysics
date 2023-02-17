@@ -17,12 +17,12 @@ public:
 							SphereShapeSettings() = default;
 
 	/// Create a sphere with radius inRadius
-							SphereShapeSettings(float inRadius, const PhysicsMaterial *inMaterial = nullptr)	: ConvexShapeSettings(inMaterial), mRadius(inRadius) { }
+							SphereShapeSettings(decimal inRadius, const PhysicsMaterial *inMaterial = nullptr)	: ConvexShapeSettings(inMaterial), mRadius(inRadius) { }
 
 	// See: ShapeSettings
 	virtual ShapeResult		Create() const override;
 
-	float					mRadius = 0.0f;
+	decimal					mRadius = C0;
 };
 
 /// A sphere, centered around the origin.
@@ -37,10 +37,10 @@ public:
 							SphereShape(const SphereShapeSettings &inSettings, ShapeResult &outResult);
 
 	/// Create a sphere with radius inRadius
-							SphereShape(float inRadius, const PhysicsMaterial *inMaterial = nullptr)			: ConvexShape(EShapeSubType::Sphere, inMaterial), mRadius(inRadius) { JPH_ASSERT(inRadius > 0.0f); }
+							SphereShape(decimal inRadius, const PhysicsMaterial *inMaterial = nullptr)			: ConvexShape(EShapeSubType::Sphere, inMaterial), mRadius(inRadius) { JPH_ASSERT(inRadius > C0); }
 
 	/// Radius of the sphere
-	float					GetRadius() const																	{ return mRadius; }
+	decimal					GetRadius() const																	{ return mRadius; }
 
 	// See Shape::GetLocalBounds
 	virtual AABox			GetLocalBounds() const override;
@@ -50,7 +50,7 @@ public:
 	using Shape::GetWorldSpaceBounds;
 
 	// See Shape::GetInnerRadius
-	virtual float			GetInnerRadius() const override														{ return mRadius; }
+	virtual decimal			GetInnerRadius() const override														{ return mRadius; }
 
 	// See Shape::GetMassProperties
 	virtual MassProperties	GetMassProperties() const override;
@@ -65,7 +65,7 @@ public:
 	virtual const Support *	GetSupportFunction(ESupportMode inMode, SupportBuffer &inBuffer, Vec3Arg inScale) const override;
 
 	// See Shape::GetSubmergedVolume
-	virtual void			GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override;
+	virtual void			GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override;
 
 #ifdef JPH_DEBUG_RENDERER
 	// See Shape::Draw
@@ -95,7 +95,7 @@ public:
 	virtual Stats			GetStats() const override															{ return Stats(sizeof(*this), 0); }
 
 	// See Shape::GetVolume
-	virtual float			GetVolume() const override															{ return 4.0f / 3.0f * JPH_PI * Cubed(mRadius); }
+	virtual decimal			GetVolume() const override															{ return decimal(4.0f) / C3 * JPH_PI * Cubed(mRadius); }
 
 	// See Shape::IsValidScale
 	virtual bool			IsValidScale(Vec3Arg inScale) const override;
@@ -109,13 +109,13 @@ protected:
 
 private:
 	// Get the radius of this sphere scaled by inScale
-	inline float			GetScaledRadius(Vec3Arg inScale) const;
+	inline decimal			GetScaledRadius(Vec3Arg inScale) const;
 
 	// Classes for GetSupportFunction
 	class 					SphereNoConvex;
 	class 					SphereWithConvex;
 
-	float					mRadius = 0.0f;
+	decimal					mRadius = C0;
 };
 
 JPH_NAMESPACE_END

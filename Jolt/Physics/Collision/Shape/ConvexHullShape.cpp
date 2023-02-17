@@ -46,7 +46,7 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 	using Faces = Array<BuilderFace *>;
 	
 	// Check convex radius
-	if (mConvexRadius < 0.0f)
+	if (mConvexRadius < C0)
 	{
 		outResult.SetError("Invalid convex radius");
 		return;
@@ -67,10 +67,10 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 	if (result == ConvexHullBuilder::EResult::Success)
 	{
 		ConvexHullBuilder::Face *max_error_face;
-		float max_error_distance, coplanar_distance;
+		decimal max_error_distance, coplanar_distance;
 		int max_error_idx;
 		builder.DetermineMaxError(max_error_face, max_error_distance, max_error_idx, coplanar_distance);
-		if (max_error_distance > 4.0f * max(coplanar_distance, inSettings.mHullTolerance)) // Coplanar distance could be bigger than the allowed tolerance if the points are far apart
+		if (max_error_distance > decimal(4.0f) * max(coplanar_distance, inSettings.mHullTolerance)) // Coplanar distance could be bigger than the allowed tolerance if the points are far apart
 		{
 			outResult.SetError(StringFormat("Hull building failed, point %d had an error of %g (relative to tolerance: %g)", max_error_idx, (double)max_error_distance, double(max_error_distance / inSettings.mHullTolerance)));
 			return;
@@ -84,7 +84,7 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 	// See: 
 	// - Why the inertia tensor is the inertia tensor - Jonathan Blow (http://number-none.com/blow/inertia/deriving_i.html)
 	// - How to find the inertia tensor (or other mass properties) of a 3D solid body represented by a triangle mesh (Draft) - Jonathan Blow, Atman J Binstock (http://number-none.com/blow/inertia/bb_inertia.doc)
-	Mat44 covariance_canonical(Vec4(1.0f / 60.0f, 1.0f / 120.0f, 1.0f / 120.0f, 0), Vec4(1.0f / 120.0f, 1.0f / 60.0f, 1.0f / 120.0f, 0), Vec4(1.0f / 120.0f, 1.0f / 120.0f, 1.0f / 60.0f, 0), Vec4(0, 0, 0, 1));
+	Mat44 covariance_canonical(Vec4(C1 / decimal(60.0f), C1 / decimal(120.0f), C1 / decimal(120.0f), C0), Vec4(C1 / decimal(120.0f), C1 / decimal(60.0f), C1 / decimal(120.0f), C0), Vec4(C1 / decimal(120.0f), C1 / decimal(120.0f), C1 / decimal(60.0f), C0), Vec4(C0, C0, C0, C1));
 	Mat44 covariance_matrix = Mat44::sZero();
 	for (BuilderFace *f : builder_faces)
 	{
@@ -103,10 +103,10 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 			Vec3 v3 = inSettings.mPoints[e->mStartIdx] - mCenterOfMass;
 
 			// Affine transform that transforms a unit tetrahedon (with vertices (0, 0, 0), (1, 0, 0), (0, 1, 0) and (0, 0, 1) to this tetrahedron
-			Mat44 a(Vec4(v1, 0), Vec4(v2, 0), Vec4(v3, 0), Vec4(0, 0, 0, 1));
+			Mat44 a(Vec4(v1, C0), Vec4(v2, C0), Vec4(v3, C0), Vec4(C0, C0, C0, C1));
 
 			// Calculate covariance matrix for this tetrahedron
-			float det_a = a.GetDeterminant3x3();
+			decimal det_a = a.GetDeterminant3x3();
 			Mat44 c = det_a * (a * covariance_canonical * a.Transposed());
 
 			// Add it
@@ -207,12 +207,12 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 			// Find the 3 normals that form the largest tetrahedron
 			// The largest tetrahedron we can get is ((1, 0, 0) x (0, 1, 0)) . (0, 0, 1) = 1, if the volume is only 5% of that,
 			// the three vectors are too coplanar and we fall back to using only 2 plane normals
-			float biggest_volume = 0.05f; 
+			decimal biggest_volume = decimal(0.05f); 
 			int best3[3] = { -1, -1, -1 };
 			
 			// When using 2 normals, we get the two with the biggest angle between them with a minimal difference of 1 degree
 			// otherwise we fall back to just using 1 plane normal
-			float smallest_dot = Cos(DegreesToRadians(1.0f));
+			decimal smallest_dot = Cos(DegreesToRadians(C1));
 			int best2[2] = { -1, -1 };
 
 			for (int face1 = 0; face1 < (int)faces.size(); ++face1)
@@ -224,7 +224,7 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 					Vec3 cross = normal1.Cross(normal2);
 
 					// Determine the 2 face normals that are most apart
-					float dot = normal1.Dot(normal2);
+					decimal dot = normal1.Dot(normal2);
 					if (dot < smallest_dot)
 					{
 						smallest_dot = dot;
@@ -236,7 +236,7 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 					for (int face3 = face2 + 1; face3 < (int)faces.size(); ++face3)
 					{
 						Vec3 normal3 = mPlanes[faces[face3]].GetNormal();
-						float volume = abs(cross.Dot(normal3));
+						decimal volume = abs(cross.Dot(normal3));
 						if (volume > biggest_volume)
 						{
 							biggest_volume = volume;
@@ -265,17 +265,17 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 	}
 
 	// If the convex radius is already zero, there's no point in further reducing it
-	if (mConvexRadius > 0.0f)
+	if (mConvexRadius > C0)
 	{
 		// Find out how thin the hull is by walking over all planes and checking the thickness of the hull in that direction
-		float min_size = FLT_MAX;
+		decimal min_size = FIX_MAX;
 		for (const Plane &plane : mPlanes)
 		{
 			// Take the point that is furthest away from the plane as thickness of this hull
-			float max_dist = 0.0f;
+			decimal max_dist = C0;
 			for (const Point &point : mPoints)
 			{
-				float dist = -plane.SignedDistance(point.mPosition); // Point is always behind plane, so we need to negate
+				decimal dist = -plane.SignedDistance(point.mPosition); // Point is always behind plane, so we need to negate
 				if (dist > max_dist)
 					max_dist = dist;
 			}
@@ -283,11 +283,11 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 		}
 
 		// We need to fit in 2x the convex radius in min_size, so reduce the convex radius if it's bigger than that
-		mConvexRadius = min(mConvexRadius, 0.5f * min_size);
+		mConvexRadius = min(mConvexRadius, C0P5 * min_size);
 	}
 
 	// Now walk over all points and see if we have to further reduce the convex radius because of sharp edges
-	if (mConvexRadius > 0.0f)
+	if (mConvexRadius > C0)
 	{
 		for (const Point &point : mPoints)
 			if (point.mNumFaces != 1) // If we have a single face, shifting back is easy and we don't need to reduce the convex radius
@@ -304,7 +304,7 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 					p3 = mPlanes[point.mFaces[2]];
 
 					// All 3 planes will be offset by the convex radius
-					offset_mask = Vec3::sReplicate(1); 
+					offset_mask = Vec3::sReplicate(C1); 
 				}
 				else
 				{
@@ -313,7 +313,7 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 					p3 = Plane::sFromPointAndNormal(point.mPosition, p1.GetNormal().Cross(p2.GetNormal()));
 
 					// Only the first and 2nd plane will be offset, the 3rd plane is only there to guide the intersection point
-					offset_mask = Vec3(1, 1, 0); 
+					offset_mask = Vec3(C1, C1, C0); 
 				}
 
 				// Plane equation: point . normal + constant = 0
@@ -327,27 +327,27 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 				// Where offset = -n^-1 (1, 1, 1) or -n^-1 (1, 1, 0) in case only the first 2 planes are offset
 				// The error that is introduced by a convex radius r is: error = r * |offset| - r
 				// So the max convex radius given error is: r = error / (|offset| - 1)
-				Mat44 n = Mat44(Vec4(p1.GetNormal(), 0), Vec4(p2.GetNormal(), 0), Vec4(p3.GetNormal(), 0), Vec4(0, 0, 0, 1)).Transposed();
-				float det_n = n.GetDeterminant3x3();
-				if (det_n == 0.0f)
+				Mat44 n = Mat44(Vec4(p1.GetNormal(), C0), Vec4(p2.GetNormal(), C0), Vec4(p3.GetNormal(), C0), Vec4(C0, C0, C0, C1)).Transposed();
+				decimal det_n = n.GetDeterminant3x3();
+				if (det_n == C0)
 				{
 					// If the determinant is zero, the matrix is not invertible so no solution exists to move the point backwards and we have to choose a convex radius of zero
-					mConvexRadius = 0.0f;
+					mConvexRadius = C0;
 					break;
 				}
 				Mat44 adj_n = n.Adjointed3x3();
-				float offset = ((adj_n * offset_mask) / det_n).Length();
-				JPH_ASSERT(offset > 1.0f);
-				float max_convex_radius = inSettings.mMaxErrorConvexRadius / (offset - 1.0f);
+				decimal offset = ((adj_n * offset_mask) / det_n).Length();
+				JPH_ASSERT(offset > C1);
+				decimal max_convex_radius = inSettings.mMaxErrorConvexRadius / (offset - C1);
 				mConvexRadius = min(mConvexRadius, max_convex_radius);
 			}
 		}
 
 	// Calculate the inner radius by getting the minimum distance from the origin to the planes of the hull
-	mInnerRadius = FLT_MAX;
+	mInnerRadius = FIX_MAX;
 	for (const Plane &p : mPlanes)
 		mInnerRadius = min(mInnerRadius, -p.GetConstant());
-	mInnerRadius = max(0.0f, mInnerRadius); // Clamp against zero, this should do nothing as the shape is centered around the center of mass but for flat convex hulls there may be numerical round off issues
+	mInnerRadius = max(C0, mInnerRadius); // Clamp against zero, this should do nothing as the shape is centered around the center of mass but for flat convex hulls there may be numerical round off issues
 
 	outResult.Set(this);
 }
@@ -356,14 +356,14 @@ MassProperties ConvexHullShape::GetMassProperties() const
 {
 	MassProperties p;
 
-	float density = GetDensity();
+	decimal density = GetDensity();
 
 	// Calculate mass
 	p.mMass = density * mVolume;
 
 	// Calculate inertia matrix
 	p.mInertia = density * mInertia;
-	p.mInertia(3, 3) = 1.0f;
+	p.mInertia(3, 3) = C1;
 	
 	return p;
 }
@@ -374,14 +374,14 @@ Vec3 ConvexHullShape::GetSurfaceNormal(const SubShapeID &inSubShapeID, Vec3Arg i
 
 	const Plane &first_plane = mPlanes[0];
 	Vec3 best_normal = first_plane.GetNormal();
-	float best_dist = abs(first_plane.SignedDistance(inLocalSurfacePosition));
+	decimal best_dist = abs(first_plane.SignedDistance(inLocalSurfacePosition));
 
 	// Find the face that has the shortest distance to the surface point
 	for (Array<Face>::size_type i = 1; i < mFaces.size(); ++i)
 	{
 		const Plane &plane = mPlanes[i];
 		Vec3 plane_normal = plane.GetNormal();
-		float dist = abs(plane.SignedDistance(inLocalSurfacePosition));
+		decimal dist = abs(plane.SignedDistance(inLocalSurfacePosition));
 		if (dist < best_dist)
 		{
 			best_dist = dist;
@@ -395,7 +395,7 @@ Vec3 ConvexHullShape::GetSurfaceNormal(const SubShapeID &inSubShapeID, Vec3Arg i
 class ConvexHullShape::HullNoConvex final : public Support
 {
 public:
-	explicit				HullNoConvex(float inConvexRadius) : 
+	explicit				HullNoConvex(decimal inConvexRadius) : 
 		mConvexRadius(inConvexRadius)
 	{ 
 		static_assert(sizeof(HullNoConvex) <= sizeof(SupportBuffer), "Buffer size too small"); 
@@ -405,13 +405,13 @@ public:
 	virtual Vec3			GetSupport(Vec3Arg inDirection) const override
 	{ 
 		// Find the point with the highest projection on inDirection
-		float best_dot = -FLT_MAX;
+		decimal best_dot = FIX_MIN;
 		Vec3 best_point = Vec3::sZero();
 	
 		for (Vec3 point : mPoints)
 		{
 			// Check if its support is bigger than the current max
-			float dot = point.Dot(inDirection);
+			decimal dot = point.Dot(inDirection);
 			if (dot > best_dot)
 			{
 				best_dot = dot;
@@ -422,7 +422,7 @@ public:
 		return best_point;
 	}
 
-	virtual float			GetConvexRadius() const override
+	virtual decimal			GetConvexRadius() const override
 	{
 		return mConvexRadius;
 	}
@@ -440,7 +440,7 @@ public:
 	}
 
 private:
-	float					mConvexRadius;
+	decimal					mConvexRadius;
 	PointsArray				mPoints;
 };
 
@@ -457,13 +457,13 @@ public:
 	virtual Vec3			GetSupport(Vec3Arg inDirection) const override
 	{ 
 		// Find the point with the highest projection on inDirection
-		float best_dot = -FLT_MAX;
+		decimal best_dot = FIX_MIN;
 		Vec3 best_point = Vec3::sZero();
 	
 		for (const Point &point : mShape->mPoints)
 		{
 			// Check if its support is bigger than the current max
-			float dot = point.mPosition.Dot(inDirection);
+			decimal dot = point.mPosition.Dot(inDirection);
 			if (dot > best_dot)
 			{
 				best_dot = dot;
@@ -474,9 +474,9 @@ public:
 		return best_point;
 	}
 
-	virtual float			GetConvexRadius() const override
+	virtual decimal			GetConvexRadius() const override
 	{
-		return 0.0f;
+		return C0;
 	}
 
 private:
@@ -497,7 +497,7 @@ public:
 	virtual Vec3			GetSupport(Vec3Arg inDirection) const override
 	{ 
 		// Find the point with the highest projection on inDirection
-		float best_dot = -FLT_MAX;
+		decimal best_dot = FIX_MIN;
 		Vec3 best_point = Vec3::sZero();
 	
 		for (const Point &point : mShape->mPoints)
@@ -506,7 +506,7 @@ public:
 			Vec3 pos = mScale * point.mPosition;
 
 			// Check if its support is bigger than the current max
-			float dot = pos.Dot(inDirection);
+			decimal dot = pos.Dot(inDirection);
 			if (dot > best_dot)
 			{
 				best_dot = dot;
@@ -517,9 +517,9 @@ public:
 		return best_point;
 	}
 
-	virtual float			GetConvexRadius() const override
+	virtual decimal			GetConvexRadius() const override
 	{
-		return 0.0f;
+		return C0;
 	}
 
 private:
@@ -530,7 +530,7 @@ private:
 const ConvexShape::Support *ConvexHullShape::GetSupportFunction(ESupportMode inMode, SupportBuffer &inBuffer, Vec3Arg inScale) const
 {
 	// If there's no convex radius, we don't need to shrink the hull
-	if (mConvexRadius == 0.0f)
+	if (mConvexRadius == C0)
 	{
 		if (ScaleHelpers::IsNotScaled(inScale))
 			return new (&inBuffer) HullWithConvex(this);
@@ -599,7 +599,7 @@ const ConvexShape::Support *ConvexHullShape::GetSupportFunction(ESupportMode inM
 		else
 		{
 			// Calculate scaled convex radius
-			float convex_radius = ScaleHelpers::ScaleConvexRadius(mConvexRadius, inScale);
+			decimal convex_radius = ScaleHelpers::ScaleConvexRadius(mConvexRadius, inScale);
 
 			// Create new support function
 			HullNoConvex *hull = new (&inBuffer) HullNoConvex(convex_radius);
@@ -679,13 +679,13 @@ void ConvexHullShape::GetSupportingFace(const SubShapeID &inSubShapeID, Vec3Arg 
 	// Transforming a direction with matrix M is done through multiplying by (M^-1)^T
 	// In this case M is a diagonal matrix with the scale vector, so we need to multiply our normal by 1 / scale and renormalize afterwards
 	Vec3 plane0_normal = inv_scale * mPlanes[0].GetNormal();
-	float best_dot = plane0_normal.Dot(inDirection) / plane0_normal.Length();
+	decimal best_dot = plane0_normal.Dot(inDirection) / plane0_normal.Length();
 	int best_face_idx = 0;
 
 	for (Array<Plane>::size_type i = 1; i < mPlanes.size(); ++i)
 	{
 		Vec3 plane_normal = inv_scale * mPlanes[i].GetNormal();
-		float dot = plane_normal.Dot(inDirection) / plane_normal.Length();
+		decimal dot = plane_normal.Dot(inDirection) / plane_normal.Length();
 		if (dot < best_dot)
 		{
 			best_dot = dot;
@@ -720,7 +720,7 @@ void ConvexHullShape::GetSupportingFace(const SubShapeID &inSubShapeID, Vec3Arg 
 	}
 }
 
-void ConvexHullShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const
+void ConvexHullShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const
 {
 	// Trivially calculate total volume
 	Vec3 abs_scale = inScale.Abs();
@@ -737,7 +737,7 @@ void ConvexHullShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3A
 	if (submerged_vol_calc.AreAllAbove())
 	{
 		// We're above the water
-		outSubmergedVolume = 0.0f;
+		outSubmergedVolume = C0;
 		outCenterOfBuoyancy = Vec3::sZero();
 	}
 	else if (submerged_vol_calc.AreAllBelow())
@@ -797,7 +797,7 @@ void ConvexHullShape::GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3A
 #ifdef JPH_DEBUG_RENDERER
 	// Draw center of buoyancy
 	if (sDrawSubmergedVolumes)
-		DebugRenderer::sInstance->DrawWireSphere(inBaseOffset + outCenterOfBuoyancy, 0.05f, Color::sRed, 1);
+		DebugRenderer::sInstance->DrawWireSphere(inBaseOffset + outCenterOfBuoyancy, decimal(0.05f), Color::sRed, 1);
 #endif // JPH_DEBUG_RENDERER
 }
 
@@ -855,7 +855,7 @@ void ConvexHullShape::DrawShrunkShape(DebugRenderer *inRenderer, RMat44Arg inCen
 {
 	// Get the shrunk points
 	SupportBuffer buffer;
-	const HullNoConvex *support = mConvexRadius > 0.0f? static_cast<const HullNoConvex *>(GetSupportFunction(ESupportMode::ExcludeConvexRadius, buffer, inScale)) : nullptr;
+	const HullNoConvex *support = mConvexRadius > C0? static_cast<const HullNoConvex *>(GetSupportFunction(ESupportMode::ExcludeConvexRadius, buffer, inScale)) : nullptr;
 
 	RMat44 transform = inCenterOfMassTransform * Mat44::sScale(inScale);
 
@@ -870,15 +870,15 @@ void ConvexHullShape::DrawShrunkShape(DebugRenderer *inRenderer, RMat44Arg inCen
 
 		// Draw face normals that are contributing
 		for (int i = 0; i < point.mNumFaces; ++i)
-			inRenderer->DrawLine(position, position + 0.1f * mPlanes[point.mFaces[i]].GetNormal(), Color::sYellow);
+			inRenderer->DrawLine(position, position + decimal(0.1f) * mPlanes[point.mFaces[i]].GetNormal(), Color::sYellow);
 
 		// Draw point index
-		inRenderer->DrawText3D(position, ConvertToString(p), Color::sWhite, 0.1f);
+		inRenderer->DrawText3D(position, ConvertToString(p), Color::sWhite, decimal(0.1f));
 	}
 }
 #endif // JPH_DEBUG_RENDERER
 
-bool ConvexHullShape::CastRayHelper(const RayCast &inRay, float &outMinFraction, float &outMaxFraction) const
+bool ConvexHullShape::CastRayHelper(const RayCast &inRay, decimal &outMinFraction, decimal &outMaxFraction) const
 {
 	if (mFaces.size() == 2)
 	{
@@ -887,17 +887,17 @@ bool ConvexHullShape::CastRayHelper(const RayCast &inRay, float &outMinFraction,
 		// Check if plane is parallel to ray
 		const Plane &p = mPlanes.front();
 		Vec3 plane_normal = p.GetNormal();
-		float direction_projection = inRay.mDirection.Dot(plane_normal);
-		if (abs(direction_projection) >= 1.0e-12f)
+		decimal direction_projection = inRay.mDirection.Dot(plane_normal);
+		if (abs(direction_projection) >= decimal(1.0e-12f))
 		{
 			// Calculate intersection point
-			float distance_to_plane = inRay.mOrigin.Dot(plane_normal) + p.GetConstant();
-			float fraction = -distance_to_plane / direction_projection;
-			if (fraction < 0.0f || fraction > 1.0f)
+			decimal distance_to_plane = inRay.mOrigin.Dot(plane_normal) + p.GetConstant();
+			decimal fraction = -distance_to_plane / direction_projection;
+			if (fraction < C0 || fraction > C1)
 			{
 				// Does not hit plane, no hit
-				outMinFraction = 0.0f;
-				outMaxFraction = 1.0f + FLT_EPSILON;
+				outMinFraction = C0;
+				outMaxFraction = C1 + FIX_EPSILON;
 				return false;
 			}
 			Vec3 intersection_point = inRay.mOrigin + fraction * inRay.mDirection;
@@ -910,11 +910,11 @@ bool ConvexHullShape::CastRayHelper(const RayCast &inRay, float &outMinFraction,
 			for (const uint8 *v = first_vtx; v < end_vtx; ++v)
 			{
 				Vec3 p2 = mPoints[*v].mPosition;
-				if ((p2 - p1).Cross(intersection_point - p1).Dot(plane_normal) < 0.0f)
+				if ((p2 - p1).Cross(intersection_point - p1).Dot(plane_normal) < C0)
 				{
 					// Outside polygon, no hit
-					outMinFraction = 0.0f;
-					outMaxFraction = 1.0f + FLT_EPSILON;
+					outMinFraction = C0;
+					outMaxFraction = C1 + FIX_EPSILON;
 					return false;
 				}
 				p1 = p2;
@@ -928,8 +928,8 @@ bool ConvexHullShape::CastRayHelper(const RayCast &inRay, float &outMinFraction,
 		else
 		{
 			// Parallel ray doesn't hit
-			outMinFraction = 0.0f;
-			outMaxFraction = 1.0f + FLT_EPSILON;
+			outMinFraction = C0;
+			outMaxFraction = C1 + FIX_EPSILON;
 			return false;
 		}
 	}
@@ -938,24 +938,24 @@ bool ConvexHullShape::CastRayHelper(const RayCast &inRay, float &outMinFraction,
 		// Clip ray against all planes
 		int fractions_set = 0;
 		bool all_inside = true;
-		float min_fraction = 0.0f, max_fraction = 1.0f + FLT_EPSILON;
+		decimal min_fraction = C0, max_fraction = C1 + FIX_EPSILON;
 		for (const Plane &p : mPlanes)
 		{
 			// Check if the ray origin is behind this plane
 			Vec3 plane_normal = p.GetNormal();
-			float distance_to_plane = inRay.mOrigin.Dot(plane_normal) + p.GetConstant();
-			bool is_outside = distance_to_plane > 0.0f;
+			decimal distance_to_plane = inRay.mOrigin.Dot(plane_normal) + p.GetConstant();
+			bool is_outside = distance_to_plane > C0;
 			all_inside &= !is_outside;
 
 			// Check if plane is parallel to ray
-			float direction_projection = inRay.mDirection.Dot(plane_normal);
-			if (abs(direction_projection) >= 1.0e-12f)
+			decimal direction_projection = inRay.mDirection.Dot(plane_normal);
+			if (abs(direction_projection) >= decimal(1.0e-12f))
 			{
 				// Get intersection fraction between ray and plane
-				float fraction = -distance_to_plane / direction_projection;
+				decimal fraction = -distance_to_plane / direction_projection;
 
 				// Update interval of ray that is inside the hull
-				if (direction_projection < 0.0f)
+				if (direction_projection < C0)
 				{
 					min_fraction = max(fraction, min_fraction);
 					fractions_set |= 1;
@@ -978,13 +978,13 @@ bool ConvexHullShape::CastRayHelper(const RayCast &inRay, float &outMinFraction,
 			outMaxFraction = max_fraction;
 
 			// Test if the infinite ray intersects with the hull (the length will be checked later)
-			return min_fraction <= max_fraction && max_fraction >= 0.0f;
+			return min_fraction <= max_fraction && max_fraction >= C0;
 		}
 		else
 		{
 			// Degenerate case, either the ray is parallel to all planes or the ray has zero length
-			outMinFraction = 0.0f;
-			outMaxFraction = 1.0f + FLT_EPSILON;
+			outMinFraction = C0;
+			outMaxFraction = C1 + FIX_EPSILON;
 
 			// Return if the origin is inside the hull
 			return all_inside;
@@ -995,7 +995,7 @@ bool ConvexHullShape::CastRayHelper(const RayCast &inRay, float &outMinFraction,
 bool ConvexHullShape::CastRay(const RayCast &inRay, const SubShapeIDCreator &inSubShapeIDCreator, RayCastResult &ioHit) const
 {
 	// Determine if ray hits the shape
-	float min_fraction, max_fraction;
+	decimal min_fraction, max_fraction;
 	if (CastRayHelper(inRay, min_fraction, max_fraction)
 		&& min_fraction < ioHit.mFraction) // Check if this is a closer hit
 	{
@@ -1014,7 +1014,7 @@ void ConvexHullShape::CastRay(const RayCast &inRay, const RayCastSettings &inRay
 		return;
 
 	// Determine if ray hits the shape
-	float min_fraction, max_fraction;
+	decimal min_fraction, max_fraction;
 	if (CastRayHelper(inRay, min_fraction, max_fraction)
 		&& min_fraction < ioCollector.GetEarlyOutFraction()) // Check if this is closer than the early out fraction
 	{
@@ -1024,7 +1024,7 @@ void ConvexHullShape::CastRay(const RayCast &inRay, const RayCastSettings &inRay
 		hit.mSubShapeID2 = inSubShapeIDCreator.GetID();
 
 		// Check front side hit
-		if (inRayCastSettings.mTreatConvexAsSolid || min_fraction > 0.0f)
+		if (inRayCastSettings.mTreatConvexAsSolid || min_fraction > C0)
 		{
 			hit.mFraction = min_fraction;
 			ioCollector.AddHit(hit);
@@ -1048,7 +1048,7 @@ void ConvexHullShape::CollidePoint(Vec3Arg inPoint, const SubShapeIDCreator &inS
 
 	// Check if point is behind all planes
 	for (const Plane &p : mPlanes)
-		if (p.SignedDistance(inPoint) > 0.0f)
+		if (p.SignedDistance(inPoint) > C0)
 			return;
 
 	// Point is inside

@@ -68,7 +68,7 @@ public:
 	virtual uint					GetSubShapeIDBitsRecursive() const override;
 
 	// See Shape::GetInnerRadius
-	virtual float					GetInnerRadius() const override								{ return 0.0f; }
+	virtual decimal					GetInnerRadius() const override								{ return C0; }
 
 	// See Shape::GetMassProperties
 	virtual MassProperties			GetMassProperties() const override;
@@ -110,7 +110,7 @@ public:
 	virtual int						GetTrianglesNext(GetTrianglesContext &ioContext, int inMaxTrianglesRequested, Float3 *outTriangleVertices, const PhysicsMaterial **outMaterials = nullptr) const override;
 
 	// See Shape::GetSubmergedVolume
-	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, float &outTotalVolume, float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override { JPH_ASSERT(false, "Not supported"); }
+	virtual void					GetSubmergedVolume(Mat44Arg inCenterOfMassTransform, Vec3Arg inScale, const Plane &inSurface, decimal &outTotalVolume, decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy JPH_IF_DEBUG_RENDERER(, RVec3Arg inBaseOffset)) const override { JPH_ASSERT(false, "Not supported"); }
 
 	// See Shape
 	virtual void					SaveBinaryState(StreamOut &inStream) const override;
@@ -121,7 +121,7 @@ public:
 	virtual Stats					GetStats() const override;
 
 	// See Shape::GetVolume
-	virtual float					GetVolume() const override									{ return 0; }
+	virtual decimal					GetVolume() const override									{ return C0; }
 
 #ifdef JPH_DEBUG_RENDERER
 	// Settings

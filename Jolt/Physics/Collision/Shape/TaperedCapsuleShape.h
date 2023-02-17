@@ -19,10 +19,10 @@ class TaperedCapsuleShapeSettings final : public ConvexShapeSettings
 							TaperedCapsuleShapeSettings() = default;
 
 	/// Create a tapered capsule centered around the origin with one sphere cap at (0, -inHalfHeightOfTaperedCylinder, 0) with radius inBottomRadius and the other at (0, inHalfHeightOfTaperedCylinder, 0) with radius inTopRadius
-							TaperedCapsuleShapeSettings(float inHalfHeightOfTaperedCylinder, float inTopRadius, float inBottomRadius, const PhysicsMaterial *inMaterial = nullptr);
+							TaperedCapsuleShapeSettings(decimal inHalfHeightOfTaperedCylinder, decimal inTopRadius, decimal inBottomRadius, const PhysicsMaterial *inMaterial = nullptr);
 
 	/// Check if the settings are valid
-	bool					IsValid() const															{ return mTopRadius > 0.0f && mBottomRadius > 0.0f && mHalfHeightOfTaperedCylinder >= 0.0f; }
+	bool					IsValid() const															{ return mTopRadius > C0 && mBottomRadius > C0 && mHalfHeightOfTaperedCylinder >= C0; }
 
 	/// Checks if the settings of this tapered capsule make this shape a sphere
 	bool					IsSphere() const;
@@ -30,9 +30,9 @@ class TaperedCapsuleShapeSettings final : public ConvexShapeSettings
 	// See: ShapeSettings
 	virtual ShapeResult		Create() const override;
 
-	float					mHalfHeightOfTaperedCylinder = 0.0f;
-	float					mTopRadius = 0.0f;
-	float					mBottomRadius = 0.0f;
+	decimal					mHalfHeightOfTaperedCylinder = C0;
+	decimal					mTopRadius = C0;
+	decimal					mBottomRadius = C0;
 };
 
 /// A capsule with different top and bottom radii
@@ -56,7 +56,7 @@ public:
 	using Shape::GetWorldSpaceBounds;
 
 	// See Shape::GetInnerRadius
-	virtual float			GetInnerRadius() const override											{ return min(mTopRadius, mBottomRadius); }
+	virtual decimal			GetInnerRadius() const override											{ return min(mTopRadius, mBottomRadius); }
 
 	// See Shape::GetMassProperties
 	virtual MassProperties	GetMassProperties() const override;
@@ -85,7 +85,7 @@ public:
 	virtual Stats			GetStats() const override												{ return Stats(sizeof(*this), 0); } 
 
 	// See Shape::GetVolume
-	virtual float			GetVolume() const override												{ return GetLocalBounds().GetVolume(); } // Volume is approximate!
+	virtual decimal			GetVolume() const override												{ return GetLocalBounds().GetVolume(); } // Volume is approximate!
 
 	// See Shape::IsValidScale
 	virtual bool			IsValidScale(Vec3Arg inScale) const override;
@@ -105,13 +105,13 @@ private:
 	AABox					GetInertiaApproximation() const;
 
 	Vec3					mCenterOfMass = Vec3::sZero();
-	float					mTopRadius = 0.0f;
-	float					mBottomRadius = 0.0f;
-	float					mTopCenter = 0.0f;
-	float					mBottomCenter = 0.0f;
-	float					mConvexRadius = 0.0f;
-	float					mSinAlpha = 0.0f;
-	float					mTanAlpha = 0.0f;
+	decimal					mTopRadius = C0;
+	decimal					mBottomRadius = C0;
+	decimal					mTopCenter = C0;
+	decimal					mBottomCenter = C0;
+	decimal					mConvexRadius = C0;
+	decimal					mSinAlpha = C0;
+	decimal					mTanAlpha = C0;
 
 #ifdef JPH_DEBUG_RENDERER
 	mutable DebugRenderer::GeometryRef mGeometry;

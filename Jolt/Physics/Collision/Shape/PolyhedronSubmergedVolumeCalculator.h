@@ -18,21 +18,21 @@ class PolyhedronSubmergedVolumeCalculator
 private:
 	// Calculate submerged volume * 6 and center of mass * 4 for a tetrahedron with 4 vertices submerged
 	// inV1 .. inV4 are submerged
-	inline static void	sTetrahedronVolume4(Vec3Arg inV1, Vec3Arg inV2, Vec3Arg inV3, Vec3Arg inV4, float &outVolumeTimes6, Vec3 &outCenterTimes4)
+	inline static void	sTetrahedronVolume4(Vec3Arg inV1, Vec3Arg inV2, Vec3Arg inV3, Vec3Arg inV4, decimal &outVolumeTimes6, Vec3 &outCenterTimes4)
 	{
 		// Calculate center of mass and mass of this tetrahedron,
 		// see: https://en.wikipedia.org/wiki/Tetrahedron#Volume
-		outVolumeTimes6 = max((inV1 - inV4).Dot((inV2 - inV4).Cross(inV3 - inV4)), 0.0f); // All contributions should be positive because we use a reference point that is on the surface of the hull
+		outVolumeTimes6 = max((inV1 - inV4).Dot((inV2 - inV4).Cross(inV3 - inV4)), C0); // All contributions should be positive because we use a reference point that is on the surface of the hull
 		outCenterTimes4 = inV1 + inV2 + inV3 + inV4;
 	}
 
 	// Get the intersection point with a plane.
 	// inV1 is inD1 distance away from the plane, inV2 is inD2 distance away from the plane
-	inline static Vec3	sGetPlaneIntersection(Vec3Arg inV1, float inD1, Vec3Arg inV2, float inD2)
+	inline static Vec3	sGetPlaneIntersection(Vec3Arg inV1, decimal inD1, Vec3Arg inV2, decimal inD2)
 	{
 		JPH_ASSERT(Sign(inD1) != Sign(inD2), "Assuming both points are on opposite ends of the plane");
-		float delta = inD1 - inD2;
-		if (abs(delta) < 1.0e-6f)
+		decimal delta = inD1 - inD2;
+		if (abs(delta) < decimal(1.0e-6f))
 			return inV1; // Parallel to plane, just pick a point
 		else	
 			return inV1 + inD1 * (inV2 - inV1) / delta;
@@ -41,7 +41,7 @@ private:
 	// Calculate submerged volume * 6 and center of mass * 4 for a tetrahedron with 1 vertex submerged
 	// inV1 is submerged, inV2 .. inV4 are not
 	// inD1 .. inD4 are the distances from the points to the plane
-	inline JPH_IF_NOT_DEBUG_RENDERER(static) void sTetrahedronVolume1(Vec3Arg inV1, float inD1, Vec3Arg inV2, float inD2, Vec3Arg inV3, float inD3, Vec3Arg inV4, float inD4, float &outVolumeTimes6, Vec3 &outCenterTimes4)
+	inline JPH_IF_NOT_DEBUG_RENDERER(static) void sTetrahedronVolume1(Vec3Arg inV1, decimal inD1, Vec3Arg inV2, decimal inD2, Vec3Arg inV3, decimal inD3, Vec3Arg inV4, decimal inD4, decimal &outVolumeTimes6, Vec3 &outCenterTimes4)
 	{
 		// A tetrahedron with 1 point submerged is cut along 3 edges forming a new tetrahedron
 		Vec3 v2 = sGetPlaneIntersection(inV1, inD1, inV2, inD2);
@@ -67,7 +67,7 @@ private:
 	// Calculate submerged volume * 6 and center of mass * 4 for a tetrahedron with 2 vertices submerged
 	// inV1, inV2 are submerged, inV3, inV4 are not
 	// inD1 .. inD4 are the distances from the points to the plane
-	inline JPH_IF_NOT_DEBUG_RENDERER(static) void sTetrahedronVolume2(Vec3Arg inV1, float inD1, Vec3Arg inV2, float inD2, Vec3Arg inV3, float inD3, Vec3Arg inV4, float inD4, float &outVolumeTimes6, Vec3 &outCenterTimes4)
+	inline JPH_IF_NOT_DEBUG_RENDERER(static) void sTetrahedronVolume2(Vec3Arg inV1, decimal inD1, Vec3Arg inV2, decimal inD2, Vec3Arg inV3, decimal inD3, Vec3Arg inV4, decimal inD4, decimal &outVolumeTimes6, Vec3 &outCenterTimes4)
 	{
 		// A tetrahedron with 2 points submerged is cut along 4 edges forming a quad
 		Vec3 c = sGetPlaneIntersection(inV1, inD1, inV3, inD3);
@@ -94,20 +94,20 @@ private:
 		// We pick point c as reference (which is on the cut off surface)
 		// This leaves us with three tetrahedrons to sum up (any faces that are in the same plane as c will have zero volume)
 		Vec3 center1, center2, center3;
-		float volume1, volume2, volume3;
+		decimal volume1, volume2, volume3;
 		sTetrahedronVolume4(e, f, inV2, c, volume1, center1);
 		sTetrahedronVolume4(e, inV1, d, c, volume2, center2);
 		sTetrahedronVolume4(e, inV2, inV1, c, volume3, center3);
 
 		// Tally up the totals
 		outVolumeTimes6 = volume1 + volume2 + volume3;
-		outCenterTimes4 = outVolumeTimes6 > 0.0f? (volume1 * center1 + volume2 * center2 + volume3 * center3) / outVolumeTimes6 : Vec3::sZero();
+		outCenterTimes4 = outVolumeTimes6 > C0? (volume1 * center1 + volume2 * center2 + volume3 * center3) / outVolumeTimes6 : Vec3::sZero();
 	}
 
 	// Calculate submerged volume * 6 and center of mass * 4 for a tetrahedron with 3 vertices submerged
 	// inV1, inV2, inV3 are submerged, inV4 is not
 	// inD1 .. inD4 are the distances from the points to the plane
-	inline JPH_IF_NOT_DEBUG_RENDERER(static) void sTetrahedronVolume3(Vec3Arg inV1, float inD1, Vec3Arg inV2, float inD2, Vec3Arg inV3, float inD3, Vec3Arg inV4, float inD4, float &outVolumeTimes6, Vec3 &outCenterTimes4)
+	inline JPH_IF_NOT_DEBUG_RENDERER(static) void sTetrahedronVolume3(Vec3Arg inV1, decimal inD1, Vec3Arg inV2, decimal inD2, Vec3Arg inV3, decimal inD3, Vec3Arg inV4, decimal inD4, decimal &outVolumeTimes6, Vec3 &outCenterTimes4)
 	{
 		// A tetrahedron with 1 point above the surface is cut along 3 edges forming a new tetrahedron
 		Vec3 v1 = sGetPlaneIntersection(inV1, inD1, inV4, inD4);
@@ -128,7 +128,7 @@ private:
 	#endif // JPH_DEBUG_RENDERER
 
 		Vec3 dry_center, total_center;
-		float dry_volume, total_volume;
+		decimal dry_volume, total_volume;
 
 		// We first calculate the part that is above the surface
 		sTetrahedronVolume4(v1, v2, v3, inV4, dry_volume, dry_center);
@@ -137,8 +137,8 @@ private:
 		sTetrahedronVolume4(inV1, inV2, inV3, inV4, total_volume, total_center);
 
 		// From this we can calculate the center and volume of the submerged part
-		outVolumeTimes6 = max(total_volume - dry_volume, 0.0f);
-		outCenterTimes4 = outVolumeTimes6 > 0.0f? (total_center * total_volume - dry_center * dry_volume) / outVolumeTimes6 : Vec3::sZero();
+		outVolumeTimes6 = max(total_volume - dry_volume, C0);
+		outCenterTimes4 = outVolumeTimes6 > C0? (total_center * total_volume - dry_center * dry_volume) / outVolumeTimes6 : Vec3::sZero();
 	}
 
 public:
@@ -147,7 +147,7 @@ public:
 	{
 	public:
 		Vec3			mPosition;						///< World space position of vertex
-		float			mDistanceToSurface;				///< Signed distance to the surface (> 0 is above, < 0 is below)
+		decimal			mDistanceToSurface;				///< Signed distance to the surface (> 0 is above, < 0 is below)
 		bool			mAboveSurface;					///< If the point is above the surface (mDistanceToSurface > 0)
 	};
 
@@ -172,13 +172,13 @@ public:
 #endif // JPH_DEBUG_RENDERER
 	{
 		// Convert the points to world space and determine the distance to the surface
-		float reference_dist = FLT_MAX;
+		decimal reference_dist = FIX_MAX;
 		for (int p = 0; p < inNumPoints; ++p)
 		{
 			// Calculate values
 			Vec3 transformed_point = inTransform * *reinterpret_cast<const Vec3 *>(reinterpret_cast<const uint8 *>(inPoints) + p * inPointStride);
-			float dist = inSurface.SignedDistance(transformed_point);
-			bool above = dist >= 0.0f;
+			decimal dist = inSurface.SignedDistance(transformed_point);
+			bool above = dist >= C0;
 
 			// Keep track if all are above or below
 			mAllAbove &= above;
@@ -231,7 +231,7 @@ public:
 		// Determine which vertices are submerged
 		uint code = (p1.mAboveSurface? 0 : 0b001) | (p2.mAboveSurface? 0 : 0b010) | (p3.mAboveSurface? 0 : 0b100);
 
-		float volume;
+		decimal volume;
 		Vec3 center;
 		switch (code)
 		{
@@ -278,7 +278,7 @@ public:
 		default:
 			// Should not be possible
 			JPH_ASSERT(false);
-			volume = 0.0f;
+			volume = C0;
 			center = Vec3::sZero();
 			break;
 		}
@@ -288,10 +288,10 @@ public:
 	}
 
 	/// Call after all faces have been added. Returns the submerged volume and the center of buoyancy for the submerged volume.
-	void				GetResult(float &outSubmergedVolume, Vec3 &outCenterOfBuoyancy) const
+	void				GetResult(decimal &outSubmergedVolume, Vec3 &outCenterOfBuoyancy) const
 	{
-		outCenterOfBuoyancy = mSubmergedVolume > 0.0f? mCenterOfBuoyancy / (4.0f * mSubmergedVolume) : Vec3::sZero(); // Do this before dividing submerged volume by 6 to get correct weight factor
-		outSubmergedVolume = mSubmergedVolume / 6.0f;
+		outCenterOfBuoyancy = mSubmergedVolume > C0? mCenterOfBuoyancy / (decimal(4.0f) * mSubmergedVolume) : Vec3::sZero(); // Do this before dividing submerged volume by 6 to get correct weight factor
+		outSubmergedVolume = mSubmergedVolume / decimal(6.0f);
 	}
 
 private:
@@ -306,7 +306,7 @@ private:
 	int					mReferencePointIdx = 0;
 
 	// Aggregator for submerged volume and center of buoyancy
-	float				mSubmergedVolume = 0.0f;
+	decimal				mSubmergedVolume = C0;
 	Vec3				mCenterOfBuoyancy = Vec3::sZero();
 
 #ifdef JPH_DEBUG_RENDERER

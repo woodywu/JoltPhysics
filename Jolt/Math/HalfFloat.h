@@ -9,7 +9,7 @@ JPH_NAMESPACE_BEGIN
 
 using HalfFloat = uint16;
 
-// Define half float constant values
+// Define half decimal constant values
 static constexpr HalfFloat HALF_FLT_MAX				= 0x7bff;
 static constexpr HalfFloat HALF_FLT_MAX_NEGATIVE	= 0xfbff;
 static constexpr HalfFloat HALF_FLT_INF				= 0x7c00;
@@ -19,7 +19,7 @@ static constexpr HalfFloat HALF_FLT_NANQ_NEGATIVE	= 0xfe00;
 
 namespace HalfFloatConversion {
 
-// Layout of a float
+// Layout of a decimal
 static constexpr int FLOAT_SIGN_POS = 31;
 static constexpr int FLOAT_EXPONENT_POS = 23;
 static constexpr int FLOAT_EXPONENT_BITS = 8;
@@ -29,7 +29,7 @@ static constexpr int FLOAT_MANTISSA_BITS = 23;
 static constexpr int FLOAT_MANTISSA_MASK = (1 << FLOAT_MANTISSA_BITS) - 1;
 static constexpr int FLOAT_EXPONENT_AND_MANTISSA_MASK = FLOAT_MANTISSA_MASK + (FLOAT_EXPONENT_MASK << FLOAT_EXPONENT_POS);
 
-// Layout of half float
+// Layout of half decimal
 static constexpr int HALF_FLT_SIGN_POS = 15;
 static constexpr int HALF_FLT_EXPONENT_POS = 10;
 static constexpr int HALF_FLT_EXPONENT_BITS = 5;
@@ -39,7 +39,7 @@ static constexpr int HALF_FLT_MANTISSA_BITS = 10;
 static constexpr int HALF_FLT_MANTISSA_MASK = (1 << HALF_FLT_MANTISSA_BITS) - 1;
 static constexpr int HALF_FLT_EXPONENT_AND_MANTISSA_MASK = HALF_FLT_MANTISSA_MASK + (HALF_FLT_EXPONENT_MASK << HALF_FLT_EXPONENT_POS);
 
-/// Define half-float rounding modes
+/// Define half-decimal rounding modes
 enum ERoundingMode
 {
 	ROUND_TO_NEG_INF,				///< Round to negative infinity
@@ -47,11 +47,11 @@ enum ERoundingMode
 	ROUND_TO_NEAREST,				///< Round to nearest value
 };
 
-/// Convert a float (32-bits) to a half float (16-bits), fallback version when no intrinsics available
+/// Convert a decimal (32-bits) to a half decimal (16-bits), fallback version when no intrinsics available
 template <int RoundingMode>
-inline HalfFloat FromFloatFallback(float inV)
+inline HalfFloat FromFloatFallback(decimal inV)
 {
-	// Reinterpret the float as an uint32
+	// Reinterpret the decimal as an uint32
 	uint32 value = BitCast<uint32>(inV);
 
 	// Extract exponent
@@ -60,14 +60,14 @@ inline HalfFloat FromFloatFallback(float inV)
 	// Extract mantissa
 	uint32 mantissa = value & FLOAT_MANTISSA_MASK;
 
-	// Extract the sign and move it into the right spot for the half float (so we can just or it in at the end)
+	// Extract the sign and move it into the right spot for the half decimal (so we can just or it in at the end)
 	HalfFloat hf_sign = HalfFloat(value >> (FLOAT_SIGN_POS - HALF_FLT_SIGN_POS)) & (1 << HALF_FLT_SIGN_POS);
 
 	// Check NaN or INF
 	if (exponent == FLOAT_EXPONENT_MASK) // NaN or INF
 		return hf_sign | (mantissa == 0? HALF_FLT_INF : HALF_FLT_NANQ);
 
-	// Rebias the exponent for half floats
+	// Rebias the exponent for half decimals
 	int rebiased_exponent = int(exponent) - FLOAT_EXPONENT_BIAS + HALF_FLT_EXPONENT_BIAS;
 
 	// Check overflow to infinity
@@ -95,12 +95,12 @@ inline HalfFloat FromFloatFallback(float inV)
 	}
 	else
 	{
-		// Normal half float
+		// Normal half decimal
 		hf_exponent = HalfFloat(rebiased_exponent << HALF_FLT_EXPONENT_POS);
 		shift = FLOAT_MANTISSA_BITS - HALF_FLT_MANTISSA_BITS;
 	}
 
-	// Compose the half float
+	// Compose the half decimal
 	HalfFloat hf_mantissa = HalfFloat(mantissa >> shift);
 	HalfFloat hf = hf_sign | hf_exponent | hf_mantissa;
 
@@ -126,9 +126,9 @@ inline HalfFloat FromFloatFallback(float inV)
 	return hf;
 }
 
-/// Convert a float (32-bits) to a half float (16-bits)
+/// Convert a decimal (32-bits) to a half decimal (16-bits)
 template <int RoundingMode>
-JPH_INLINE HalfFloat FromFloat(float inV)
+JPH_INLINE HalfFloat FromFloat(decimal inV)
 {
 #ifdef JPH_USE_F16C
 	union
@@ -155,16 +155,16 @@ JPH_INLINE HalfFloat FromFloat(float inV)
 #endif
 }
 
-/// Convert 4 half floats (lower 64 bits) to floats, fallback version when no intrinsics available
+/// Convert 4 half decimals (lower 64 bits) to decimals, fallback version when no intrinsics available
 inline Vec4 ToFloatFallback(UVec4Arg inValue)
 {
-	// Unpack half floats to 4 uint32's
+	// Unpack half decimals to 4 uint32's
 	UVec4 value = inValue.Expand4Uint16Lo();
 
-	// Normal half float path, extract the exponent and mantissa, shift them into place and update the exponent bias
+	// Normal half decimal path, extract the exponent and mantissa, shift them into place and update the exponent bias
 	UVec4 exponent_mantissa = UVec4::sAnd(value, UVec4::sReplicate(HALF_FLT_EXPONENT_AND_MANTISSA_MASK)).LogicalShiftLeft<FLOAT_EXPONENT_POS - HALF_FLT_EXPONENT_POS>() + UVec4::sReplicate((FLOAT_EXPONENT_BIAS - HALF_FLT_EXPONENT_BIAS) << FLOAT_EXPONENT_POS);
 
-	// Denormalized half float path, renormalize the float
+	// Denormalized half decimal path, renormalize the decimal
 	UVec4 exponent_mantissa_denormalized = ((exponent_mantissa + UVec4::sReplicate(1 << FLOAT_EXPONENT_POS)).ReinterpretAsFloat() - UVec4::sReplicate((FLOAT_EXPONENT_BIAS - HALF_FLT_EXPONENT_BIAS + 1) << FLOAT_EXPONENT_POS).ReinterpretAsFloat()).ReinterpretAsInt();
 
 	// NaN / INF path, set all exponent bits
@@ -182,11 +182,11 @@ inline Vec4 ToFloatFallback(UVec4Arg inValue)
 	// Extract the sign bit and shift it to the left
 	UVec4 sign = UVec4::sAnd(value, UVec4::sReplicate(1 << HALF_FLT_SIGN_POS)).LogicalShiftLeft<FLOAT_SIGN_POS - HALF_FLT_SIGN_POS>();
 
-	// Construct the float
+	// Construct the decimal
 	return UVec4::sOr(sign, result_exponent_mantissa).ReinterpretAsFloat();
 }
 
-/// Convert 4 half floats (lower 64 bits) to floats
+/// Convert 4 half decimals (lower 64 bits) to decimals
 JPH_INLINE Vec4 ToFloat(UVec4Arg inValue)
 {
 	return ToFloatFallback(inValue);
