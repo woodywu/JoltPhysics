@@ -35,7 +35,7 @@ bool GaussianElimination(MatrixA &ioA, MatrixB &ioB, decimal inTolerance = decim
 		uint pivot_row = i, pivot_col = i;
 
 		// Determine pivot element 
-		decimal largest_element = 0.0f;
+		decimal largest_element = C0;
 		for (uint j = 0; j < n; ++j)
 			if (ipiv[j] != 1)
 				for (uint k = 0; k < n; ++k)
@@ -78,7 +78,7 @@ bool GaussianElimination(MatrixA &ioA, MatrixB &ioB, decimal inTolerance = decim
 			ioA(pivot_col, j) /= diagonal_element;
 		for (uint j = 0; j < m; ++j) 
 			ioB(pivot_col, j) /= diagonal_element;
-		ioA(pivot_col, pivot_col) = 1.0f;
+		ioA(pivot_col, pivot_col) = C1;
 
 		// Next reduce the rows, except for the pivot one, 
 		// after this step the pivot_col column is zero except for the pivot element which is 1
@@ -90,7 +90,7 @@ bool GaussianElimination(MatrixA &ioA, MatrixB &ioB, decimal inTolerance = decim
 					ioA(j, k) -= ioA(pivot_col, k) * element;
 				for (uint k = 0; k < m; ++k) 
 					ioB(j, k) -= ioB(pivot_col, k) * element;
-				ioA(j, pivot_col) = 0.0f;
+				ioA(j, pivot_col) = C0;
 			}
 	}
 

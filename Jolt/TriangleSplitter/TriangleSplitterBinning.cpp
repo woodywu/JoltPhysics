@@ -25,7 +25,7 @@ bool TriangleSplitterBinning::Split(const Range &inTriangles, Range &outLeft, Ra
 
 	decimal best_cp = FIX_MAX;
 	uint best_dim = 0xffffffff;
-	decimal best_split = 0;
+	decimal best_split = decimal(0);
 
 	// Bin in all dimensions
 	uint num_bins = Clamp(inTriangles.Count() / mNumTrianglesPerBin, mMinNumBins, mMaxNumBins);	

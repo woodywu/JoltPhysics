@@ -59,19 +59,19 @@ bool EigenValueSymmetric(const Matrix &inMatrix, Matrix &outEigVec, Vector &outE
 		outEigVal[ip] = a(ip, ip);
 
 		// Reset z
-		z[ip] = 0.0f;
+		z[ip] = C0;
 	}
 
 	for (int sweep = 0; sweep < cMaxSweeps; ++sweep)
 	{
 		// Get the sum of the off-diagonal elements of a
-		decimal sm = 0.0f;
+		decimal sm = C0;
 		for (uint ip = 0; ip < n - 1; ++ip)
 			for (uint iq = ip + 1; iq < n; ++iq)
 				sm += abs(a(ip, iq));
 
 		// Normal return, convergence to machine underflow
-		if (sm == 0.0f)
+		if (sm == C0)
 		{
 			// Sanity checks
 			#ifdef JPH_ENABLE_ASSERTS
@@ -92,19 +92,19 @@ bool EigenValueSymmetric(const Matrix &inMatrix, Matrix &outEigVec, Vector &outE
 		}
 
 		// On the first three sweeps use a fraction of the sum of the off diagonal elements as treshold
-		decimal tresh = sweep < 4? 0.2f * sm / Square(n) : 0.0f;
+		decimal tresh = sweep < 4? decimal(0.2f) * sm / Square(n) : C0;
 
 		for (uint ip = 0; ip < n - 1; ++ip)
 			for (uint iq = ip + 1; iq < n; ++iq)
 			{
-				decimal g = 100.0f * abs(a(ip, iq));
+				decimal g = decimal(100.0f) * abs(a(ip, iq));
 				
 				// After four sweeps, skip the rotation if the off-diagonal element is small
 				if (sweep > 4 
 					&& abs(outEigVal[ip]) + g == abs(outEigVal[ip])
 					&& abs(outEigVal[iq]) + g == abs(outEigVal[iq]))
 				{
-					a(ip, iq) = 0.0f;
+					a(ip, iq) = C0;
 				}
 				else if (abs(a(ip, iq)) > tresh)
 				{
@@ -117,17 +117,17 @@ bool EigenValueSymmetric(const Matrix &inMatrix, Matrix &outEigVec, Vector &outE
 					}
 					else
 					{
-						decimal theta = 0.5f * h / a(ip, iq); // Warning: Can become inf if a(ip, iq) too small
-						t = 1.0f / (abs(theta) + sqrt(1.0f + theta * theta)); // Warning: Squaring large value can make it inf
-						if (theta < 0.0f) t = -t;
+						decimal theta = C0P5 * h / a(ip, iq); // Warning: Can become inf if a(ip, iq) too small
+						t = C1 / (abs(theta) + sqrt(C1 + theta * theta)); // Warning: Squaring large value can make it inf
+						if (theta < C0) t = -t;
 					}
 					
-					decimal c = 1.0f / sqrt(1.0f + t * t);
+					decimal c = C1 / sqrt(C1 + t * t);
 					decimal s = t * c;
-					decimal tau = s / (1.0f + c);
+					decimal tau = s / (C1 + c);
 					h = t * a(ip, iq);
 					
-					a(ip, iq) = 0.0f;
+					a(ip, iq) = C0;
 
 					// !Modification from Numerical Recipes!
 					// h can become infinite due to numerical overflow, this only happens when a(ip, iq) is very small
@@ -162,7 +162,7 @@ bool EigenValueSymmetric(const Matrix &inMatrix, Matrix &outEigVec, Vector &outE
 		{
 			b[ip] += z[ip];
 			outEigVal[ip] = b[ip];
-			z[ip] = 0.0f;
+			z[ip] = C0;
 		}
 	}
 

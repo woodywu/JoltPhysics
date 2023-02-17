@@ -53,7 +53,7 @@ struct AddConvexRadius
 	Vec3					GetSupport(Vec3Arg inDirection) const
 	{
 		decimal length = inDirection.Length();
-		return length > 0.0f ? mObject.GetSupport(inDirection) + (mRadius / length) * inDirection : mObject.GetSupport(inDirection);
+		return length > C0 ? mObject.GetSupport(inDirection) + (mRadius / length) * inDirection : mObject.GetSupport(inDirection);
 	}
 
 	const ConvexObject &	mObject;

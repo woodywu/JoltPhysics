@@ -85,7 +85,7 @@ void PathConstraint::SetPath(const PathConstraintPath *inPath, decimal inPathFra
 		mPath->GetPointOnPath(mPathFraction, path_point, path_tangent, path_normal, path_binormal);
 
 		// Construct the matrix that takes us from the closest point on the path to body 2 center of mass space
-		Mat44 closest_point_to_path(Vec4(path_tangent, 0), Vec4(path_binormal, 0), Vec4(path_normal, 0), Vec4(path_point, 1));
+		Mat44 closest_point_to_path(Vec4(path_tangent, C0), Vec4(path_binormal, C0), Vec4(path_normal, C0), Vec4(path_point, C1));
 		Mat44 cp_to_body1 = mPathToBody1 * closest_point_to_path;
 		mPathToBody2 = (mBody2->GetInverseCenterOfMassTransform() * mBody1->GetCenterOfMassTransform()).ToMat44() * cp_to_body1;
 
@@ -164,7 +164,7 @@ void PathConstraint::CalculateConstraintProperties(decimal inDeltaTime)
 		// RotationBody2 = RotationBody1 * InitialOrientation <=> InitialOrientation^-1 = RotationBody2^-1 * RotationBody1
 		// We can express RotationBody2 in terms of RotationBody1: RotationBody2 = RotationBody1 * PathToBody1 * RotationClosestPointOnPath * PathToBody2^-1
 		// Combining these two: InitialOrientation^-1 = PathToBody2 * (PathToBody1 * RotationClosestPointOnPath)^-1
-		mInvInitialOrientation = mPathToBody2.Multiply3x3RightTransposed(mPathToBody1.Multiply3x3(Mat44(Vec4(path_tangent, 0), Vec4(path_binormal, 0), Vec4(path_normal, 0), Vec4::sZero()))).GetQuaternion();
+		mInvInitialOrientation = mPathToBody2.Multiply3x3RightTransposed(mPathToBody1.Multiply3x3(Mat44(Vec4(path_tangent, C0), Vec4(path_binormal, C0), Vec4(path_normal, C0), Vec4::sZero()))).GetQuaternion();
 		[[fallthrough]];
 
 	case EPathRotationConstraintType::FullyConstrained:
@@ -269,11 +269,11 @@ bool PathConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 	if (mPositionLimitsConstraintPart.IsActive())
 	{
 		if (mPathFraction <= decimal(0.0f))
-			limit = mPositionLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mPathTangent, 0, FIX_MAX);
+			limit = mPositionLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mPathTangent, C0, FIX_MAX);
 		else
 		{
 			JPH_ASSERT(mPathFraction >= mPath->GetPathMaxFraction());
-			limit = mPositionLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mPathTangent, FIX_MIN, 0);
+			limit = mPositionLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mPathTangent, FIX_MIN, C0);
 		}
 	}
 

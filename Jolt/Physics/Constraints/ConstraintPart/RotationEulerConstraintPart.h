@@ -108,8 +108,8 @@ public:
 		}
 		else
 		{
-			Mat44 constraint1(Vec4(inAxisX1, 0), Vec4(inAxisY1, 0), Vec4(inAxisX1.Cross(inAxisY1), 0), Vec4(0, 0, 0, 1));
-			Mat44 constraint2(Vec4(inAxisX2, 0), Vec4(inAxisY2, 0), Vec4(inAxisX2.Cross(inAxisY2), 0), Vec4(0, 0, 0, 1));
+			Mat44 constraint1(Vec4(inAxisX1, C0), Vec4(inAxisY1, C0), Vec4(inAxisX1.Cross(inAxisY1), C0), Vec4(C0, C0, C0, C1));
+			Mat44 constraint2(Vec4(inAxisX2, C0), Vec4(inAxisY2, C0), Vec4(inAxisX2.Cross(inAxisY2), C0), Vec4(C0, C0, C0, C1));
 			return constraint2.GetQuaternion() * constraint1.GetQuaternion().Conjugated();
 		}
 	}
@@ -128,8 +128,8 @@ public:
 		}
 		else
 		{
-			Mat44 constraint1(Vec4(inAxisX1, 0), Vec4(inAxisZ1.Cross(inAxisX1), 0), Vec4(inAxisZ1, 0), Vec4(0, 0, 0, 1));
-			Mat44 constraint2(Vec4(inAxisX2, 0), Vec4(inAxisZ2.Cross(inAxisX2), 0), Vec4(inAxisZ2, 0), Vec4(0, 0, 0, 1));
+			Mat44 constraint1(Vec4(inAxisX1, C0), Vec4(inAxisZ1.Cross(inAxisX1), C0), Vec4(inAxisZ1, C0), Vec4(C0, C0, C0, C1));
+			Mat44 constraint2(Vec4(inAxisX2, C0), Vec4(inAxisZ2.Cross(inAxisX2), C0), Vec4(inAxisZ2, C0), Vec4(C0, C0, C0, C1));
 			return constraint2.GetQuaternion() * constraint1.GetQuaternion().Conjugated();
 		}
 	}

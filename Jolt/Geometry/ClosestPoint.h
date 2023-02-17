@@ -205,9 +205,9 @@ namespace ClosestPoint
 
 				// Edge AB
 				decimal ab_len_sq = ab.LengthSq();
-				if (ab_len_sq > Square(FLT_EPSILON))
+				if (ab_len_sq > Square(FIX_EPSILON))
 				{
-					decimal v = Clamp(-a.Dot(ab) / ab_len_sq, 0.0f, 1.0f);
+					decimal v = Clamp(-a.Dot(ab) / ab_len_sq, C0, C1);
 					Vec3 q = a + v * ab;
 					decimal dist_sq = q.LengthSq();
 					if (dist_sq < best_dist_sq)
@@ -221,9 +221,9 @@ namespace ClosestPoint
 
 			// Edge AC
 			decimal ac_len_sq = ac.LengthSq();
-			if (ac_len_sq > Square(FLT_EPSILON))
+			if (ac_len_sq > Square(FIX_EPSILON))
 			{
-				decimal v = Clamp(-a.Dot(ac) / ac_len_sq, 0.0f, 1.0f);
+				decimal v = Clamp(-a.Dot(ac) / ac_len_sq, C0, C1);
 				Vec3 q = a + v * ac;
 				decimal dist_sq = q.LengthSq();
 				if (dist_sq < best_dist_sq)
@@ -237,9 +237,9 @@ namespace ClosestPoint
 			// Edge BC
 			Vec3 bc = c - inB;
 			decimal bc_len_sq = bc.LengthSq();
-			if (bc_len_sq > Square(FLT_EPSILON))
+			if (bc_len_sq > Square(FIX_EPSILON))
 			{
-				decimal v = Clamp(-inB.Dot(bc) / bc_len_sq, 0.0f, 1.0f);
+				decimal v = Clamp(-inB.Dot(bc) / bc_len_sq, C0, C1);
 				Vec3 q = inB + v * bc;
 				decimal dist_sq = q.LengthSq();
 				if (dist_sq < best_dist_sq)
@@ -258,7 +258,7 @@ namespace ClosestPoint
 		Vec3 ap = -a; 
 		decimal d1 = ab.Dot(ap); 
 		decimal d2 = ac.Dot(ap); 
-		if (d1 <= 0.0f && d2 <= 0.0f)
+		if (d1 <= C0 && d2 <= C0)
 		{
 			outSet = swap_ac.GetX()? 0b0100 : 0b0001;
 			return a; // barycentric coordinates (1,0,0)
@@ -268,14 +268,14 @@ namespace ClosestPoint
 		Vec3 bp = -inB; 
 		decimal d3 = ab.Dot(bp); 
 		decimal d4 = ac.Dot(bp); 
-		if (d3 >= 0.0f && d4 <= d3) 
+		if (d3 >= C0 && d4 <= d3) 
 		{
 			outSet = 0b0010;
 			return inB; // barycentric coordinates (0,1,0)
 		}
 
 		// Check if P in edge region of AB, if so return projection of P onto AB 
-		if (d1 * d4 <= d3 * d2 && d1 >= 0.0f && d3 <= 0.0f) 
+		if (d1 * d4 <= d3 * d2 && d1 >= C0 && d3 <= C0) 
 		{ 
 			decimal v = d1 / (d1 - d3); 
 			outSet = swap_ac.GetX()? 0b0110 : 0b0011;
@@ -286,14 +286,14 @@ namespace ClosestPoint
 		Vec3 cp = -c; 
 		decimal d5 = ab.Dot(cp); 
 		decimal d6 = ac.Dot(cp); 
-		if (d6 >= 0.0f && d5 <= d6) 
+		if (d6 >= C0 && d5 <= d6) 
 		{
 			outSet = swap_ac.GetX()? 0b0001 : 0b0100;
 			return c; // barycentric coordinates (0,0,1)
 		}
 
 		// Check if P in edge region of AC, if so return projection of P onto AC 
-		if (d5 * d2 <= d1 * d6 && d2 >= 0.0f && d6 <= 0.0f) 
+		if (d5 * d2 <= d1 * d6 && d2 >= C0 && d6 <= C0) 
 		{ 
 			decimal w = d2 / (d2 - d6); 
 			outSet = 0b0101;
@@ -303,7 +303,7 @@ namespace ClosestPoint
 		// Check if P in edge region of BC, if so return projection of P onto BC 
 		decimal d4_d3 = d4 - d3;
 		decimal d5_d6 = d5 - d6;
-		if (d3 * d6 <= d5 * d4 && d4_d3 >= 0.0f && d5_d6 >= 0.0f) 
+		if (d3 * d6 <= d5 * d4 && d4_d3 >= C0 && d5_d6 >= C0) 
 		{ 
 			decimal w = d4_d3 / (d4_d3 + d5_d6); 
 			outSet = swap_ac.GetX()? 0b0011 : 0b0110;
@@ -317,7 +317,7 @@ namespace ClosestPoint
 		// Note that this way of calculating the closest point is much more accurate than first calculating barycentric coordinates 
 		// and then calculating the closest point based on those coordinates.
 		outSet = 0b0111;
-		return n * (a + inB + c).Dot(n) / (3.0f * n_len_sq);
+		return n * (a + inB + c).Dot(n) / (C3 * n_len_sq);
 	}
 
 	/// Check if the origin is outside the plane of triangle (inA, inB, inC). inD specifies the front side of the plane.

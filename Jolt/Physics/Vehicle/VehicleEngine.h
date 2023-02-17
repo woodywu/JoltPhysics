@@ -43,7 +43,7 @@ class VehicleEngine : public VehicleEngineSettings
 {
 public:
 	/// Multiply an angular velocity (rad/s) with this value to get rounds per minute (RPM)
-	static constexpr decimal	cAngularVelocityToRPM = decimal(60.0f) / (decimal(2.0f) * JPH_PI);
+	static constexpr decimal	cAngularVelocityToRPM = decimal(94.247778F);
 
 	/// Clamp the RPM between min and max RPM
 	inline void				ClampRPM()									{ mCurrentRPM = Clamp(mCurrentRPM, mMinRPM, mMaxRPM); }

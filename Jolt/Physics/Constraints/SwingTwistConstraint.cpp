@@ -97,12 +97,12 @@ SwingTwistConstraint::SwingTwistConstraint(Body &inBody1, Body &inBody2, const S
 {
 	// Calculate rotation needed to go from constraint space to body1 local space
 	Vec3 normal_axis1 = inSettings.mPlaneAxis1.Cross(inSettings.mTwistAxis1);
-	Mat44 c_to_b1(Vec4(inSettings.mTwistAxis1, 0), Vec4(normal_axis1, 0), Vec4(inSettings.mPlaneAxis1, 0), Vec4(0, 0, 0, 1));
+	Mat44 c_to_b1(Vec4(inSettings.mTwistAxis1, C0), Vec4(normal_axis1, C0), Vec4(inSettings.mPlaneAxis1, C0), Vec4(C0, C0, C0, C1));
 	mConstraintToBody1 = c_to_b1.GetQuaternion();
 
 	// Calculate rotation needed to go from constraint space to body2 local space
 	Vec3 normal_axis2 = inSettings.mPlaneAxis2.Cross(inSettings.mTwistAxis2);
-	Mat44 c_to_b2(Vec4(inSettings.mTwistAxis2, 0), Vec4(normal_axis2, 0), Vec4(inSettings.mPlaneAxis2, 0), Vec4(0, 0, 0, 1));
+	Mat44 c_to_b2(Vec4(inSettings.mTwistAxis2, C0), Vec4(normal_axis2, C0), Vec4(inSettings.mPlaneAxis2, C0), Vec4(C0, C0, C0, C1));
 	mConstraintToBody2 = c_to_b2.GetQuaternion();
 
 	if (inSettings.mSpace == EConstraintSpace::WorldSpace)

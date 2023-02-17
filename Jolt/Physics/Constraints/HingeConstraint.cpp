@@ -250,9 +250,9 @@ bool HingeConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 	if (mRotationLimitsConstraintPart.IsActive())
 	{
 		if (GetSmallestAngleToLimit() < decimal(0.0f))
-			limit = mRotationLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mA1, 0, FIX_MAX);
+			limit = mRotationLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mA1, C0, FIX_MAX);
 		else
-			limit = mRotationLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mA1, FIX_MIN, 0);
+			limit = mRotationLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mA1, FIX_MIN, C0);
 	}
 
 	return motor || pos || rot || limit;
@@ -363,12 +363,12 @@ Ref<ConstraintSettings> HingeConstraint::GetConstraintSettings() const
 
 Mat44 HingeConstraint::GetConstraintToBody1Matrix() const
 { 
-	return Mat44(Vec4(mLocalSpaceHingeAxis1, 0), Vec4(mLocalSpaceNormalAxis1, 0), Vec4(mLocalSpaceHingeAxis1.Cross(mLocalSpaceNormalAxis1), 0), Vec4(mLocalSpacePosition1, 1)); 
+	return Mat44(Vec4(mLocalSpaceHingeAxis1, C0), Vec4(mLocalSpaceNormalAxis1, C0), Vec4(mLocalSpaceHingeAxis1.Cross(mLocalSpaceNormalAxis1), C0), Vec4(mLocalSpacePosition1, C1)); 
 }
 
 Mat44 HingeConstraint::GetConstraintToBody2Matrix() const
 { 
-	return Mat44(Vec4(mLocalSpaceHingeAxis2, 0), Vec4(mLocalSpaceNormalAxis2, 0), Vec4(mLocalSpaceHingeAxis2.Cross(mLocalSpaceNormalAxis2), 0), Vec4(mLocalSpacePosition2, 1)); 
+	return Mat44(Vec4(mLocalSpaceHingeAxis2, C0), Vec4(mLocalSpaceNormalAxis2, C0), Vec4(mLocalSpaceHingeAxis2.Cross(mLocalSpaceNormalAxis2), C0), Vec4(mLocalSpacePosition2, C1)); 
 }
 
 JPH_NAMESPACE_END

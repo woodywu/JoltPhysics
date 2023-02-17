@@ -133,7 +133,7 @@ bool ConeConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 
 	bool rot = false;
 	if (mAngleConstraintPart.IsActive())
-		rot = mAngleConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceRotationAxis, 0, FIX_MAX);
+		rot = mAngleConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceRotationAxis, C0, FIX_MAX);
 
 	return pos || rot;
 }
@@ -216,7 +216,7 @@ Mat44 ConeConstraint::GetConstraintToBody1Matrix() const
 { 
 	Vec3 perp = mLocalSpaceTwistAxis1.GetNormalizedPerpendicular(); 
 	Vec3 perp2 = mLocalSpaceTwistAxis1.Cross(perp); 
-	return Mat44(Vec4(mLocalSpaceTwistAxis1, 0), Vec4(perp, 0), Vec4(perp2, 0), Vec4(mLocalSpacePosition1, 1)); 
+	return Mat44(Vec4(mLocalSpaceTwistAxis1, C0), Vec4(perp, C0), Vec4(perp2, C0), Vec4(mLocalSpacePosition1, C1)); 
 }
 
 Mat44 ConeConstraint::GetConstraintToBody2Matrix() const 
@@ -225,7 +225,7 @@ Mat44 ConeConstraint::GetConstraintToBody2Matrix() const
 	// this should not matter as we're not limiting rotation around the twist axis.
 	Vec3 perp = mLocalSpaceTwistAxis2.GetNormalizedPerpendicular(); 
 	Vec3 perp2 = mLocalSpaceTwistAxis2.Cross(perp); 
-	return Mat44(Vec4(mLocalSpaceTwistAxis2, 0), Vec4(perp, 0), Vec4(perp2, 0), Vec4(mLocalSpacePosition2, 1)); 
+	return Mat44(Vec4(mLocalSpaceTwistAxis2, C0), Vec4(perp, C0), Vec4(perp2, C0), Vec4(mLocalSpacePosition2, C1)); 
 }
 
 JPH_NAMESPACE_END

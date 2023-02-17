@@ -68,7 +68,7 @@ public:
 	inline bool					IsZero() const
 	{
 		for (uint r = 0; r < Rows; ++r)
-			if (mF32[r] != 0.0f)
+			if (mF32[r] != C0)
 				return false;
 		return true;
 	}
@@ -162,7 +162,7 @@ public:
 	/// Dot product
 	inline decimal				Dot(const Vector &inV2) const
 	{
-		decimal dot = 0.0f;
+		decimal dot = C0;
 		for (uint r = 0; r < Rows; ++r)
 			dot += mF32[r] * inV2.mF32[r];
 		return dot;

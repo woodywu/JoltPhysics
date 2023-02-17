@@ -55,7 +55,7 @@ public:
 	/// Friction settings.
 	/// For translation: Max friction force in N. 0 = no friction.
 	/// For rotation: Max friction torque in Nm. 0 = no friction.
-	decimal						mMaxFriction[EAxis::Num] = { 0, 0, 0, 0, 0, 0 };
+	decimal						mMaxFriction[EAxis::Num] = { C0, C0, C0, C0, C0, C0 };
 
 	/// Limits.
 	/// For translation: Min and max linear limits in m (0 is frame of body 1 and 2 coincide). 

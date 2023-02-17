@@ -109,7 +109,7 @@ public:
 			// No collision
 			return EStatus::NotColliding; 
 		}
-		if (closest_points_dist_sq > 0.0f)
+		if (closest_points_dist_sq > C0)
 		{
 			// Collision within convex radius, adjust points for convex radius
 			decimal v_len = sqrt(closest_points_dist_sq); // GetClosestPoints function returns |ioV|^2 when return value < FIX_MAX
@@ -139,7 +139,7 @@ public:
 		JPH_PROFILE_FUNCTION();
 
 		// Check that the tolerance makes sense (smaller value than this will just result in needless iterations)
-		JPH_ASSERT(inTolerance >= FLT_EPSILON);
+		JPH_ASSERT(inTolerance >= FIX_EPSILON);
 
 		// Fetch the simplex from GJK algorithm
 		SupportPoints support_points;
@@ -156,10 +156,10 @@ public:
 
 				// Add support points in 4 directions to form a tetrahedron around the origin
 				int p1, p2, p3, p4;
-				(void)support_points.Add(inAIncludingConvexRadius, inBIncludingConvexRadius, Vec3(0, 1, 0), p1);
-				(void)support_points.Add(inAIncludingConvexRadius, inBIncludingConvexRadius, Vec3(-1, -1, -1), p2);
-				(void)support_points.Add(inAIncludingConvexRadius, inBIncludingConvexRadius, Vec3(1, -1, -1), p3);
-				(void)support_points.Add(inAIncludingConvexRadius, inBIncludingConvexRadius, Vec3(0, -1, 1), p4);
+				(void)support_points.Add(inAIncludingConvexRadius, inBIncludingConvexRadius, Vec3(C0, C1, C0), p1);
+				(void)support_points.Add(inAIncludingConvexRadius, inBIncludingConvexRadius, Vec3(-C1, -C1, -C1), p2);
+				(void)support_points.Add(inAIncludingConvexRadius, inBIncludingConvexRadius, Vec3(C1, -C1, -C1), p3);
+				(void)support_points.Add(inAIncludingConvexRadius, inBIncludingConvexRadius, Vec3(C0, -C1, C1), p4);
 				JPH_ASSERT(p1 == 0);
 				JPH_ASSERT(p2 == 1);
 				JPH_ASSERT(p3 == 2);
@@ -171,7 +171,7 @@ public:
 			{
 				// Two vertices, create 3 extra by taking perpendicular axis and rotating it around in 120 degree increments
 				Vec3 axis = (support_points.mY[1] - support_points.mY[0]).Normalized();
-				Mat44 rotation = Mat44::sRotation(axis, DegreesToRadians(120.0f));
+				Mat44 rotation = Mat44::sRotation(axis, DegreesToRadians(decimal(120.0f)));
 				Vec3 dir1 = axis.GetNormalizedPerpendicular();
 				Vec3 dir2 = rotation * dir1;
 				Vec3 dir3 = rotation * dir2;
@@ -231,7 +231,7 @@ public:
 			}
 
 			// If the closest to the triangle is zero or positive, the origin is in the hull and we can proceed to the main algorithm
-			if (t->mClosestLenSq >= 0.0f)
+			if (t->mClosestLenSq >= C0)
 				break;
 
 			// Remove the triangle from the queue before we start adding new ones (which may result in a new closest triangle at the front of the queue)
@@ -301,7 +301,7 @@ public:
 
 			// Check if we just found a separating axis. This can happen if the shape shrunk by convex radius and then expanded by
 			// convex radius is bigger then the original shape due to inaccuracies in the shrinking process.
-			if (dot < 0.0f)
+			if (dot < C0)
 				return false;
 
 			// Get the distance squared (along normal) to the support point
@@ -434,8 +434,8 @@ public:
 		bool contact_normal_invalid = outContactNormal.IsNearZero(Square(inCollisionTolerance));
 		
 		if (inReturnDeepestPoint 
-			&& ioLambda == 0.0f // Only when lambda = 0 we can have the bodies overlap
-			&& (inConvexRadiusA + inConvexRadiusB == 0.0f // When no convex radius was provided we can never trust contact points at lambda = 0
+			&& ioLambda == C0 // Only when lambda = 0 we can have the bodies overlap
+			&& (inConvexRadiusA + inConvexRadiusB == C0 // When no convex radius was provided we can never trust contact points at lambda = 0
 				|| contact_normal_invalid))
 		{
 			// If we're initially intersecting, we need to run the EPA algorithm in order to find the deepest contact point

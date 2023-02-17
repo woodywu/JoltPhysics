@@ -9,12 +9,12 @@
 
 using decimal = fpm::fixed_24_8;
 
-constexpr decimal C0 = decimal(0);
-constexpr decimal C0P5 = decimal(0.5);
-constexpr decimal C0P1 = decimal(0.1);
-constexpr decimal C1 = decimal(1);
-constexpr decimal C2 = decimal(2);
-constexpr decimal C3 = decimal(3);
+constexpr decimal C0 = decimal(0.0F);
+constexpr decimal C0P5 = decimal(0.5F);
+constexpr decimal C0P1 = decimal(0.1F);
+constexpr decimal C1 = decimal(1.0F);
+constexpr decimal C2 = decimal(2.0F);
+constexpr decimal C3 = decimal(3.0F);
 
 constexpr decimal FIX_MIN = std::numeric_limits<decimal>::min();
 constexpr decimal FIX_MAX = std::numeric_limits<decimal>::max();

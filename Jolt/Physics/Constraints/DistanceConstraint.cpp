@@ -124,7 +124,7 @@ void DistanceConstraint::CalculateConstraintProperties(decimal inDeltaTime)
 		mAxisConstraint.CalculateConstraintProperties(inDeltaTime, *mBody1, r1_plus_u, *mBody2, r2, mWorldSpaceNormal, decimal(0.0f), delta_len - mMinDistance, mFrequency, mDamping);
 
 		// Allow constraint forces to make distance bigger only
-		mMinLambda = 0;
+		mMinLambda = C0;
 		mMaxLambda = FIX_MAX;
 	}
 	else if (delta_len >= mMaxDistance)
@@ -133,7 +133,7 @@ void DistanceConstraint::CalculateConstraintProperties(decimal inDeltaTime)
 
 		// Allow constraint forces to make distance smaller only
 		mMinLambda = FIX_MIN;
-		mMaxLambda = 0;
+		mMaxLambda = C0;
 	}
 	else
 		mAxisConstraint.Deactivate();
@@ -187,13 +187,13 @@ void DistanceConstraint::DrawConstraint(DebugRenderer *inRenderer) const
 	decimal len = delta.Length();
 	if (len < mMinDistance)
 	{
-		RVec3 real_end_pos = mWorldSpacePosition1 + (len > decimal(0.0f)? delta * mMinDistance / len : Vec3(0, len, 0));
+		RVec3 real_end_pos = mWorldSpacePosition1 + (len > decimal(0.0f)? delta * mMinDistance / len : Vec3(C0, len, C0));
 		inRenderer->DrawLine(mWorldSpacePosition1, mWorldSpacePosition2, Color::sGreen);
 		inRenderer->DrawLine(mWorldSpacePosition2, real_end_pos, Color::sYellow);
 	}
 	else if (len > mMaxDistance)
 	{
-		RVec3 real_end_pos = mWorldSpacePosition1 + (len > decimal(0.0f)? delta * mMaxDistance / len : Vec3(0, len, 0));
+		RVec3 real_end_pos = mWorldSpacePosition1 + (len > decimal(0.0f)? delta * mMaxDistance / len : Vec3(C0, len, C0));
 		inRenderer->DrawLine(mWorldSpacePosition1, real_end_pos, Color::sGreen);
 		inRenderer->DrawLine(real_end_pos, mWorldSpacePosition2, Color::sRed);
 	}

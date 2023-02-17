@@ -171,13 +171,13 @@ Ref<ConstraintSettings> RackAndPinionConstraint::GetConstraintSettings() const
 Mat44 RackAndPinionConstraint::GetConstraintToBody1Matrix() const
 {
 	Vec3 perp = mLocalSpaceHingeAxis.GetNormalizedPerpendicular();
-	return Mat44(Vec4(mLocalSpaceHingeAxis, 0), Vec4(perp, 0), Vec4(mLocalSpaceHingeAxis.Cross(perp), 0), Vec4(0, 0, 0, 1)); 
+	return Mat44(Vec4(mLocalSpaceHingeAxis, C0), Vec4(perp, C0), Vec4(mLocalSpaceHingeAxis.Cross(perp), C0), Vec4(C0, C0, C0, C1)); 
 }
 
 Mat44 RackAndPinionConstraint::GetConstraintToBody2Matrix() const 
 { 
 	Vec3 perp = mLocalSpaceSliderAxis.GetNormalizedPerpendicular();
-	return Mat44(Vec4(mLocalSpaceSliderAxis, 0), Vec4(perp, 0), Vec4(mLocalSpaceSliderAxis.Cross(perp), 0), Vec4(0, 0, 0, 1)); 
+	return Mat44(Vec4(mLocalSpaceSliderAxis, C0), Vec4(perp, C0), Vec4(mLocalSpaceSliderAxis.Cross(perp), C0), Vec4(C0, C0, C0, C1)); 
 }
 
 JPH_NAMESPACE_END

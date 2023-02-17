@@ -13,7 +13,7 @@ class CollisionCollectorTraitsCastRay
 {
 public:
 	/// For rays the early out fraction is the fraction along the line to order hits.
-	static constexpr decimal InitialEarlyOutFraction = C1 + FIX_EPSILON;	///< Furthest hit: Fraction is 1 + epsilon
+	static constexpr decimal InitialEarlyOutFraction = decimal(1.01F);// C1 + FIX_EPSILON;	///< Furthest hit: Fraction is 1 + epsilon
 	static constexpr decimal ShouldEarlyOutFraction = C0;					///< Closest hit: Fraction is 0
 };
 
@@ -22,7 +22,7 @@ class CollisionCollectorTraitsCastShape
 {
 public:
 	/// For rays the early out fraction is the fraction along the line to order hits.
-	static constexpr decimal InitialEarlyOutFraction = C1 + FIX_EPSILON;	///< Furthest hit: Fraction is 1 + epsilon
+	static constexpr decimal InitialEarlyOutFraction = decimal(1.01F);// C1 + FIX_EPSILON;	///< Furthest hit: Fraction is 1 + epsilon
 	static constexpr decimal ShouldEarlyOutFraction = FIX_MIN;				///< Deepest hit: Penetration is infinite
 };
 

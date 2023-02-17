@@ -102,12 +102,12 @@ SixDOFConstraint::SixDOFConstraint(Body &inBody1, Body &inBody2, const SixDOFCon
 
 	// Calculate rotation needed to go from constraint space to body1 local space
 	Vec3 axis_z1 = inSettings.mAxisX1.Cross(inSettings.mAxisY1);
-	Mat44 c_to_b1(Vec4(inSettings.mAxisX1, 0), Vec4(inSettings.mAxisY1, 0), Vec4(axis_z1, 0), Vec4(0, 0, 0, 1));
+	Mat44 c_to_b1(Vec4(inSettings.mAxisX1, C0), Vec4(inSettings.mAxisY1, C0), Vec4(axis_z1, C0), Vec4(C0, C0, C0, C1));
 	mConstraintToBody1 = c_to_b1.GetQuaternion();
 
 	// Calculate rotation needed to go from constraint space to body2 local space
 	Vec3 axis_z2 = inSettings.mAxisX2.Cross(inSettings.mAxisY2);
-	Mat44 c_to_b2(Vec4(inSettings.mAxisX2, 0), Vec4(inSettings.mAxisY2, 0), Vec4(axis_z2, 0), Vec4(0, 0, 0, 1));
+	Mat44 c_to_b2(Vec4(inSettings.mAxisX2, C0), Vec4(inSettings.mAxisY2, C0), Vec4(axis_z2, C0), Vec4(C0, C0, C0, C1));
 	mConstraintToBody2 = c_to_b2.GetQuaternion();
 
 	if (inSettings.mSpace == EConstraintSpace::WorldSpace)
@@ -574,9 +574,9 @@ bool SixDOFConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 				{
 					JPH_ASSERT(!IsFreeAxis(EAxis(EAxis::TranslationX + i)));
 					if (mDisplacement[i] <= mLimitMin[i])
-						limit_min = 0;
+						limit_min = C0;
 					else if (mDisplacement[i] >= mLimitMax[i])
-						limit_max = 0;
+						limit_max = C0;
 				}
 
 				impulse |= mTranslationConstraintPart[i].SolveVelocityConstraint(*mBody1, *mBody2, mTranslationAxis[i], limit_min, limit_max);

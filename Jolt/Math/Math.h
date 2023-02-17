@@ -64,7 +64,7 @@ constexpr T Cubed(T inV)
 template <typename T>
 constexpr T Sign(T inV)
 {
-	return inV < 0? T(-1) : T(1);
+	return inV < C0? T(-C1) : T(C1);
 }
 
 /// Check if inV is a power of 2

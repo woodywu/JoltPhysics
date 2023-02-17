@@ -23,8 +23,8 @@ public:
 	public:
 		JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(Point)
 
-		decimal			mX = 0.0f;
-		decimal			mY = 0.0f;
+		decimal			mX = C0;
+		decimal			mY = C0;
 	};
 
 	/// Remove all points
@@ -42,10 +42,10 @@ public:
 	void				Sort()											{ QuickSort(mPoints.begin(), mPoints.end(), [](const Point &inLHS, const Point &inRHS) { return inLHS.mX < inRHS.mX; }); }
 
 	/// Get the lowest X value
-	decimal				GetMinX() const									{ return mPoints.empty()? 0.0f : mPoints.front().mX; }
+	decimal				GetMinX() const									{ return mPoints.empty()? C0 : mPoints.front().mX; }
 
 	/// Get the highest X value
-	decimal				GetMaxX() const									{ return mPoints.empty()? 0.0f : mPoints.back().mX; }
+	decimal				GetMaxX() const									{ return mPoints.empty()? C0 : mPoints.back().mX; }
 
 	/// Sample value on the curve
 	/// @param inX X value to sample at

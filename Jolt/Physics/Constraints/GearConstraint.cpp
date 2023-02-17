@@ -170,13 +170,13 @@ Ref<ConstraintSettings> GearConstraint::GetConstraintSettings() const
 Mat44 GearConstraint::GetConstraintToBody1Matrix() const
 {
 	Vec3 perp = mLocalSpaceHingeAxis1.GetNormalizedPerpendicular();
-	return Mat44(Vec4(mLocalSpaceHingeAxis1, 0), Vec4(perp, 0), Vec4(mLocalSpaceHingeAxis1.Cross(perp), 0), Vec4(0, 0, 0, 1)); 
+	return Mat44(Vec4(mLocalSpaceHingeAxis1, C0), Vec4(perp, C0), Vec4(mLocalSpaceHingeAxis1.Cross(perp), C0), Vec4(C0, C0, C0, C1)); 
 }
 
 Mat44 GearConstraint::GetConstraintToBody2Matrix() const 
 { 
 	Vec3 perp = mLocalSpaceHingeAxis2.GetNormalizedPerpendicular();
-	return Mat44(Vec4(mLocalSpaceHingeAxis2, 0), Vec4(perp, 0), Vec4(mLocalSpaceHingeAxis2.Cross(perp), 0), Vec4(0, 0, 0, 1)); 
+	return Mat44(Vec4(mLocalSpaceHingeAxis2, C0), Vec4(perp, C0), Vec4(mLocalSpaceHingeAxis2.Cross(perp), C0), Vec4(C0, C0, C0, C1)); 
 }
 
 JPH_NAMESPACE_END

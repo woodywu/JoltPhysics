@@ -131,7 +131,7 @@ public:
 		for (uint c = 0; c < OtherCols; ++c)
 			for (uint r = 0; r < Rows; ++r)
 			{
-				decimal dot = 0.0f;
+				decimal dot = C0;
 				for (uint i = 0; i < Cols; ++i)
 					dot += mCol[i].mF32[r] * inM.mCol[c].mF32[i];
 				m.mCol[c].mF32[r] = dot;
@@ -145,7 +145,7 @@ public:
 		Vector<Rows> v;
 		for (uint r = 0; r < Rows; ++r)
 		{
-			decimal dot = 0.0f;
+			decimal dot = C0;
 			for (uint c = 0; c < Cols; ++c)
 				dot += mCol[c].mF32[r] * inV.mF32[c];
 			v.mF32[r] = dot;

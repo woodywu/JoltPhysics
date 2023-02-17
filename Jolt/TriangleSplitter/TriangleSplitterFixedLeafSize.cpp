@@ -49,7 +49,7 @@ bool TriangleSplitterFixedLeafSize::Split(const Range &inTriangles, Range &outLe
 
 	decimal best_cp = FIX_MAX;
 	uint best_dim = 0xffffffff;
-	decimal best_split = 0;
+	decimal best_split = C0;
 
 	// Bin in all dimensions
 	uint num_bins = Clamp(inTriangles.Count() / mNumTrianglesPerBin, mMinNumBins, mMaxNumBins);	

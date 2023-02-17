@@ -24,7 +24,7 @@ JPH_IMPLEMENT_SERIALIZABLE_NON_VIRTUAL(LinearCurve)
 decimal LinearCurve::GetValue(decimal inX) const
 {
 	if (mPoints.empty())
-		return 0.0f;
+		return C0;
 
 	Points::const_iterator i2 = lower_bound(mPoints.begin(), mPoints.end(), inX, [](const Point &inPoint, decimal inValue) { return inPoint.mX < inValue; });
 

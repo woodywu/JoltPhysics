@@ -293,11 +293,11 @@ bool SliderConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 	if (mPositionLimitsConstraintPart.IsActive())
 	{
 		if (mD <= mLimitsMin)
-			limit = mPositionLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceSliderAxis, 0, FIX_MAX);
+			limit = mPositionLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceSliderAxis, C0, FIX_MAX);
 		else
 		{
 			JPH_ASSERT(mD >= mLimitsMax);
-			limit = mPositionLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceSliderAxis, FIX_MIN, 0);
+			limit = mPositionLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceSliderAxis, FIX_MIN, C0);
 		}
 	}
 
@@ -455,12 +455,12 @@ Ref<ConstraintSettings> SliderConstraint::GetConstraintSettings() const
 
 Mat44 SliderConstraint::GetConstraintToBody1Matrix() const
 { 
-	return Mat44(Vec4(mLocalSpaceSliderAxis1, 0), Vec4(mLocalSpaceNormal1, 0), Vec4(mLocalSpaceNormal2, 0), Vec4(mLocalSpacePosition1, 1)); 
+	return Mat44(Vec4(mLocalSpaceSliderAxis1, C0), Vec4(mLocalSpaceNormal1, C0), Vec4(mLocalSpaceNormal2, C0), Vec4(mLocalSpacePosition1, C1)); 
 }
 
 Mat44 SliderConstraint::GetConstraintToBody2Matrix() const 
 { 
-	Mat44 mat = Mat44::sRotation(mInvInitialOrientation).Multiply3x3(Mat44(Vec4(mLocalSpaceSliderAxis1, 0), Vec4(mLocalSpaceNormal1, 0), Vec4(mLocalSpaceNormal2, 0), Vec4(0, 0, 0, 1))); 
+	Mat44 mat = Mat44::sRotation(mInvInitialOrientation).Multiply3x3(Mat44(Vec4(mLocalSpaceSliderAxis1, C0), Vec4(mLocalSpaceNormal1, C0), Vec4(mLocalSpaceNormal2, C0), Vec4(C0, C0, C0, C1))); 
 	mat.SetTranslation(mLocalSpacePosition2); 
 	return mat; 
 }

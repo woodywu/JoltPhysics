@@ -239,7 +239,7 @@ public:
 			Vec3 w = p - q;
 
 			// If the support point sA-B(v) is in the opposite direction as v, then we have found a separating axis and there is no intersection
-			if (ioV.Dot(w) < 0.0f)
+			if (ioV.Dot(w) < C0)
 			{
 				// Separating axis found
 #ifdef JPH_GJK_DEBUG
@@ -283,7 +283,7 @@ public:
 			}
 
 			// If v is very small compared to the length of y, we also consider this a collision
-			if (v_len_sq <= FLT_EPSILON * GetMaxYLengthSq())
+			if (v_len_sq <= FIX_EPSILON * GetMaxYLengthSq())
 			{
 #ifdef JPH_GJK_DEBUG
 				Trace("Machine precision reached");
@@ -298,7 +298,7 @@ public:
 
 			// If the squared length of v is not changing enough, we've converged and there is no collision
 			JPH_ASSERT(prev_v_len_sq >= v_len_sq);
-			if (prev_v_len_sq - v_len_sq <= FLT_EPSILON * prev_v_len_sq)
+			if (prev_v_len_sq - v_len_sq <= FIX_EPSILON * prev_v_len_sq)
 			{
 				// v is a separating axis
 #ifdef JPH_GJK_DEBUG
@@ -387,7 +387,7 @@ public:
 #endif
 
 			// Test if we have a separation of more than inMaxDistSq, in which case we terminate early
-			if (dot < 0.0f && dot * dot > v_len_sq * inMaxDistSq)
+			if (dot < C0 && dot * dot > v_len_sq * inMaxDistSq)
 			{
 #ifdef JPH_GJK_DEBUG
 				Trace("Distance bigger than max");
@@ -423,7 +423,7 @@ public:
 				Trace("Full simplex");
 #endif
 				ioV = Vec3::sZero();
-				v_len_sq = 0.0f;
+				v_len_sq = C0;
 				break;
 			}
 
@@ -437,7 +437,7 @@ public:
 				Trace("Distance zero");
 #endif
 				ioV = Vec3::sZero();
-				v_len_sq = 0.0f;
+				v_len_sq = C0;
 				break;
 			}
 
@@ -445,13 +445,13 @@ public:
 #ifdef JPH_GJK_DEBUG
 			Trace("Check v small compared to y: %g <= %g", (double)v_len_sq, (double)(FLT_EPSILON * GetMaxYLengthSq()));
 #endif
-			if (v_len_sq <= FLT_EPSILON * GetMaxYLengthSq())
+			if (v_len_sq <= FIX_EPSILON * GetMaxYLengthSq())
 			{
 #ifdef JPH_GJK_DEBUG
 				Trace("Machine precision reached");
 #endif
 				ioV = Vec3::sZero();
-				v_len_sq = 0.0f;
+				v_len_sq = C0;
 				break;
 			}
 
@@ -464,7 +464,7 @@ public:
 			Trace("Check v not changing enough: %g <= %g", (double)(prev_v_len_sq - v_len_sq), (double)(FLT_EPSILON * prev_v_len_sq));
 #endif
 			JPH_ASSERT(prev_v_len_sq >= v_len_sq);
-			if (prev_v_len_sq - v_len_sq <= FLT_EPSILON * prev_v_len_sq)
+			if (prev_v_len_sq - v_len_sq <= FIX_EPSILON * prev_v_len_sq)
 			{
 				// v is a separating axis
 #ifdef JPH_GJK_DEBUG
@@ -526,7 +526,7 @@ public:
 		// Reset state
 		mNumPoints = 0;
 
-		decimal lambda = 0.0f;
+		decimal lambda = C0;
 		Vec3 x = inRayOrigin;
 		Vec3 v = x - inA.GetSupport(Vec3::sZero());
 		decimal v_len_sq = FIX_MAX;
@@ -550,14 +550,14 @@ public:
 #ifdef JPH_GJK_DEBUG
 			Trace("v . w = %g", (double)v_dot_w);
 #endif
-			if (v_dot_w > 0.0f)
+			if (v_dot_w > C0)
 			{
 				// If ray and normal are in the same direction, we've passed A and there's no collision
 				decimal v_dot_r = v.Dot(inRayDirection);
 #ifdef JPH_GJK_DEBUG
 				Trace("v . r = %g", (double)v_dot_r);
 #endif
-				if (v_dot_r >= 0.0f)
+				if (v_dot_r >= C0)
 					return false;
 
 				// Update the lower bound for lambda
@@ -716,7 +716,7 @@ public:
 		// Reset state
 		mNumPoints = 0;
 
-		decimal lambda = 0.0f;
+		decimal lambda = C0;
 		Vec3 x = Vec3::sZero(); // Since A is already transformed we can start the cast from zero
 		Vec3 v = -inB.GetSupport(Vec3::sZero()) + transformed_a.GetSupport(Vec3::sZero()); // See CastRay: v = x - inA.GetSupport(Vec3::sZero()) where inA is the Minkowski difference inB - transformed_a (see CastShape above) and x is zero
 		decimal v_len_sq = FIX_MAX;
@@ -754,14 +754,14 @@ public:
 #ifdef JPH_GJK_DEBUG
 			Trace("v . w = %g", (double)v_dot_w);
 #endif
-			if (v_dot_w > 0.0f)
+			if (v_dot_w > C0)
 			{
 				// If ray and normal are in the same direction, we've passed A and there's no collision
 				decimal v_dot_r = v.Dot(inDirection);
 #ifdef JPH_GJK_DEBUG
 				Trace("v . r = %g", (double)v_dot_r);
 #endif
-				if (v_dot_r >= 0.0f)
+				if (v_dot_r >= C0)
 					return false;
 
 				// Update the lower bound for lambda
@@ -884,7 +884,7 @@ public:
 		{
 		case 1:
 			outPointB = mQ[0] + convex_radius_b; 
-			outPointA = lambda > 0.0f? outPointB : mP[0] - convex_radius_a;
+			outPointA = lambda > C0? outPointB : mP[0] - convex_radius_a;
 			break;
 
 		case 2:
@@ -892,7 +892,7 @@ public:
 				decimal bu, bv;
 				ClosestPoint::GetBaryCentricCoordinates(mY[0], mY[1], bu, bv);
 				outPointB = bu * mQ[0] + bv * mQ[1] + convex_radius_b;
-				outPointA = lambda > 0.0f? outPointB : bu * mP[0] + bv * mP[1] - convex_radius_a;
+				outPointA = lambda > C0? outPointB : bu * mP[0] + bv * mP[1] - convex_radius_a;
 			}
 			break;
 
@@ -902,14 +902,14 @@ public:
 				decimal bu, bv, bw;
 				ClosestPoint::GetBaryCentricCoordinates(mY[0], mY[1], mY[2], bu, bv, bw);
 				outPointB = bu * mQ[0] + bv * mQ[1] + bw * mQ[2] + convex_radius_b;
-				outPointA = lambda > 0.0f? outPointB : bu * mP[0] + bv * mP[1] + bw * mP[2] - convex_radius_a;
+				outPointA = lambda > C0? outPointB : bu * mP[0] + bv * mP[1] + bw * mP[2] - convex_radius_a;
 			}
 			break;
 		}
 
 		// Store separating axis, in case we have a convex radius we can just return v, 
 		// otherwise v will be very small and we resort to returning previous v as an approximation.
-		outSeparatingAxis = sum_convex_radius > 0.0f? -v : -prev_v;
+		outSeparatingAxis = sum_convex_radius > C0? -v : -prev_v;
 
 		// Store hit fraction
 		ioLambda = lambda;

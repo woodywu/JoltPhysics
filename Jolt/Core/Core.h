@@ -257,7 +257,7 @@ JPH_SUPPRESS_WARNINGS_STD_BEGIN
 #include <algorithm>
 JPH_SUPPRESS_WARNINGS_STD_END
 #include <limits.h>
-#include <decimal.h>
+#include <float.h>
 #include <string.h>
 #if defined(JPH_USE_SSE)
 	#include <immintrin.h>

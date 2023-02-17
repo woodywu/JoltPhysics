@@ -130,29 +130,7 @@ inline HalfFloat FromFloatFallback(decimal inV)
 template <int RoundingMode>
 JPH_INLINE HalfFloat FromFloat(decimal inV)
 {
-#ifdef JPH_USE_F16C
-	union
-	{
-		__m128i		u128;
-		HalfFloat	u16[8];
-	} hf;	
-	__m128 val = _mm_load_ss(&inV);
-	switch (RoundingMode)
-	{
-	case ROUND_TO_NEG_INF:
-		hf.u128 = _mm_cvtps_ph(val, _MM_FROUND_TO_NEG_INF);
-		break;
-	case ROUND_TO_POS_INF:
-		hf.u128 = _mm_cvtps_ph(val, _MM_FROUND_TO_POS_INF);
-		break;
-	case ROUND_TO_NEAREST:
-		hf.u128 = _mm_cvtps_ph(val, _MM_FROUND_TO_NEAREST_INT);
-		break;		
-	}
-	return hf.u16[0];
-#else
 	return FromFloatFallback<RoundingMode>(inV);
-#endif
 }
 
 /// Convert 4 half decimals (lower 64 bits) to decimals, fallback version when no intrinsics available

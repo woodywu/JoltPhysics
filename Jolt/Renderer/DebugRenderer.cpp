@@ -960,8 +960,8 @@ void DebugRenderer::DrawPie(RVec3Arg inCenter, decimal inRadius, Vec3Arg inNorma
 		{
 			decimal angle = decimal(i) / decimal(num_parts) * delta_angle;
 
-			Float3 pos = { Cos(angle), 0, Sin(angle) };
-			*vertices++ = { pos, normal, { 0, 0 }, Color::sWhite };
+			Float3 pos = { Cos(angle), C0, Sin(angle) };
+			*vertices++ = { pos, normal, { C0, C0 }, Color::sWhite };
 		}
 
 		// Allocate space for indices

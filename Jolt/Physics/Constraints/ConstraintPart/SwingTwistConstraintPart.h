@@ -27,8 +27,8 @@ public:
 	/// Set limits for this constraint (see description above for parameters)
 	void						SetLimits(decimal inTwistMinAngle, decimal inTwistMaxAngle, decimal inSwingYHalfAngle, decimal inSwingZHalfAngle)
 	{
-		constexpr decimal cLockedAngle = DegreesToRadians(decimal(0.5f));
-		constexpr decimal cFreeAngle = DegreesToRadians(decimal(179.5f));
+		constexpr decimal cLockedAngle = decimal(0.0087266F);
+		constexpr decimal cFreeAngle = decimal(3.13286595F);
 
 		// Assume sane input
 		JPH_ASSERT(inTwistMinAngle <= decimal(0.0f) && inTwistMinAngle >= -JPH_PI);
@@ -146,9 +146,9 @@ public:
 
 				// Pick the twist that corresponds to the smallest delta
 				if (delta_min < delta_max)
-					ioTwist = Quat(mSinTwistHalfMinAngle, 0, 0, mCosTwistHalfMinAngle);
+					ioTwist = Quat(mSinTwistHalfMinAngle, C0, C0, mCosTwistHalfMinAngle);
 				else
-					ioTwist = Quat(mSinTwistHalfMaxAngle, 0, 0, mCosTwistHalfMaxAngle);
+					ioTwist = Quat(mSinTwistHalfMaxAngle, C0, C0, mCosTwistHalfMaxAngle);
 				outTwistClamped = true;
 			}
 		}
@@ -171,7 +171,7 @@ public:
 				outSwingYClamped = ioSwing.GetY() != decimal(0.0f);
 				outSwingZClamped = z != ioSwing.GetZ();
 				if (outSwingYClamped || outSwingZClamped)
-					ioSwing = Quat(0, 0, z, sqrt(decimal(1.0f) - Square(z)));
+					ioSwing = Quat(C0, C0, z, sqrt(decimal(1.0f) - Square(z)));
 			}
 		}
 		else if (mRotationFlags & SwingZLocked)
@@ -181,7 +181,7 @@ public:
 			outSwingYClamped = y != ioSwing.GetY();
 			outSwingZClamped = ioSwing.GetZ() != decimal(0.0f);
 			if (outSwingYClamped || outSwingZClamped)
-				ioSwing = Quat(0, y, 0, sqrt(decimal(1.0f) - Square(y)));
+				ioSwing = Quat(C0, y, C0, sqrt(decimal(1.0f) - Square(y)));
 		}
 		else
 		{
@@ -191,7 +191,7 @@ public:
 			if (!ellipse.IsInside(point))
 			{
 				Float2 closest = ellipse.GetClosestPoint(point);
-				ioSwing = Quat(0, closest.x, closest.y, sqrt(max(decimal(0.0f), decimal(1.0f) - Square(closest.x) - Square(closest.y))));
+				ioSwing = Quat(C0, closest.x, closest.y, sqrt(max(decimal(0.0f), decimal(1.0f) - Square(closest.x) - Square(closest.y))));
 				outSwingYClamped = true;
 				outSwingZClamped = true;
 			}

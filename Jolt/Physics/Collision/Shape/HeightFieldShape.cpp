@@ -685,14 +685,14 @@ bool HeightFieldShape::ProjectOntoSurface(Vec3Arg inLocalPosition, Vec3 &outSurf
 
 	// Get x coordinate and fraction
 	decimal x_frac = integer_space.GetX();
-	if (x_frac < C0 || x_frac >= mSampleCount - 1)
+	if (x_frac < C0 || static_cast<uint>(x_frac) >= mSampleCount - 1)
 		return false;
 	uint x = (uint)floor(x_frac);
 	x_frac -= x;
 
 	// Get y coordinate and fraction
 	decimal y_frac = integer_space.GetZ();
-	if (y_frac < C0 || y_frac >= mSampleCount - 1)
+	if (y_frac < C0 || static_cast<uint>(y_frac) >= mSampleCount - 1)
 		return false;
 	uint y = (uint)floor(y_frac);
 	y_frac -= y;
@@ -1213,8 +1213,8 @@ public:
 					uint32 stride = block_size_plus_1 - size_x_plus_1;
 
 					// Start range with a very large inside-out box
-					Vec3 value_min = Vec3::sReplicate(1.0e30f);
-					Vec3 value_max = Vec3::sReplicate(-1.0e30f);
+					Vec3 value_min = Vec3::sReplicate(decimal(1.0e30f));
+					Vec3 value_max = Vec3::sReplicate(decimal(-1.0e30f));
 
 					// Loop over the samples to determine the min and max of this block
 					for (uint32 block_y = 0; block_y < size_y_plus_1; ++block_y)

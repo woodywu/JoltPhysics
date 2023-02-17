@@ -96,11 +96,6 @@ set(JOLT_PHYSICS_SRC_FILES
 	${JOLT_PHYSICS_ROOT}/Geometry/Triangle.h
 	${JOLT_PHYSICS_ROOT}/Jolt.cmake
 	${JOLT_PHYSICS_ROOT}/Jolt.h
-	${JOLT_PHYSICS_ROOT}/Math/DMat44.h
-	${JOLT_PHYSICS_ROOT}/Math/DMat44.inl
-	${JOLT_PHYSICS_ROOT}/Math/Double3.h
-	${JOLT_PHYSICS_ROOT}/Math/DVec3.h
-	${JOLT_PHYSICS_ROOT}/Math/DVec3.inl
 	${JOLT_PHYSICS_ROOT}/Math/DynMatrix.h
 	${JOLT_PHYSICS_ROOT}/Math/EigenValueSymmetric.h
 	${JOLT_PHYSICS_ROOT}/Math/FindRoot.h

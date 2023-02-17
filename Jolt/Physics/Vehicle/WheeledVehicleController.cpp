@@ -269,7 +269,7 @@ void WheeledVehicleController::PostCollide(decimal inDeltaTime, PhysicsSystem &i
 		if (avg_omega_denom > 0)
 		{
 			avg_omega = abs(avg_omega * d.mDifferentialRatio / decimal(avg_omega_denom)); // ignoring that the differentials may be rotating in different directions
-			driven_differentials.push_back({ &d, avg_omega, d.mEngineTorqueRatio, 0 });
+			driven_differentials.push_back({ &d, avg_omega, d.mEngineTorqueRatio, C0 });
 
 			// Remember min and max velocity
 			differential_omega_min = min(differential_omega_min, avg_omega);

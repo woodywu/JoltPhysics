@@ -1259,7 +1259,7 @@ void ContactConstraintManager::OnCCDContactAdded(ContactAllocator &ioContactAllo
 			{
 				// We don't store any contact points in this manifold as it is not for caching impulses, we only need to know that the contact was created
 				CachedManifold &new_manifold = new_manifold_kv.first->GetValue();
-				new_manifold.mContactNormal = { 0, 0, 0 };
+				new_manifold.mContactNormal = { C0, C0, C0 };
 				new_manifold.mFlags |= (uint16)CachedManifold::EFlags::CCDContact;
 			}
 		}

@@ -141,7 +141,7 @@ protected:
 
 #ifdef JPH_DEBUG_RENDERER
 	// Debug settings
-	Vec3						mRPMMeterPosition { 0, 1, 0 };				///< Position (in local space of the body) of the RPM meter when drawing the constraint
+	Vec3						mRPMMeterPosition { C0, C1, C0 };				///< Position (in local space of the body) of the RPM meter when drawing the constraint
 	decimal						mRPMMeterSize = decimal(0.5f);						///< Size of the RPM meter when drawing the constraint
 #endif // JPH_DEBUG_RENDERER
 };
