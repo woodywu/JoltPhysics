@@ -40,7 +40,7 @@ Character::Character(const CharacterSettings *inSettings, RVec3Arg inPosition, Q
 	if (body != nullptr)
 	{
 		// Update the mass properties of the shape so that we set the correct mass and don't allow any rotation
-		body->GetMotionProperties()->SetInverseMass(1.0f / inSettings->mMass);
+		body->GetMotionProperties()->SetInverseMass(C1 / inSettings->mMass);
 		body->GetMotionProperties()->SetInverseInertia(Vec3::sZero(), Quat::sIdentity());
 
 		mBodyID = body->GetID();
@@ -68,7 +68,7 @@ void Character::Activate(bool inLockBodies)
 	sGetBodyInterface(mSystem, inLockBodies).ActivateBody(mBodyID);
 }
 
-void Character::CheckCollision(RMat44Arg inCenterOfMassTransform, Vec3Arg inMovementDirection, float inMaxSeparationDistance, const Shape *inShape, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, bool inLockBodies) const
+void Character::CheckCollision(RMat44Arg inCenterOfMassTransform, Vec3Arg inMovementDirection, decimal inMaxSeparationDistance, const Shape *inShape, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, bool inLockBodies) const
 {
 	// Create query broadphase layer filter
 	DefaultBroadPhaseLayerFilter broadphase_layer_filter = mSystem->GetDefaultBroadPhaseLayerFilter(mLayer);
@@ -86,10 +86,10 @@ void Character::CheckCollision(RMat44Arg inCenterOfMassTransform, Vec3Arg inMove
 	settings.mActiveEdgeMovementDirection = inMovementDirection;
 	settings.mBackFaceMode = EBackFaceMode::IgnoreBackFaces;
 
-	sGetNarrowPhaseQuery(mSystem, inLockBodies).CollideShape(inShape, Vec3::sReplicate(1.0f), inCenterOfMassTransform, settings, inBaseOffset, ioCollector, broadphase_layer_filter, object_layer_filter, body_filter);
+	sGetNarrowPhaseQuery(mSystem, inLockBodies).CollideShape(inShape, Vec3::sReplicate(C1), inCenterOfMassTransform, settings, inBaseOffset, ioCollector, broadphase_layer_filter, object_layer_filter, body_filter);
 }
 
-void Character::CheckCollision(RVec3Arg inPosition, QuatArg inRotation, Vec3Arg inMovementDirection, float inMaxSeparationDistance, const Shape *inShape, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, bool inLockBodies) const
+void Character::CheckCollision(RVec3Arg inPosition, QuatArg inRotation, Vec3Arg inMovementDirection, decimal inMaxSeparationDistance, const Shape *inShape, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, bool inLockBodies) const
 {
 	// Calculate center of mass transform
 	RMat44 center_of_mass = RMat44::sRotationTranslation(inRotation, inPosition).PreTranslated(inShape->GetCenterOfMass());
@@ -97,7 +97,7 @@ void Character::CheckCollision(RVec3Arg inPosition, QuatArg inRotation, Vec3Arg 
 	CheckCollision(center_of_mass, inMovementDirection, inMaxSeparationDistance, inShape, inBaseOffset, ioCollector, inLockBodies);
 }
 
-void Character::CheckCollision(const Shape *inShape, float inMaxSeparationDistance, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, bool inLockBodies) const
+void Character::CheckCollision(const Shape *inShape, decimal inMaxSeparationDistance, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, bool inLockBodies) const
 {
 	// Determine position and velocity of body
 	RMat44 query_transform;
@@ -117,7 +117,7 @@ void Character::CheckCollision(const Shape *inShape, float inMaxSeparationDistan
 	CheckCollision(query_transform, velocity, inMaxSeparationDistance, inShape, inBaseOffset, ioCollector, inLockBodies);
 }
 
-void Character::PostSimulation(float inMaxSeparationDistance, bool inLockBodies)
+void Character::PostSimulation(decimal inMaxSeparationDistance, bool inLockBodies)
 {
 	// Get character position, rotation and velocity
 	RVec3 char_pos;
@@ -144,7 +144,7 @@ void Character::PostSimulation(float inMaxSeparationDistance, bool inLockBodies)
 		virtual void		AddHit(const CollideShapeResult &inResult) override
 		{
 			Vec3 normal = -inResult.mPenetrationAxis.Normalized();
-			float dot = normal.Dot(mUp);
+			decimal dot = normal.Dot(mUp);
 			if (dot > mBestDot) // Find the hit that is most aligned with the up vector
 			{
 				mGroundBodyID = inResult.mBodyID2;
@@ -163,7 +163,7 @@ void Character::PostSimulation(float inMaxSeparationDistance, bool inLockBodies)
 	private:
 		RVec3				mBaseOffset;
 		Vec3				mUp;
-		float				mBestDot = -FLT_MAX;
+		decimal				mBestDot = FIX_MIN;
 	};
 
 	// Collide shape
@@ -184,7 +184,7 @@ void Character::PostSimulation(float inMaxSeparationDistance, bool inLockBodies)
 
 		// Update ground state
 		RMat44 inv_transform = RMat44::sInverseRotationTranslation(char_rot, char_pos);
-		if (mSupportingVolume.SignedDistance(Vec3(inv_transform * mGroundPosition)) > 0.0f)
+		if (mSupportingVolume.SignedDistance(Vec3(inv_transform * mGroundPosition)) > C0)
 			mGroundState = EGroundState::NotSupported;
 		else if (IsSlopeTooSteep(mGroundNormal))
 			mGroundState = EGroundState::OnSteepGround;
@@ -277,16 +277,16 @@ void Character::SetLayer(ObjectLayer inLayer, bool inLockBodies)
 	sGetBodyInterface(mSystem, inLockBodies).SetObjectLayer(mBodyID, inLayer);
 }
 
-bool Character::SetShape(const Shape *inShape, float inMaxPenetrationDepth, bool inLockBodies)
+bool Character::SetShape(const Shape *inShape, decimal inMaxPenetrationDepth, bool inLockBodies)
 {
-	if (inMaxPenetrationDepth < FLT_MAX)
+	if (inMaxPenetrationDepth < FIX_MAX)
 	{
 		// Collector that checks if there is anything in the way while switching to inShape
 		class MyCollector : public CollideShapeCollector
 		{
 		public:
 			// Constructor
-			explicit			MyCollector(float inMaxPenetrationDepth) : mMaxPenetrationDepth(inMaxPenetrationDepth) { }
+			explicit			MyCollector(decimal inMaxPenetrationDepth) : mMaxPenetrationDepth(inMaxPenetrationDepth) { }
 
 			// See: CollectorType::AddHit
 			virtual void		AddHit(const CollideShapeResult &inResult) override
@@ -298,14 +298,14 @@ bool Character::SetShape(const Shape *inShape, float inMaxPenetrationDepth, bool
 				}
 			}
 
-			float				mMaxPenetrationDepth;
+			decimal				mMaxPenetrationDepth;
 			bool				mHadCollision = false;
 		};
 
 		// Test if anything is in the way of switching
 		RVec3 char_pos = GetPosition(inLockBodies);
 		MyCollector collector(inMaxPenetrationDepth);
-		CheckCollision(inShape, 0.0f, char_pos, collector, inLockBodies);
+		CheckCollision(inShape, C0, char_pos, collector, inLockBodies);
 		if (collector.mHadCollision)
 			return false;
 	}

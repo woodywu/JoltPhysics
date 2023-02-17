@@ -18,13 +18,13 @@ public:
 	ObjectLayer							mLayer = 0;
 
 	/// Mass of the character
-	float								mMass = 80.0f;
+	decimal								mMass = decimal(80.0f);
 
 	/// Friction for the character
-	float								mFriction = 0.2f;
+	decimal								mFriction = decimal(0.2f);
 
 	/// Value to multiply gravity with for this character
-	float								mGravityFactor = 1.0f;
+	decimal								mGravityFactor = C1;
 };
 
 /// Runtime character object.
@@ -59,7 +59,7 @@ public:
 	/// Needs to be called after every PhysicsSystem::Update
 	/// @param inMaxSeparationDistance Max distance between the floor and the character to still consider the character standing on the floor
 	/// @param inLockBodies If the collision query should use the locking body interface (true) or the non locking body interface (false)
-	void								PostSimulation(float inMaxSeparationDistance, bool inLockBodies = true);
+	void								PostSimulation(decimal inMaxSeparationDistance, bool inLockBodies = true);
 
 	/// Control the velocity of the character
 	void								SetLinearAndAngularVelocity(Vec3Arg inLinearVelocity, Vec3Arg inAngularVelocity, bool inLockBodies = true);
@@ -108,7 +108,7 @@ public:
 
 	/// Switch the shape of the character (e.g. for stance). When inMaxPenetrationDepth is not FLT_MAX, it checks
 	/// if the new shape collides before switching shape. Returns true if the switch succeeded.
-	bool								SetShape(const Shape *inShape, float inMaxPenetrationDepth, bool inLockBodies = true);
+	bool								SetShape(const Shape *inShape, decimal inMaxPenetrationDepth, bool inLockBodies = true);
 
 	/// @brief Get all contacts for the character at a particular location
 	/// @param inPosition Position to test.
@@ -116,17 +116,17 @@ public:
 	/// @param inMovementDirection A hint in which direction the character is moving, will be used to calculate a proper normal.
 	/// @param inMaxSeparationDistance How much distance around the character you want to report contacts in (can be 0 to match the character exactly).
 	/// @param inShape Shape to test collision with.
-	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. GetPosition() since floats are most accurate near the origin
+	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. GetPosition() since decimals are most accurate near the origin
 	/// @param ioCollector Collision collector that receives the collision results.
 	/// @param inLockBodies If the collision query should use the locking body interface (true) or the non locking body interface (false)
-	void								CheckCollision(RVec3Arg inPosition, QuatArg inRotation, Vec3Arg inMovementDirection, float inMaxSeparationDistance, const Shape *inShape, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, bool inLockBodies = true) const;
+	void								CheckCollision(RVec3Arg inPosition, QuatArg inRotation, Vec3Arg inMovementDirection, decimal inMaxSeparationDistance, const Shape *inShape, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, bool inLockBodies = true) const;
 
 private:
 	/// Check collisions between inShape and the world using the center of mass transform
-	void								CheckCollision(RMat44Arg inCenterOfMassTransform, Vec3Arg inMovementDirection, float inMaxSeparationDistance, const Shape *inShape, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, bool inLockBodies) const;
+	void								CheckCollision(RMat44Arg inCenterOfMassTransform, Vec3Arg inMovementDirection, decimal inMaxSeparationDistance, const Shape *inShape, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, bool inLockBodies) const;
 
 	/// Check collisions between inShape and the world using the current position / rotation of the character
-	void								CheckCollision(const Shape *inShape, float inMaxSeparationDistance, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, bool inLockBodies) const;
+	void								CheckCollision(const Shape *inShape, decimal inMaxSeparationDistance, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, bool inLockBodies) const;
 
 	/// The body of this character
 	BodyID								mBodyID;

@@ -52,7 +52,7 @@ struct ShapeCastT
 	}
 
 	/// Get point with fraction inFraction on ray from mCenterOfMassStart to mCenterOfMassStart + mDirection (0 = start of ray, 1 = end of ray)
-	inline Vec					GetPointOnRay(float inFraction) const
+	inline Vec					GetPointOnRay(decimal inFraction) const
 	{
 		return mCenterOfMassStart.GetTranslation() + inFraction * mDirection;
 	}
@@ -123,7 +123,7 @@ public:
 	/// @param inSubShapeID1 Sub shape id for shape 1
 	/// @param inSubShapeID2 Sub shape id for shape 2
 	/// @param inBodyID2 BodyID that was hit
-								ShapeCastResult(float inFraction, Vec3Arg inContactPoint1, Vec3Arg inContactPoint2, Vec3Arg inContactNormalOrPenetrationDepth, bool inBackFaceHit, const SubShapeID &inSubShapeID1, const SubShapeID &inSubShapeID2, const BodyID &inBodyID2) :
+								ShapeCastResult(decimal inFraction, Vec3Arg inContactPoint1, Vec3Arg inContactPoint2, Vec3Arg inContactNormalOrPenetrationDepth, bool inBackFaceHit, const SubShapeID &inSubShapeID1, const SubShapeID &inSubShapeID2, const BodyID &inBodyID2) :
 		CollideShapeResult(inContactPoint1, inContactPoint2, inContactNormalOrPenetrationDepth, (inContactPoint2 - inContactPoint1).Length(), inSubShapeID1, inSubShapeID2, inBodyID2),
 		mFraction(inFraction),
 		mIsBackFaceHit(inBackFaceHit)
@@ -131,7 +131,7 @@ public:
 	}
 
 	/// Function required by the CollisionCollector. A smaller fraction is considered to be a 'better hit'. For rays/cast shapes we can just use the collision fraction. The fraction and penetration depth are combined in such a way that deeper hits at fraction 0 go first.
-	inline float				GetEarlyOutFraction() const			{ return mFraction > 0.0f? mFraction : -mPenetrationDepth; }
+	inline decimal				GetEarlyOutFraction() const			{ return mFraction > C0? mFraction : -mPenetrationDepth; }
 
 	/// Reverses the hit result, swapping contact point 1 with contact point 2 etc.
 	/// @param inWorldSpaceCastDirection Direction of the shape cast in world space
@@ -162,7 +162,7 @@ public:
 		return result;
 	}
 
-	float						mFraction;							///< This is the fraction where the shape hit the other shape: CenterOfMassOnHit = Start + value * (End - Start)
+	decimal						mFraction;							///< This is the fraction where the shape hit the other shape: CenterOfMassOnHit = Start + value * (End - Start)
 	bool						mIsBackFaceHit;						///< True if the shape was hit from the back side
 };
 

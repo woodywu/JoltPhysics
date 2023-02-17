@@ -17,7 +17,7 @@ DebugRenderer *DebugRenderer::sInstance = nullptr;
 static const int sMaxLevel = 4;
 
 // Distance for each LOD level, these are tweaked for an object of approx. size 1. Use the lod scale to scale these distances.
-static const float sLODDistanceForLevel[] = { 5.0f, 10.0f, 40.0f, FLT_MAX };
+static const decimal sLODDistanceForLevel[] = { 5.0f, 10.0f, 40.0f, FLT_MAX };
 
 DebugRenderer::Triangle::Triangle(Vec3Arg inV1, Vec3Arg inV2, Vec3Arg inV3, ColorArg inColor)
 {
@@ -31,7 +31,7 @@ DebugRenderer::Triangle::Triangle(Vec3Arg inV1, Vec3Arg inV2, Vec3Arg inV3, Colo
 
 	// Calculate normal
 	Vec3 normal = (inV2 - inV1).Cross(inV3 - inV1);
-	float normal_len = normal.Length();
+	decimal normal_len = normal.Length();
 	if (normal_len > 0.0f)
 		normal /= normal_len;
 	Float3 normal3;
@@ -168,7 +168,7 @@ void DebugRenderer::DrawWireBox(RMat44Arg inMatrix, const AABox &inBox, ColorArg
 	DrawLine(v7, v8, inColor);
 }
 
-void DebugRenderer::DrawMarker(RVec3Arg inPosition, ColorArg inColor, float inSize)
+void DebugRenderer::DrawMarker(RVec3Arg inPosition, ColorArg inColor, decimal inSize)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -180,7 +180,7 @@ void DebugRenderer::DrawMarker(RVec3Arg inPosition, ColorArg inColor, float inSi
 	DrawLine(inPosition - dz, inPosition + dz, inColor);
 }
 
-void DebugRenderer::DrawArrow(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor, float inSize)
+void DebugRenderer::DrawArrow(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor, decimal inSize)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -191,7 +191,7 @@ void DebugRenderer::DrawArrow(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor, 
 	{
 		// Draw arrow head
 		Vec3 dir = Vec3(inTo - inFrom);
-		float len = dir.Length();
+		decimal len = dir.Length();
 		if (len != 0.0f)
 			dir = dir * (inSize / len);
 		else
@@ -202,16 +202,16 @@ void DebugRenderer::DrawArrow(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor, 
 	}
 }
 
-void DebugRenderer::DrawCoordinateSystem(RMat44Arg inTransform, float inSize)
+void DebugRenderer::DrawCoordinateSystem(RMat44Arg inTransform, decimal inSize)
 {
 	JPH_PROFILE_FUNCTION();
 
-	DrawArrow(inTransform.GetTranslation(), inTransform * Vec3(inSize, 0, 0), Color::sRed, 0.1f * inSize);
-	DrawArrow(inTransform.GetTranslation(), inTransform * Vec3(0, inSize, 0), Color::sGreen, 0.1f * inSize);
-	DrawArrow(inTransform.GetTranslation(), inTransform * Vec3(0, 0, inSize), Color::sBlue, 0.1f * inSize);
+	DrawArrow(inTransform.GetTranslation(), inTransform * Vec3(inSize, C0, C0), Color::sRed, 0.1f * inSize);
+	DrawArrow(inTransform.GetTranslation(), inTransform * Vec3(C0, inSize, C0), Color::sGreen, 0.1f * inSize);
+	DrawArrow(inTransform.GetTranslation(), inTransform * Vec3(C0, C0, inSize), Color::sBlue, 0.1f * inSize);
 }
 
-void DebugRenderer::DrawPlane(RVec3Arg inPoint, Vec3Arg inNormal, ColorArg inColor, float inSize)
+void DebugRenderer::DrawPlane(RVec3Arg inPoint, Vec3Arg inNormal, ColorArg inColor, decimal inSize)
 {
 	// Create orthogonal basis
 	Vec3 perp1 = inNormal.Cross(Vec3::sAxisY()).NormalizedOr(Vec3::sAxisX());
@@ -247,7 +247,7 @@ void DebugRenderer::DrawWireTriangle(RVec3Arg inV1, RVec3Arg inV2, RVec3Arg inV3
 	DrawLine(inV3, inV1, inColor);
 }
 
-void DebugRenderer::DrawWireSphere(RVec3Arg inCenter, float inRadius, ColorArg inColor, int inLevel)
+void DebugRenderer::DrawWireSphere(RVec3Arg inCenter, decimal inRadius, ColorArg inColor, int inLevel)
 {
 	RMat44 matrix = RMat44::sTranslation(inCenter) * Mat44::sScale(inRadius);
 
@@ -445,7 +445,7 @@ void DebugRenderer::Initialize()
 	for (int level = sMaxLevel; level >= 1; --level)
 	{
 		// Determine at which distance this level should be active
-		float distance = sLODDistanceForLevel[sMaxLevel - level];
+		decimal distance = sLODDistanceForLevel[sMaxLevel - level];
 
 		// Sphere
 		mSphere->mLODs.push_back({ CreateTriangleBatchForConvex(sphere_support, level), distance });
@@ -485,9 +485,9 @@ void DebugRenderer::Initialize()
 				int num_parts = 1 << level;
 				for (int i = 0; i <= num_parts; ++i)
 				{
-					float angle = 0.5f * JPH_PI * (float(q) + float(i) / num_parts);
-					float s = Sin(angle);
-					float c = Cos(angle);
+					decimal angle = 0.5f * JPH_PI * (decimal(q) + decimal(i) / num_parts);
+					decimal s = Sin(angle);
+					decimal c = Cos(angle);
 					Float3 vt(s, 1.0f, c);
 					Float3 vb(s, -1.0f, c);
 					Float3 n(s, 0, c);
@@ -527,9 +527,9 @@ void DebugRenderer::Initialize()
 				for (int i = 0; i <= num_parts; ++i)
 				{
 					// Calculate bottom vertex
-					float angle = 0.5f * JPH_PI * (float(q) + float(i) / num_parts);
-					float s = Sin(angle);
-					float c = Cos(angle);
+					decimal angle = 0.5f * JPH_PI * (decimal(q) + decimal(i) / num_parts);
+					decimal s = Sin(angle);
+					decimal c = Cos(angle);
 					Float3 vb(s, 1.0f, c);
 
 					// Calculate normal
@@ -574,9 +574,9 @@ void DebugRenderer::Initialize()
 				int num_parts = 1 << level;
 				for (int i = 0; i <= num_parts; ++i)
 				{
-					float angle = 0.5f * JPH_PI * (float(q) + float(i) / num_parts);
-					float s = Sin(angle);
-					float c = Cos(angle);
+					decimal angle = 0.5f * JPH_PI * (decimal(q) + decimal(i) / num_parts);
+					decimal s = Sin(angle);
+					decimal c = Cos(angle);
 					Float3 vt(s, 1.0f, c);
 					Float3 vb(s, -1.0f, c);
 					Float3 n(s, 0, c);
@@ -692,7 +692,7 @@ DebugRenderer::GeometryRef DebugRenderer::CreateTriangleGeometryForConvex(Suppor
 	for (int level = sMaxLevel; level >= 1; --level)
 	{
 		// Determine at which distance this level should be active
-		float distance = sLODDistanceForLevel[sMaxLevel - level];
+		decimal distance = sLODDistanceForLevel[sMaxLevel - level];
 
 		// Create triangle batch and only calculate bounds for highest LOD level
 		AABox bounds;
@@ -727,7 +727,7 @@ void DebugRenderer::DrawBox(RMat44Arg inMatrix, const AABox &inBox, ColorArg inC
 	DrawGeometry(inMatrix * m, inColor, mBox, ECullMode::CullBackFace, inCastShadow, inDrawMode);
 }
 
-void DebugRenderer::DrawSphere(RVec3Arg inCenter, float inRadius, ColorArg inColor, ECastShadow inCastShadow, EDrawMode inDrawMode)
+void DebugRenderer::DrawSphere(RVec3Arg inCenter, decimal inRadius, ColorArg inColor, ECastShadow inCastShadow, EDrawMode inDrawMode)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -743,7 +743,7 @@ void DebugRenderer::DrawUnitSphere(RMat44Arg inMatrix, ColorArg inColor, ECastSh
 	DrawGeometry(inMatrix, inColor, mSphere, ECullMode::CullBackFace, inCastShadow, inDrawMode);
 }
 
-void DebugRenderer::DrawCapsule(RMat44Arg inMatrix, float inHalfHeightOfCylinder, float inRadius, ColorArg inColor, ECastShadow inCastShadow, EDrawMode inDrawMode)
+void DebugRenderer::DrawCapsule(RMat44Arg inMatrix, decimal inHalfHeightOfCylinder, decimal inRadius, ColorArg inColor, ECastShadow inCastShadow, EDrawMode inDrawMode)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -753,7 +753,7 @@ void DebugRenderer::DrawCapsule(RMat44Arg inMatrix, float inHalfHeightOfCylinder
 	AABox local_bounds(Vec3(-inRadius, -inHalfHeightOfCylinder - inRadius, -inRadius), Vec3(inRadius, inHalfHeightOfCylinder + inRadius, inRadius));
 	AABox world_bounds = local_bounds.Transformed(inMatrix);
 	
-	float radius_sq = Square(inRadius);
+	decimal radius_sq = Square(inRadius);
 
 	// Draw bottom half sphere
 	RMat44 bottom_matrix = inMatrix * Mat44::sTranslation(Vec3(0, -inHalfHeightOfCylinder, 0)) * scale_matrix;
@@ -767,7 +767,7 @@ void DebugRenderer::DrawCapsule(RMat44Arg inMatrix, float inHalfHeightOfCylinder
 	DrawGeometry(inMatrix * Mat44::sScale(Vec3(inRadius, inHalfHeightOfCylinder, inRadius)), world_bounds, radius_sq, inColor, mCapsuleMid, ECullMode::CullBackFace, inCastShadow, inDrawMode);
 }
 
-void DebugRenderer::DrawCylinder(RMat44Arg inMatrix, float inHalfHeight, float inRadius, ColorArg inColor, ECastShadow inCastShadow, EDrawMode inDrawMode)
+void DebugRenderer::DrawCylinder(RMat44Arg inMatrix, decimal inHalfHeight, decimal inRadius, ColorArg inColor, ECastShadow inCastShadow, EDrawMode inDrawMode)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -777,7 +777,7 @@ void DebugRenderer::DrawCylinder(RMat44Arg inMatrix, float inHalfHeight, float i
 	DrawGeometry(transform, mCylinder->mBounds.Transformed(transform), Square(inRadius), inColor, mCylinder, ECullMode::CullBackFace, inCastShadow, inDrawMode);
 }
 
-void DebugRenderer::DrawOpenCone(RVec3Arg inTop, Vec3Arg inAxis, Vec3Arg inPerpendicular, float inHalfAngle, float inLength, ColorArg inColor, ECastShadow inCastShadow, EDrawMode inDrawMode)
+void DebugRenderer::DrawOpenCone(RVec3Arg inTop, Vec3Arg inAxis, Vec3Arg inPerpendicular, decimal inHalfAngle, decimal inLength, ColorArg inColor, ECastShadow inCastShadow, EDrawMode inDrawMode)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -786,7 +786,7 @@ void DebugRenderer::DrawOpenCone(RVec3Arg inTop, Vec3Arg inAxis, Vec3Arg inPerpe
 	JPH_ASSERT(abs(inPerpendicular.Dot(inAxis)) < 1.0e-4f);
 
 	Vec3 axis = Sign(inHalfAngle) * inLength * inAxis;
-	float scale = inLength * Tan(abs(inHalfAngle));
+	decimal scale = inLength * Tan(abs(inHalfAngle));
 	if (scale != 0.0f)
 	{
 		Vec3 perp1 = scale * inPerpendicular;
@@ -796,7 +796,7 @@ void DebugRenderer::DrawOpenCone(RVec3Arg inTop, Vec3Arg inAxis, Vec3Arg inPerpe
 	}
 }
 
-void DebugRenderer::DrawSwingLimits(RMat44Arg inMatrix, float inSwingYHalfAngle, float inSwingZHalfAngle, float inEdgeLength, ColorArg inColor, ECastShadow inCastShadow, EDrawMode inDrawMode)
+void DebugRenderer::DrawSwingLimits(RMat44Arg inMatrix, decimal inSwingYHalfAngle, decimal inSwingZHalfAngle, decimal inEdgeLength, ColorArg inColor, ECastShadow inCastShadow, EDrawMode inDrawMode)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -815,16 +815,16 @@ void DebugRenderer::DrawSwingLimits(RMat44Arg inMatrix, float inSwingYHalfAngle,
 		int half_num_segments = num_segments / 2;
 
 		// The y and z values of the quaternion are limited to an ellipse, e1 and e2 are the radii of this ellipse
-		float e1 = Sin(0.5f * inSwingZHalfAngle);
-		float e2 = Sin(0.5f * inSwingYHalfAngle);
+		decimal e1 = Sin(0.5f * inSwingZHalfAngle);
+		decimal e2 = Sin(0.5f * inSwingYHalfAngle);
 
 		// Check if the limits will draw something
 		if ((e1 <= 0.0f && e2 <= 0.0f) || (e2 >= 1.0f && e1 >= 1.0f))
 			return;
 
 		// Calculate squared values
-		float e1_sq = Square(e1);
-		float e2_sq = Square(e2);
+		decimal e1_sq = Square(e1);
+		decimal e2_sq = Square(e2);
 
 		// Allocate space for vertices
 		int num_vertices = 2 * num_segments;
@@ -837,14 +837,14 @@ void DebugRenderer::DrawSwingLimits(RMat44Arg inMatrix, float inSwingYHalfAngle,
 		for (int side_iter = 0; side_iter < 2; ++side_iter)
 			for (int segment_iter = 0; segment_iter < half_num_segments; ++segment_iter)
 			{
-				float y, z;
+				decimal y, z;
 				if (e2_sq > e1_sq)
 				{
 					// Trace the y value of the quaternion
 					y = e2 - 2.0f * segment_iter * e2 / half_num_segments;
 
 					// Calculate the corresponding z value of the quaternion
-					float z_sq = e1_sq - e1_sq / e2_sq * Square(y);
+					decimal z_sq = e1_sq - e1_sq / e2_sq * Square(y);
 					z = z_sq <= 0.0f? 0.0f : sqrt(z_sq);
 				}
 				else
@@ -853,7 +853,7 @@ void DebugRenderer::DrawSwingLimits(RMat44Arg inMatrix, float inSwingYHalfAngle,
 					z = -e1 + 2.0f * segment_iter * e1 / half_num_segments;
 
 					// Calculate the corresponding y value of the quaternion
-					float y_sq = e2_sq - e2_sq / e1_sq * Square(z);
+					decimal y_sq = e2_sq - e2_sq / e1_sq * Square(z);
 					y = y_sq <= 0.0f? 0.0f : sqrt(y_sq);
 				}
 
@@ -866,7 +866,7 @@ void DebugRenderer::DrawSwingLimits(RMat44Arg inMatrix, float inSwingYHalfAngle,
 
 				// Create quaternion
 				Vec3 q_xyz(0, y, z);
-				float w = sqrt(1.0f - q_xyz.LengthSq());
+				decimal w = sqrt(1.0f - q_xyz.LengthSq());
 				Quat q(Vec4(q_xyz, w));
 
 				// Store vertex
@@ -926,7 +926,7 @@ void DebugRenderer::DrawSwingLimits(RMat44Arg inMatrix, float inSwingYHalfAngle,
 }
 
 
-void DebugRenderer::DrawPie(RVec3Arg inCenter, float inRadius, Vec3Arg inNormal, Vec3Arg inAxis, float inMinAngle, float inMaxAngle, ColorArg inColor, ECastShadow inCastShadow, EDrawMode inDrawMode)
+void DebugRenderer::DrawPie(RVec3Arg inCenter, decimal inRadius, Vec3Arg inNormal, Vec3Arg inAxis, decimal inMinAngle, decimal inMaxAngle, ColorArg inColor, ECastShadow inCastShadow, EDrawMode inDrawMode)
 {
 	if (inMinAngle >= inMaxAngle)
 		return;
@@ -938,7 +938,7 @@ void DebugRenderer::DrawPie(RVec3Arg inCenter, float inRadius, Vec3Arg inNormal,
 	JPH_ASSERT(abs(inNormal.Dot(inAxis)) < 1.0e-4f);
 		
 	// Pies have a unique batch based on the difference between min and max angle
-	float delta_angle = inMaxAngle - inMinAngle;
+	decimal delta_angle = inMaxAngle - inMinAngle;
 	GeometryRef &geometry = mPieLimits[delta_angle];
 	if (geometry == nullptr)
 	{	
@@ -958,7 +958,7 @@ void DebugRenderer::DrawPie(RVec3Arg inCenter, float inRadius, Vec3Arg inNormal,
 		// Outer edge of pie
 		for (int i = 0; i <= num_parts; ++i)
 		{
-			float angle = float(i) / float(num_parts) * delta_angle;
+			decimal angle = decimal(i) / decimal(num_parts) * delta_angle;
 
 			Float3 pos = { Cos(angle), 0, Sin(angle) };
 			*vertices++ = { pos, normal, { 0, 0 }, Color::sWhite };

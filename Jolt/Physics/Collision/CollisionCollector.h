@@ -13,8 +13,8 @@ class CollisionCollectorTraitsCastRay
 {
 public:
 	/// For rays the early out fraction is the fraction along the line to order hits.
-	static constexpr float InitialEarlyOutFraction = 1.0f + FLT_EPSILON;	///< Furthest hit: Fraction is 1 + epsilon
-	static constexpr float ShouldEarlyOutFraction = 0.0f;					///< Closest hit: Fraction is 0
+	static constexpr decimal InitialEarlyOutFraction = 1.0f + FLT_EPSILON;	///< Furthest hit: Fraction is 1 + epsilon
+	static constexpr decimal ShouldEarlyOutFraction = 0.0f;					///< Closest hit: Fraction is 0
 };
 
 /// Traits to use for CastShape
@@ -22,8 +22,8 @@ class CollisionCollectorTraitsCastShape
 {
 public:
 	/// For rays the early out fraction is the fraction along the line to order hits.
-	static constexpr float InitialEarlyOutFraction = 1.0f + FLT_EPSILON;	///< Furthest hit: Fraction is 1 + epsilon
-	static constexpr float ShouldEarlyOutFraction = -FLT_MAX;				///< Deepest hit: Penetration is infinite
+	static constexpr decimal InitialEarlyOutFraction = 1.0f + FLT_EPSILON;	///< Furthest hit: Fraction is 1 + epsilon
+	static constexpr decimal ShouldEarlyOutFraction = -FLT_MAX;				///< Deepest hit: Penetration is infinite
 };
 
 /// Traits to use for CollideShape
@@ -31,8 +31,8 @@ class CollisionCollectorTraitsCollideShape
 {
 public:
 	/// For shape collisions we use -penetration depth to order hits.
-	static constexpr float InitialEarlyOutFraction = FLT_MAX;				///< Most shallow hit: Separatation is infinite
-	static constexpr float ShouldEarlyOutFraction = -FLT_MAX;				///< Deepest hit: Penetration is infinite
+	static constexpr decimal InitialEarlyOutFraction = FLT_MAX;				///< Most shallow hit: Separatation is infinite
+	static constexpr decimal ShouldEarlyOutFraction = -FLT_MAX;				///< Deepest hit: Penetration is infinite
 };
 
 /// Traits to use for CollidePoint
@@ -65,10 +65,10 @@ public:
 	virtual void			AddHit(const ResultType &inResult) = 0;		
 
 	/// Update the early out fraction (should be lower than before)
-	inline void				UpdateEarlyOutFraction(float inFraction)		{ JPH_ASSERT(inFraction <= mEarlyOutFraction); mEarlyOutFraction = inFraction; }
+	inline void				UpdateEarlyOutFraction(decimal inFraction)		{ JPH_ASSERT(inFraction <= mEarlyOutFraction); mEarlyOutFraction = inFraction; }
 
 	/// Reset the early out fraction to a specific value
-	inline void				ResetEarlyOutFraction(float inFraction)			{ mEarlyOutFraction = inFraction; }
+	inline void				ResetEarlyOutFraction(decimal inFraction)			{ mEarlyOutFraction = inFraction; }
 
 	/// Force the collision detection algorithm to terminate as soon as possible. Call this from the AddHit function when a satisfying hit is found.
 	inline void				ForceEarlyOut()									{ mEarlyOutFraction = TraitsType::ShouldEarlyOutFraction; }
@@ -77,11 +77,11 @@ public:
 	inline bool				ShouldEarlyOut() const							{ return mEarlyOutFraction <= TraitsType::ShouldEarlyOutFraction; }
 
 	/// Get the current early out value
-	inline float			GetEarlyOutFraction() const						{ return mEarlyOutFraction; }
+	inline decimal			GetEarlyOutFraction() const						{ return mEarlyOutFraction; }
 
 private:
 	/// The early out fraction determines the fraction below which the collector is still accepting a hit (can be used to reduce the amount of work)
-	float					mEarlyOutFraction = TraitsType::InitialEarlyOutFraction;
+	decimal					mEarlyOutFraction = TraitsType::InitialEarlyOutFraction;
 
 	/// Set by the collision detection functions to the current TransformedShape of the body that we're colliding against before calling the AddHit function
 	const TransformedShape *mContext = nullptr;

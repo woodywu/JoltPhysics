@@ -21,25 +21,25 @@ public:
 	JPH_OVERRIDE_NEW_DELETE
 
 	/// Character mass (kg). Used to push down objects with gravity when the character is standing on top.
-	float								mMass = 70.0f;
+	decimal								mMass = decimal(70.0f);
 
 	/// Maximum force with which the character can push other bodies (N).
-	float								mMaxStrength = 100.0f;
+	decimal								mMaxStrength = decimal(100.0f);
 
 	/// An extra offset applied to the shape in local space. This allows applying an extra offset to the shape in local space.
 	Vec3								mShapeOffset = Vec3::sZero();
 
 	///@name Movement settings
 	EBackFaceMode						mBackFaceMode = EBackFaceMode::CollideWithBackFaces;	///< When colliding with back faces, the character will not be able to move through back facing triangles. Use this if you have triangles that need to collide on both sides.
-	float								mPredictiveContactDistance = 0.1f;						///< How far to scan outside of the shape for predictive contacts. A value of 0 will most likely cause the character to get stuck as it properly calculate a sliding direction anymore. A value that's too high will cause ghost collisions.
+	decimal								mPredictiveContactDistance = decimal(0.1f);						///< How far to scan outside of the shape for predictive contacts. A value of 0 will most likely cause the character to get stuck as it properly calculate a sliding direction anymore. A value that's too high will cause ghost collisions.
 	uint								mMaxCollisionIterations = 5;							///< Max amount of collision loops
 	uint								mMaxConstraintIterations = 15;							///< How often to try stepping in the constraint solving
-	float								mMinTimeRemaining = 1.0e-4f;							///< Early out condition: If this much time is left to simulate we are done
-	float								mCollisionTolerance = 1.0e-3f;							///< How far we're willing to penetrate geometry
-	float								mCharacterPadding = 0.02f;								///< How far we try to stay away from the geometry, this ensures that the sweep will hit as little as possible lowering the collision cost and reducing the risk of getting stuck
+	decimal								mMinTimeRemaining = decimal(1.0e-4f);							///< Early out condition: If this much time is left to simulate we are done
+	decimal								mCollisionTolerance = decimal(1.0e-3f);							///< How far we're willing to penetrate geometry
+	decimal								mCharacterPadding = decimal(0.02f);								///< How far we try to stay away from the geometry, this ensures that the sweep will hit as little as possible lowering the collision cost and reducing the risk of getting stuck
 	uint								mMaxNumHits = 256;										///< Max num hits to collect in order to avoid excess of contact points collection
-	float								mHitReductionCosMaxAngle = 0.999f;						///< Cos(angle) where angle is the maximum angle between two hits contact normals that are allowed to be merged during hit reduction. Default is around 2.5 degrees. Set to -1 to turn off.
-	float								mPenetrationRecoverySpeed = 1.0f;						///< This value governs how fast a penetration will be resolved, 0 = nothing is resolved, 1 = everything in one update
+	decimal								mHitReductionCosMaxAngle = decimal(0.999f);						///< Cos(angle) where angle is the maximum angle between two hits contact normals that are allowed to be merged during hit reduction. Default is around 2.5 degrees. Set to -1 to turn off.
+	decimal								mPenetrationRecoverySpeed = C1;						///< This value governs how fast a penetration will be resolved, 0 = nothing is resolved, 1 = everything in one update
 };
 
 /// This class contains settings that allow you to override the behavior of a character's collision response
@@ -134,27 +134,27 @@ public:
 	RMat44								GetCenterOfMassTransform() const						{ return GetCenterOfMassTransform(mPosition, mRotation, mShape); }
 
 	/// Character mass (kg)
-	float								GetMass() const											{ return mMass; }
-	void								SetMass(float inMass)									{ mMass = inMass; }
+	decimal								GetMass() const											{ return mMass; }
+	void								SetMass(decimal inMass)									{ mMass = inMass; }
 
 	/// Maximum force with which the character can push other bodies (N)
-	float								GetMaxStrength() const									{ return mMaxStrength; }
-	void								SetMaxStrength(float inMaxStrength)						{ mMaxStrength = inMaxStrength; }
+	decimal								GetMaxStrength() const									{ return mMaxStrength; }
+	void								SetMaxStrength(decimal inMaxStrength)						{ mMaxStrength = inMaxStrength; }
 
 	/// This value governs how fast a penetration will be resolved, 0 = nothing is resolved, 1 = everything in one update
-	float								GetPenetrationRecoverySpeed() const						{ return mPenetrationRecoverySpeed; }
-	void								SetPenetrationRecoverySpeed(float inSpeed)				{ mPenetrationRecoverySpeed = inSpeed; }
+	decimal								GetPenetrationRecoverySpeed() const						{ return mPenetrationRecoverySpeed; }
+	void								SetPenetrationRecoverySpeed(decimal inSpeed)				{ mPenetrationRecoverySpeed = inSpeed; }
 
 	/// Character padding
-	float								GetCharacterPadding() const								{ return mCharacterPadding; }
+	decimal								GetCharacterPadding() const								{ return mCharacterPadding; }
 
 	/// Max num hits to collect in order to avoid excess of contact points collection
 	uint								GetMaxNumHits() const									{ return mMaxNumHits; }
 	void								SetMaxNumHits(uint inMaxHits)							{ mMaxNumHits = inMaxHits; }
 
 	/// Cos(angle) where angle is the maximum angle between two hits contact normals that are allowed to be merged during hit reduction. Default is around 2.5 degrees. Set to -1 to turn off.
-	float								GetHitReductionCosMaxAngle() const						{ return mHitReductionCosMaxAngle; }
-	void								SetHitReductionCosMaxAngle(float inCosMaxAngle)			{ mHitReductionCosMaxAngle = inCosMaxAngle; }
+	decimal								GetHitReductionCosMaxAngle() const						{ return mHitReductionCosMaxAngle; }
+	void								SetHitReductionCosMaxAngle(decimal inCosMaxAngle)			{ mHitReductionCosMaxAngle = inCosMaxAngle; }
 
 	/// Returns if we exceeded the maximum number of hits during the last collision check and had to discard hits based on distance.
 	/// This can be used to find areas that have too complex geometry for the character to navigate properly.
@@ -182,7 +182,7 @@ public:
 	/// @param inBodyFilter Filter that is used to check if a character collides with a body.
 	/// @param inShapeFilter Filter that is used to check if a character collides with a subshape.
 	/// @param inAllocator An allocator for temporary allocations. All memory will be freed by the time this function returns.
-	void								Update(float inDeltaTime, Vec3Arg inGravity, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter, TempAllocator &inAllocator);
+	void								Update(decimal inDeltaTime, Vec3Arg inGravity, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter, TempAllocator &inAllocator);
 
 	/// This function will return true if the character has moved into a slope that is too steep (e.g. a vertical wall).
 	/// You would call WalkStairs to attempt to step up stairs.
@@ -201,7 +201,7 @@ public:
 	/// @param inShapeFilter Filter that is used to check if a character collides with a subshape.
 	/// @param inAllocator An allocator for temporary allocations. All memory will be freed by the time this function returns.
 	/// @return true if the stair walk was successful
-	bool								WalkStairs(float inDeltaTime, Vec3Arg inStepUp, Vec3Arg inStepForward, Vec3Arg inStepForwardTest, Vec3Arg inStepDownExtra, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter, TempAllocator &inAllocator);
+	bool								WalkStairs(decimal inDeltaTime, Vec3Arg inStepUp, Vec3Arg inStepForward, Vec3Arg inStepForwardTest, Vec3Arg inStepDownExtra, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter, TempAllocator &inAllocator);
 
 	/// This function can be used to artificially keep the character to the floor. Normally when a character is on a small step and starts moving horizontally, the character will
 	/// lose contact with the floor because the initial vertical velocity is zero while the horizontal velocity is quite high. To prevent the character from losing contact with the floor,
@@ -218,11 +218,11 @@ public:
 	/// Settings struct with settings for ExtendedUpdate
 	struct ExtendedUpdateSettings
 	{
-		Vec3							mStickToFloorStepDown { 0, -0.5f, 0 };									///< See StickToFloor inStepDown parameter. Can be zero to turn off.
-		Vec3							mWalkStairsStepUp { 0, 0.4f, 0 };										///< See WalkStairs inStepUp parameter. Can be zero to turn off.
-		float							mWalkStairsMinStepForward { 0.02f };									///< See WalkStairs inStepForward parameter. Note that the parameter only indicates a magnitude, direction is taken from current velocity.
-		float							mWalkStairsStepForwardTest { 0.15f };									///< See WalkStairs inStepForwardTest parameter. Note that the parameter only indicates a magnitude, direction is taken from current velocity.
-		float							mWalkStairsCosAngleForwardContact { Cos(DegreesToRadians(75.0f)) };		///< Cos(angle) where angle is the maximum angle between the ground normal in the horizontal plane and the character forward vector where we're willing to adjust the step forward test towards the contact normal.
+		Vec3							mStickToFloorStepDown { C0, -C0P5, C0 };									///< See StickToFloor inStepDown parameter. Can be zero to turn off.
+		Vec3							mWalkStairsStepUp { C0, decimal(0.4f), C0 };										///< See WalkStairs inStepUp parameter. Can be zero to turn off.
+		decimal							mWalkStairsMinStepForward { decimal(0.02f) };									///< See WalkStairs inStepForward parameter. Note that the parameter only indicates a magnitude, direction is taken from current velocity.
+		decimal							mWalkStairsStepForwardTest { decimal(0.15f) };									///< See WalkStairs inStepForwardTest parameter. Note that the parameter only indicates a magnitude, direction is taken from current velocity.
+		decimal							mWalkStairsCosAngleForwardContact { Cos(DegreesToRadians(decimal(75.0f))) };		///< Cos(angle) where angle is the maximum angle between the ground normal in the horizontal plane and the character forward vector where we're willing to adjust the step forward test towards the contact normal.
 		Vec3							mWalkStairsStepDownExtra { Vec3::sZero() };								///< See WalkStairs inStepDownExtra
 	};
 
@@ -238,7 +238,7 @@ public:
 	/// @param inBodyFilter Filter that is used to check if a character collides with a body.
 	/// @param inShapeFilter Filter that is used to check if a character collides with a subshape.
 	/// @param inAllocator An allocator for temporary allocations. All memory will be freed by the time this function returns.
-	void								ExtendedUpdate(float inDeltaTime, Vec3Arg inGravity, const ExtendedUpdateSettings &inSettings, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter, TempAllocator &inAllocator);
+	void								ExtendedUpdate(decimal inDeltaTime, Vec3Arg inGravity, const ExtendedUpdateSettings &inSettings, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter, TempAllocator &inAllocator);
 
 	/// This function can be used after a character has teleported to determine the new contacts with the world.
 	void								RefreshContacts(const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter, TempAllocator &inAllocator);
@@ -252,7 +252,7 @@ public:
 	/// @param inShapeFilter Filter that is used to check if a character collides with a subshape.
 	/// @param inAllocator An allocator for temporary allocations. All memory will be freed by the time this function returns.
 	/// @return Returns true if the switch succeeded.
-	bool								SetShape(const Shape *inShape, float inMaxPenetrationDepth, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter, TempAllocator &inAllocator);
+	bool								SetShape(const Shape *inShape, decimal inMaxPenetrationDepth, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter, TempAllocator &inAllocator);
 
 	/// @brief Get all contacts for the character at a particular location
 	/// @param inPosition Position to test, note that this position will be corrected for the character padding.
@@ -260,13 +260,13 @@ public:
 	/// @param inMovementDirection A hint in which direction the character is moving, will be used to calculate a proper normal.
 	/// @param inMaxSeparationDistance How much distance around the character you want to report contacts in (can be 0 to match the character exactly).
 	/// @param inShape Shape to test collision with.
-	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. GetPosition() since floats are most accurate near the origin
+	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. GetPosition() since decimals are most accurate near the origin
 	/// @param ioCollector Collision collector that receives the collision results.
 	/// @param inBroadPhaseLayerFilter Filter that is used to check if the character collides with something in the broadphase.
 	/// @param inObjectLayerFilter Filter that is used to check if a character collides with a layer.
 	/// @param inBodyFilter Filter that is used to check if a character collides with a body.
 	/// @param inShapeFilter Filter that is used to check if a character collides with a subshape.
-	void								CheckCollision(RVec3Arg inPosition, QuatArg inRotation, Vec3Arg inMovementDirection, float inMaxSeparationDistance, const Shape *inShape, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter) const;
+	void								CheckCollision(RVec3Arg inPosition, QuatArg inRotation, Vec3Arg inMovementDirection, decimal inMaxSeparationDistance, const Shape *inShape, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter) const;
 
 	// Saving / restoring state for replay
 	virtual void						SaveState(StateRecorder &inStream) const override;
@@ -289,8 +289,8 @@ public:
 		Vec3							mLinearVelocity;										///< Velocity of the contact point
 		Vec3							mContactNormal;											///< Contact normal, pointing towards the character
 		Vec3							mSurfaceNormal;											///< Surface normal of the contact
-		float							mDistance;												///< Distance to the contact <= 0 means that it is an actual contact, > 0 means predictive
-		float							mFraction;												///< Fraction along the path where this contact takes place
+		decimal							mDistance;												///< Distance to the contact <= 0 means that it is an actual contact, > 0 means predictive
+		decimal							mFraction;												///< Fraction along the path where this contact takes place
 		BodyID							mBodyB;													///< ID of body we're colliding with
 		SubShapeID						mSubShapeIDB;											///< Sub shape ID of body we're colliding with
 		EMotionType						mMotionTypeB;											///< Motion type of B, used to determine the priority of the contact
@@ -324,8 +324,8 @@ private:
 	struct Constraint
 	{
 		Contact *						mContact;												///< Contact that this constraint was generated from
-		float							mTOI;													///< Calculated time of impact (can be negative if penetrating)
-		float							mProjectedVelocity;										///< Velocity of the contact projected on the contact normal (negative if separating)
+		decimal							mTOI;													///< Calculated time of impact (can be negative if penetrating)
+		decimal							mProjectedVelocity;										///< Velocity of the contact projected on the contact normal (negative if separating)
 		Vec3							mLinearVelocity;										///< Velocity of the contact (can contain a corrective velocity to resolve penetration)
 		Plane							mPlane;													///< Plane around the origin that describes how far we can displace (from the origin)
 	};
@@ -336,7 +336,7 @@ private:
 	class ContactCollector : public CollideShapeCollector
 	{
 	public:
-										ContactCollector(PhysicsSystem *inSystem, const CharacterVirtual *inCharacter, uint inMaxHits, float inHitReductionCosMaxAngle, Vec3Arg inUp, RVec3Arg inBaseOffset, TempContactList &outContacts) : mBaseOffset(inBaseOffset), mUp(inUp), mSystem(inSystem), mCharacter(inCharacter), mContacts(outContacts), mMaxHits(inMaxHits), mHitReductionCosMaxAngle(inHitReductionCosMaxAngle) { }
+										ContactCollector(PhysicsSystem *inSystem, const CharacterVirtual *inCharacter, uint inMaxHits, decimal inHitReductionCosMaxAngle, Vec3Arg inUp, RVec3Arg inBaseOffset, TempContactList &outContacts) : mBaseOffset(inBaseOffset), mUp(inUp), mSystem(inSystem), mCharacter(inCharacter), mContacts(outContacts), mMaxHits(inMaxHits), mHitReductionCosMaxAngle(inHitReductionCosMaxAngle) { }
 
 		virtual void					AddHit(const CollideShapeResult &inResult) override;
 
@@ -346,7 +346,7 @@ private:
 		const CharacterVirtual *		mCharacter;
 		TempContactList &				mContacts;
 		uint							mMaxHits;
-		float							mHitReductionCosMaxAngle;
+		decimal							mHitReductionCosMaxAngle;
 		bool							mMaxHitsExceeded = false;
 	};
 
@@ -372,7 +372,7 @@ private:
 	inline static void					sFillContactProperties(const CharacterVirtual *inCharacter, Contact &outContact, const Body &inBody, Vec3Arg inUp, RVec3Arg inBaseOffset, const taCollector &inCollector, const CollideShapeResult &inResult);
 
 	// Move the shape from ioPosition and try to displace it by inVelocity * inDeltaTime, this will try to slide the shape along the world geometry
-	void								MoveShape(RVec3 &ioPosition, Vec3Arg inVelocity, float inDeltaTime, ContactList *outActiveContacts, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter, TempAllocator &inAllocator
+	void								MoveShape(RVec3 &ioPosition, Vec3Arg inVelocity, decimal inDeltaTime, ContactList *outActiveContacts, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter, TempAllocator &inAllocator
 	#ifdef JPH_DEBUG_RENDERER
 		, bool inDrawConstraints = false
 	#endif // JPH_DEBUG_RENDERER
@@ -391,7 +391,7 @@ private:
 	void								DetermineConstraints(TempContactList &inContacts, ConstraintList &outConstraints) const;
 
 	// Use the constraints to solve the displacement of the character. This will slide the character on the planes around the origin for as far as possible.
-	void								SolveConstraints(Vec3Arg inVelocity, float inDeltaTime, float inTimeRemaining, ConstraintList &ioConstraints, IgnoredContactList &ioIgnoredContacts, float &outTimeSimulated, Vec3 &outDisplacement, TempAllocator &inAllocator
+	void								SolveConstraints(Vec3Arg inVelocity, decimal inDeltaTime, decimal inTimeRemaining, ConstraintList &ioConstraints, IgnoredContactList &ioIgnoredContacts, decimal &outTimeSimulated, Vec3 &outDisplacement, TempAllocator &inAllocator
 	#ifdef JPH_DEBUG_RENDERER
 		, bool inDrawConstraints = false
 	#endif // JPH_DEBUG_RENDERER
@@ -401,7 +401,7 @@ private:
 	void								GetAdjustedBodyVelocity(const Body& inBody, Vec3 &outLinearVelocity, Vec3 &outAngularVelocity) const;
 
 	// Handle contact with physics object that we're colliding against
-	bool								HandleContact(Vec3Arg inVelocity, Constraint &ioConstraint, float inDeltaTime) const;
+	bool								HandleContact(Vec3Arg inVelocity, Constraint &ioConstraint, decimal inDeltaTime) const;
 
 	// Does a swept test of the shape from inPosition with displacement inDisplacement, returns true if there was a collision
 	bool								GetFirstContactForSweep(RVec3Arg inPosition, Vec3Arg inDisplacement, Contact &outContact, const IgnoredContactList &inIgnoredContacts, const BroadPhaseLayerFilter &inBroadPhaseLayerFilter, const ObjectLayerFilter &inObjectLayerFilter, const BodyFilter &inBodyFilter, const ShapeFilter &inShapeFilter) const;
@@ -426,21 +426,21 @@ private:
 
 	// Movement settings
 	EBackFaceMode						mBackFaceMode;											// When colliding with back faces, the character will not be able to move through back facing triangles. Use this if you have triangles that need to collide on both sides.
-	float								mPredictiveContactDistance;								// How far to scan outside of the shape for predictive contacts. A value of 0 will most likely cause the character to get stuck as it properly calculate a sliding direction anymore. A value that's too high will cause ghost collisions.
+	decimal								mPredictiveContactDistance;								// How far to scan outside of the shape for predictive contacts. A value of 0 will most likely cause the character to get stuck as it properly calculate a sliding direction anymore. A value that's too high will cause ghost collisions.
 	uint								mMaxCollisionIterations;								// Max amount of collision loops
 	uint								mMaxConstraintIterations;								// How often to try stepping in the constraint solving
-	float								mMinTimeRemaining;										// Early out condition: If this much time is left to simulate we are done
-	float								mCollisionTolerance;									// How far we're willing to penetrate geometry
-	float								mCharacterPadding;										// How far we try to stay away from the geometry, this ensures that the sweep will hit as little as possible lowering the collision cost and reducing the risk of getting stuck
+	decimal								mMinTimeRemaining;										// Early out condition: If this much time is left to simulate we are done
+	decimal								mCollisionTolerance;									// How far we're willing to penetrate geometry
+	decimal								mCharacterPadding;										// How far we try to stay away from the geometry, this ensures that the sweep will hit as little as possible lowering the collision cost and reducing the risk of getting stuck
 	uint								mMaxNumHits;											// Max num hits to collect in order to avoid excess of contact points collection
-	float								mHitReductionCosMaxAngle;								// Cos(angle) where angle is the maximum angle between two hits contact normals that are allowed to be merged during hit reduction. Default is around 2.5 degrees. Set to -1 to turn off.
-	float								mPenetrationRecoverySpeed;								// This value governs how fast a penetration will be resolved, 0 = nothing is resolved, 1 = everything in one update
+	decimal								mHitReductionCosMaxAngle;								// Cos(angle) where angle is the maximum angle between two hits contact normals that are allowed to be merged during hit reduction. Default is around 2.5 degrees. Set to -1 to turn off.
+	decimal								mPenetrationRecoverySpeed;								// This value governs how fast a penetration will be resolved, 0 = nothing is resolved, 1 = everything in one update
 
 	// Character mass (kg)
-	float								mMass;
+	decimal								mMass;
 
 	// Maximum force with which the character can push other bodies (N)
-	float								mMaxStrength;
+	decimal								mMaxStrength;
 
 	// An extra offset applied to the shape in local space. This allows applying an extra offset to the shape in local space.
 	Vec3								mShapeOffset = Vec3::sZero();
@@ -458,7 +458,7 @@ private:
 	ContactList							mActiveContacts;
 
 	// Remembers the delta time of the last update
-	float								mLastDeltaTime = 1.0f / 60.0f;
+	decimal								mLastDeltaTime = C1 / decimal(60.0f);
 
 	// Remember if we exceeded the maximum number of hits and had to remove similar contacts
 	mutable bool						mMaxHitsExceeded = false;

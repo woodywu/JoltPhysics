@@ -30,10 +30,10 @@ public:
 	/// Plane, defined in local space relative to the character. Every contact behind this plane can support the
 	/// character, every contact in front of this plane is treated as only colliding with the player.
 	/// Default: Accept any contact.
-	Plane								mSupportingVolume { Vec3::sAxisY(), -1.0e10f };
+	Plane								mSupportingVolume{ Vec3::sAxisY(), decimal(-1.0e10f) };
 
 	/// Maximum angle of slope that character can still walk on (radians).
-	float								mMaxSlopeAngle = DegreesToRadians(50.0f);
+	decimal								mMaxSlopeAngle = DegreesToRadians(decimal(50.0f));
 
 	/// Initial shape that represents the character's volume.
 	/// Usually this is a capsule, make sure the shape is made so that the bottom of the shape is at (0, 0, 0).
@@ -53,8 +53,8 @@ public:
 	virtual								~CharacterBase() = default;
 
 	/// Set the maximum angle of slope that character can still walk on (radians)
-	void								SetMaxSlopeAngle(float inMaxSlopeAngle)					{ mCosMaxSlopeAngle = Cos(inMaxSlopeAngle); }
-	float								GetCosMaxSlopeAngle() const								{ return mCosMaxSlopeAngle; }
+	void								SetMaxSlopeAngle(decimal inMaxSlopeAngle)					{ mCosMaxSlopeAngle = Cos(inMaxSlopeAngle); }
+	decimal								GetCosMaxSlopeAngle() const								{ return mCosMaxSlopeAngle; }
 
 	/// Set the up vector for the character
 	void								SetUp(Vec3Arg inUp)										{ mUp = inUp; }
@@ -126,10 +126,10 @@ protected:
 	Plane								mSupportingVolume;
 
 	// Beyond this value there is no max slope
-	static constexpr float				cNoMaxSlopeAngle = 0.9999f;
+	static constexpr decimal				cNoMaxSlopeAngle = decimal(0.9999f);
 
 	// Cosine of the maximum angle of slope that character can still walk on
-	float								mCosMaxSlopeAngle;
+	decimal								mCosMaxSlopeAngle;
 
 	// Ground properties
 	EGroundState						mGroundState = EGroundState::InAir;
