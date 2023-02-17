@@ -22,7 +22,7 @@ bool TriangleSplitterLongestAxis::Split(const Range &inTriangles, Range &outLeft
 
 	// Calculate split plane
 	uint dimension = bounds.GetExtent().GetHighestComponentIndex();
-	float split = bounds.GetCenter()[dimension];
+	decimal split = bounds.GetCenter()[dimension];
 
 	return SplitInternal(inTriangles, dimension, split, outLeft, outRight);
 }

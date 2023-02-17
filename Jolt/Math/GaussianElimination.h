@@ -15,7 +15,7 @@ JPH_NAMESPACE_BEGIN
 /// 
 /// Taken and adapted from Numerical Recipies in C paragraph 2.1
 template <class MatrixA, class MatrixB>
-bool GaussianElimination(MatrixA &ioA, MatrixB &ioB, float inTolerance = 1.0e-16f)
+bool GaussianElimination(MatrixA &ioA, MatrixB &ioB, decimal inTolerance = decimal(1.0e-16f))
 {
 	// Get problem dimensions
 	const uint n = ioA.GetCols();
@@ -35,14 +35,14 @@ bool GaussianElimination(MatrixA &ioA, MatrixB &ioB, float inTolerance = 1.0e-16
 		uint pivot_row = i, pivot_col = i;
 
 		// Determine pivot element 
-		float largest_element = 0.0f;
+		decimal largest_element = 0.0f;
 		for (uint j = 0; j < n; ++j)
 			if (ipiv[j] != 1)
 				for (uint k = 0; k < n; ++k)
 				{
 					if (ipiv[k] == 0)
 					{
-						float element = abs(ioA(j, k));
+						decimal element = abs(ioA(j, k));
 						if (element >= largest_element)
 						{
 							largest_element = element;
@@ -69,7 +69,7 @@ bool GaussianElimination(MatrixA &ioA, MatrixB &ioB, float inTolerance = 1.0e-16
 		}
 
 		// Get diagonal element that we are about to set to 1
-		float diagonal_element = ioA(pivot_col, pivot_col);
+		decimal diagonal_element = ioA(pivot_col, pivot_col);
 		if (abs(diagonal_element) < inTolerance)
 			return false;
 
@@ -85,7 +85,7 @@ bool GaussianElimination(MatrixA &ioA, MatrixB &ioB, float inTolerance = 1.0e-16
 		for (uint j = 0; j < n; ++j)
 			if (j != pivot_col)
 			{
-				float element = ioA(j, pivot_col);
+				decimal element = ioA(j, pivot_col);
 				for (uint k = 0; k < n; ++k) 
 					ioA(j, k) -= ioA(pivot_col, k) * element;
 				for (uint k = 0; k < m; ++k) 

@@ -24,7 +24,7 @@ public:
 	static JPH_INLINE Vec8		sZero();
 
 	/// Replicate across all components
-	static JPH_INLINE Vec8		sReplicate(float inV);
+	static JPH_INLINE Vec8		sReplicate(decimal inV);
 
 	/// Replicate the X component of inV to all components
 	static JPH_INLINE Vec8		sSplatX(Vec4Arg inV);
@@ -54,25 +54,25 @@ public:
 	static JPH_INLINE UVec8		sGreater(Vec8Arg inV1, Vec8Arg inV2);
 	
 	/// Load from memory
-	static JPH_INLINE Vec8		sLoadFloat8(const float *inV);
+	static JPH_INLINE Vec8		sLoadFloat8(const decimal *inV);
 
-	/// Load 8 floats from memory, 32 bytes aligned
-	static JPH_INLINE Vec8		sLoadFloat8Aligned(const float *inV);
+	/// Load 8 decimals from memory, 32 bytes aligned
+	static JPH_INLINE Vec8		sLoadFloat8Aligned(const decimal *inV);
 
-	/// Get float component by index
-	JPH_INLINE float			operator [] (uint inCoordinate) const			{ JPH_ASSERT(inCoordinate < 8); return mF32[inCoordinate]; }
-	JPH_INLINE float &			operator [] (uint inCoordinate)					{ JPH_ASSERT(inCoordinate < 8); return mF32[inCoordinate]; }
+	/// Get decimal component by index
+	JPH_INLINE decimal			operator [] (uint inCoordinate) const			{ JPH_ASSERT(inCoordinate < 8); return mF32[inCoordinate]; }
+	JPH_INLINE decimal &			operator [] (uint inCoordinate)					{ JPH_ASSERT(inCoordinate < 8); return mF32[inCoordinate]; }
 	
-	/// Multiply two float vectors
+	/// Multiply two decimal vectors
 	JPH_INLINE Vec8				operator * (Vec8Arg inV2) const;
 
-	/// Multiply vector by float
-	JPH_INLINE Vec8				operator * (float inV2) const;
+	/// Multiply vector by decimal
+	JPH_INLINE Vec8				operator * (decimal inV2) const;
 
-	/// Add two float vectors
+	/// Add two decimal vectors
 	JPH_INLINE Vec8				operator + (Vec8Arg inV2) const;
 
-	/// Subtract two float vectors
+	/// Subtract two decimal vectors
 	JPH_INLINE Vec8				operator - (Vec8Arg inV2) const;
 
 	/// Divide
@@ -94,13 +94,13 @@ public:
 	/// Fetch the higher 128 bit from a 256 bit variable
 	JPH_INLINE Vec4				UpperVec4() const;
 
-	/// Get the minimum value of the 8 floats
-	JPH_INLINE float			ReduceMin() const;
+	/// Get the minimum value of the 8 decimals
+	JPH_INLINE decimal			ReduceMin() const;
 
 	union
 	{
 		__m256					mValue;
-		float					mF32[8];
+		decimal					mF32[8];
 	};
 };
 

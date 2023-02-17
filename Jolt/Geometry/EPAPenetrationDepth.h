@@ -112,7 +112,7 @@ public:
 		if (closest_points_dist_sq > 0.0f)
 		{
 			// Collision within convex radius, adjust points for convex radius
-			decimal v_len = sqrt(closest_points_dist_sq); // GetClosestPoints function returns |ioV|^2 when return value < FLT_MAX
+			decimal v_len = sqrt(closest_points_dist_sq); // GetClosestPoints function returns |ioV|^2 when return value < FIX_MAX
 			outPointA += ioV * (inConvexRadiusA / v_len);
 			outPointB -= ioV * (inConvexRadiusB / v_len);
 			return EStatus::Colliding;
@@ -151,7 +151,7 @@ public:
 		case 1:
 			{
 				// 1 vertex, which must be at the origin, which is useless for our purpose
-				JPH_ASSERT(support_points.mY[0].IsNearZero(1.0e-8f));
+				JPH_ASSERT(support_points.mY[0].IsNearZero(decimal(1.0e-8f)));
 				support_points.mY.pop_back();
 
 				// Add support points in 4 directions to form a tetrahedron around the origin
@@ -202,7 +202,7 @@ public:
 			if (t != nullptr)
 			{
 				EPAConvexHullBuilder::NewTriangles new_triangles;
-				if (!hull.AddPoint(t, i, FLT_MAX, new_triangles))
+				if (!hull.AddPoint(t, i, FIX_MAX, new_triangles))
 				{
 					// We can't recover from a failure to add a point to the hull because the old triangles have been unlinked already. 
 					// Assume no collision. This can happen if the shapes touch in 1 point (or plane) in which case the hull is degenerate.
@@ -250,7 +250,7 @@ public:
 
 			// Add the point to the hull, if we fail we terminate and report no collision
 			EPAConvexHullBuilder::NewTriangles new_triangles;
-			if (!t->IsFacing(w) || !hull.AddPoint(t, new_index, FLT_MAX, new_triangles))
+			if (!t->IsFacing(w) || !hull.AddPoint(t, new_index, FIX_MAX, new_triangles))
 				return false;
 
 			// If the triangle was removed we can free it now
@@ -263,7 +263,7 @@ public:
 		}
 
 		// Current closest distance to origin
-		decimal closest_dist_sq = FLT_MAX;
+		decimal closest_dist_sq = FIX_MAX;
 
 		// Remember last good triangle
 		Triangle *last = nullptr;

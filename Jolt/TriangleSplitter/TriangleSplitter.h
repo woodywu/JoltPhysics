@@ -71,7 +71,7 @@ public:
 
 protected:
 	/// Helper function to split triangles based on dimension and split value
-	bool						SplitInternal(const Range &inTriangles, uint inDimension, float inSplit, Range &outLeft, Range &outRight);
+	bool						SplitInternal(const Range &inTriangles, uint inDimension, decimal inSplit, Range &outLeft, Range &outRight);
 
 	const VertexList &			mVertices;				///< Vertices of the indexed triangles
 	const IndexedTriangleList &	mTriangles;				///< Unsorted triangles

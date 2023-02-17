@@ -41,10 +41,10 @@ class AxisConstraintPart
 {
 	/// Internal helper function to update velocities of bodies after Lagrange multiplier is calculated
 	template <EMotionType Type1, EMotionType Type2>
-	JPH_INLINE bool				ApplyVelocityStep(MotionProperties *ioMotionProperties1, MotionProperties *ioMotionProperties2, Vec3Arg inWorldSpaceAxis, float inLambda) const
+	JPH_INLINE bool				ApplyVelocityStep(MotionProperties *ioMotionProperties1, MotionProperties *ioMotionProperties2, Vec3Arg inWorldSpaceAxis, decimal inLambda) const
 	{
 		// Apply impulse if delta is not zero
-		if (inLambda != 0.0f)
+		if (inLambda != decimal(0.0f))
 		{
 			// Calculate velocity change due to constraint
 			//
@@ -72,9 +72,9 @@ class AxisConstraintPart
 public:
 	/// Templated form of CalculateConstraintProperties with the motion types baked in
 	template <EMotionType Type1, EMotionType Type2>
-	JPH_INLINE void				TemplatedCalculateConstraintProperties(float inDeltaTime, const MotionProperties *inMotionProperties1, Mat44Arg inInvI1, Vec3Arg inR1PlusU, const MotionProperties *inMotionProperties2, Mat44Arg inInvI2, Vec3Arg inR2, Vec3Arg inWorldSpaceAxis, float inBias = 0.0f, float inC = 0.0f, float inFrequency = 0.0f, float inDamping = 0.0f)
+	JPH_INLINE void				TemplatedCalculateConstraintProperties(decimal inDeltaTime, const MotionProperties *inMotionProperties1, Mat44Arg inInvI1, Vec3Arg inR1PlusU, const MotionProperties *inMotionProperties2, Mat44Arg inInvI2, Vec3Arg inR2, Vec3Arg inWorldSpaceAxis, decimal inBias = decimal(0.0f), decimal inC = decimal(0.0f), decimal inFrequency = decimal(0.0f), decimal inDamping = decimal(0.0f))
 	{
-		JPH_ASSERT(inWorldSpaceAxis.IsNormalized(1.0e-5f));
+		JPH_ASSERT(inWorldSpaceAxis.IsNormalized(decimal(1.0e-5f)));
 
 		// Calculate properties used below
 		Vec3 r1_plus_u_x_axis;
@@ -94,7 +94,7 @@ public:
 			JPH_IF_DEBUG(else Vec3::sNaN().StoreFloat3(&mR2xAxis);)
 
 		// Calculate inverse effective mass: K = J M^-1 J^T
-		float inv_effective_mass;
+		decimal inv_effective_mass;
 
 		if constexpr (Type1 == EMotionType::Dynamic)
 		{
@@ -106,7 +106,7 @@ public:
 		{
 			(void)r1_plus_u_x_axis; // Fix compiler warning: Not using this (it's not calculated either)
 			JPH_IF_DEBUG(Vec3::sNaN().StoreFloat3(&mInvI1_R1PlusUxAxis);)
-			inv_effective_mass = 0.0f;
+			inv_effective_mass = decimal(0.0f);
 		}
 
 		if constexpr (Type2 == EMotionType::Dynamic)
@@ -138,7 +138,7 @@ public:
 	///	@param inC Value of the constraint equation (C). Set to zero if you don't want to drive the constraint to zero with a spring.
 	///	@param inFrequency Oscillation frequency (Hz). Set to zero if you don't want to drive the constraint to zero with a spring.
 	///	@param inDamping Damping factor (0 = no damping, 1 = critical damping). Set to zero if you don't want to drive the constraint to zero with a spring.
-	inline void					CalculateConstraintProperties(float inDeltaTime, const Body &inBody1, Vec3Arg inR1PlusU, const Body &inBody2, Vec3Arg inR2, Vec3Arg inWorldSpaceAxis, float inBias = 0.0f, float inC = 0.0f, float inFrequency = 0.0f, float inDamping = 0.0f)
+	inline void					CalculateConstraintProperties(decimal inDeltaTime, const Body &inBody1, Vec3Arg inR1PlusU, const Body &inBody2, Vec3Arg inR2, Vec3Arg inWorldSpaceAxis, decimal inBias = decimal(0.0f), decimal inC = decimal(0.0f), decimal inFrequency = decimal(0.0f), decimal inDamping = decimal(0.0f))
 	{
 		// Dispatch to the correct templated form
 		switch (inBody1.GetMotionType())
@@ -187,19 +187,19 @@ public:
 	/// Deactivate this constraint
 	inline void					Deactivate()
 	{
-		mEffectiveMass = 0.0f;
-		mTotalLambda = 0.0f;
+		mEffectiveMass = decimal(0.0f);
+		mTotalLambda = decimal(0.0f);
 	}
 
 	/// Check if constraint is active
 	inline bool					IsActive() const
 	{
-		return mEffectiveMass != 0.0f;
+		return mEffectiveMass != decimal(0.0f);
 	}
 
 	/// Templated form of WarmStart with the motion types baked in
 	template <EMotionType Type1, EMotionType Type2>
-	inline void					TemplatedWarmStart(MotionProperties *ioMotionProperties1, MotionProperties *ioMotionProperties2, Vec3Arg inWorldSpaceAxis, float inWarmStartImpulseRatio)
+	inline void					TemplatedWarmStart(MotionProperties *ioMotionProperties1, MotionProperties *ioMotionProperties2, Vec3Arg inWorldSpaceAxis, decimal inWarmStartImpulseRatio)
 	{
 		mTotalLambda *= inWarmStartImpulseRatio;
 
@@ -211,7 +211,7 @@ public:
 	/// @param ioBody2 The second body that this constraint is attached to
 	/// @param inWorldSpaceAxis Axis along which the constraint acts (normalized)
 	/// @param inWarmStartImpulseRatio Ratio of new step to old time step (dt_new / dt_old) for scaling the lagrange multiplier of the previous frame
-	inline void					WarmStart(Body &ioBody1, Body &ioBody2, Vec3Arg inWorldSpaceAxis, float inWarmStartImpulseRatio)
+	inline void					WarmStart(Body &ioBody1, Body &ioBody2, Vec3Arg inWorldSpaceAxis, decimal inWarmStartImpulseRatio)
 	{
 		EMotionType motion_type1 = ioBody1.GetMotionType();
 		MotionProperties *motion_properties1 = ioBody1.GetMotionPropertiesUnchecked();
@@ -237,10 +237,10 @@ public:
 
 	/// Templated form of SolveVelocityConstraint with the motion types baked in
 	template <EMotionType Type1, EMotionType Type2>
-	inline bool					TemplatedSolveVelocityConstraint(MotionProperties *ioMotionProperties1, MotionProperties *ioMotionProperties2, Vec3Arg inWorldSpaceAxis, float inMinLambda, float inMaxLambda)
+	inline bool					TemplatedSolveVelocityConstraint(MotionProperties *ioMotionProperties1, MotionProperties *ioMotionProperties2, Vec3Arg inWorldSpaceAxis, decimal inMinLambda, decimal inMaxLambda)
 	{
 		// Calculate jacobian multiplied by linear velocity
-		float jv;
+		decimal jv;
 		if constexpr (Type1 != EMotionType::Static && Type2 != EMotionType::Static)
 			jv = inWorldSpaceAxis.Dot(ioMotionProperties1->GetLinearVelocity() - ioMotionProperties2->GetLinearVelocity());
 		else if constexpr (Type1 != EMotionType::Static)
@@ -259,8 +259,8 @@ public:
 		// Lagrange multiplier is:
 		//
 		// lambda = -K^-1 (J v + b)
-		float lambda = mEffectiveMass * (jv - mSpringPart.GetBias(mTotalLambda));
-		float new_lambda = Clamp(mTotalLambda + lambda, inMinLambda, inMaxLambda); // Clamp impulse
+		decimal lambda = mEffectiveMass * (jv - mSpringPart.GetBias(mTotalLambda));
+		decimal new_lambda = Clamp(mTotalLambda + lambda, inMinLambda, inMaxLambda); // Clamp impulse
 		lambda = new_lambda - mTotalLambda; // Lambda potentially got clamped, calculate the new impulse to apply
 		mTotalLambda = new_lambda; // Store accumulated impulse
 
@@ -273,7 +273,7 @@ public:
 	/// @param inWorldSpaceAxis Axis along which the constraint acts (normalized)
 	/// @param inMinLambda Minimum value of constraint impulse to apply (N s)
 	/// @param inMaxLambda Maximum value of constraint impulse to apply (N s)
-	inline bool					SolveVelocityConstraint(Body &ioBody1, Body &ioBody2, Vec3Arg inWorldSpaceAxis, float inMinLambda, float inMaxLambda)
+	inline bool					SolveVelocityConstraint(Body &ioBody1, Body &ioBody2, Vec3Arg inWorldSpaceAxis, decimal inMinLambda, decimal inMaxLambda)
 	{
 		EMotionType motion_type1 = ioBody1.GetMotionType();
 		MotionProperties *motion_properties1 = ioBody1.GetMotionPropertiesUnchecked();
@@ -324,17 +324,17 @@ public:
 	/// @param inWorldSpaceAxis Axis along which the constraint acts (normalized)
 	/// @param inC Value of the constraint equation (C)
 	/// @param inBaumgarte Baumgarte constant (fraction of the error to correct)
-	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, Vec3Arg inWorldSpaceAxis, float inC, float inBaumgarte) const
+	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, Vec3Arg inWorldSpaceAxis, decimal inC, decimal inBaumgarte) const
 	{
 		// Only apply position constraint when the constraint is hard, otherwise the velocity bias will fix the constraint
-		if (inC != 0.0f && !mSpringPart.IsActive())
+		if (inC != decimal(0.0f) && !mSpringPart.IsActive())
 		{
 			// Calculate lagrange multiplier (lambda) for Baumgarte stabilization:
 			//
 			// lambda = -K^-1 * beta / dt * C
 			//
 			// We should divide by inDeltaTime, but we should multiply by inDeltaTime in the Euler step below so they're cancelled out
-			float lambda = -mEffectiveMass * inBaumgarte * inC; 
+			decimal lambda = -mEffectiveMass * inBaumgarte * inC; 
 
 			// Directly integrate velocity change for one time step
 			//
@@ -368,13 +368,13 @@ public:
 	}
 
 	/// Override total lagrange multiplier, can be used to set the initial value for warm starting
-	inline void					SetTotalLambda(float inLambda)
+	inline void					SetTotalLambda(decimal inLambda)
 	{
 		mTotalLambda = inLambda;
 	}
 
 	/// Return lagrange multiplier
-	inline float				GetTotalLambda() const
+	inline decimal				GetTotalLambda() const
 	{
 		return mTotalLambda;
 	}
@@ -396,9 +396,9 @@ private:
 	Float3						mR2xAxis;
 	Float3						mInvI1_R1PlusUxAxis;
 	Float3						mInvI2_R2xAxis;
-	float						mEffectiveMass = 0.0f;
+	decimal						mEffectiveMass = decimal(0.0f);
 	SpringPart					mSpringPart;
-	float						mTotalLambda = 0.0f;
+	decimal						mTotalLambda = decimal(0.0f);
 };
 
 JPH_NAMESPACE_END

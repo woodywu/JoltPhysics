@@ -47,7 +47,7 @@ void VehicleTransmissionSettings::RestoreBinaryState(StreamIn &inStream)
 	inStream.Read(mClutchStrength);
 }
 
-void VehicleTransmission::Update(float inDeltaTime, float inCurrentRPM, float inForwardInput, bool inCanShiftUp)
+void VehicleTransmission::Update(decimal inDeltaTime, decimal inCurrentRPM, decimal inForwardInput, bool inCanShiftUp)
 {
 	// Update current gear and calculate clutch friction
 	if (mMode == ETransmissionMode::Auto)
@@ -55,12 +55,12 @@ void VehicleTransmission::Update(float inDeltaTime, float inCurrentRPM, float in
 		// Switch gears based on rpm
 		int old_gear = mCurrentGear;
 		if (mCurrentGear == 0 // In neutral
-			|| inForwardInput * float(mCurrentGear) < 0.0f) // Changing between forward / reverse
+			|| inForwardInput * decimal(mCurrentGear) < decimal(0.0f)) // Changing between forward / reverse
 		{
 			// Switch to first gear or reverse depending on input
-			mCurrentGear = inForwardInput > 0.0f? 1 : (inForwardInput < 0.0f? -1 : 0);
+			mCurrentGear = inForwardInput > decimal(0.0f)? 1 : (inForwardInput < decimal(0.0f)? -1 : 0);
 		}
-		else if (mGearSwitchLatencyTimeLeft == 0.0f) // If not in the timout after switching gears
+		else if (mGearSwitchLatencyTimeLeft == decimal(0.0f)) // If not in the timout after switching gears
 		{
 			if (inCanShiftUp && inCurrentRPM > mShiftUpRPM)
 			{
@@ -82,14 +82,14 @@ void VehicleTransmission::Update(float inDeltaTime, float inCurrentRPM, float in
 				if (mCurrentGear < 0)
 				{
 					// Shift down, reverse
-					int max_gear = inForwardInput != 0.0f? -1 : 0;
+					int max_gear = inForwardInput != decimal(0.0f)? -1 : 0;
 					if (mCurrentGear < max_gear)
 						mCurrentGear++;
 				}
 				else
 				{
 					// Shift down, forward
-					int min_gear = inForwardInput != 0.0f? 1 : 0;
+					int min_gear = inForwardInput != decimal(0.0f)? 1 : 0;
 					if (mCurrentGear > min_gear)
 						mCurrentGear--;
 				}
@@ -99,40 +99,40 @@ void VehicleTransmission::Update(float inDeltaTime, float inCurrentRPM, float in
 		if (old_gear != mCurrentGear)
 		{
 			// We've shifted gear, start switch countdown
-			mGearSwitchTimeLeft = old_gear != 0? mSwitchTime : 0.0f;
+			mGearSwitchTimeLeft = old_gear != 0? mSwitchTime : decimal(0.0f);
 			mClutchReleaseTimeLeft = mClutchReleaseTime;
 			mGearSwitchLatencyTimeLeft = mSwitchLatency;
-			mClutchFriction = 0.0f;
+			mClutchFriction = decimal(0.0f);
 		}
-		else if (mGearSwitchTimeLeft > 0.0f)
+		else if (mGearSwitchTimeLeft > decimal(0.0f))
 		{
 			// If still switching gears, count down
-			mGearSwitchTimeLeft = max(0.0f, mGearSwitchTimeLeft - inDeltaTime);
-			mClutchFriction = 0.0f;
+			mGearSwitchTimeLeft = max(decimal(0.0f), mGearSwitchTimeLeft - inDeltaTime);
+			mClutchFriction = decimal(0.0f);
 		}
-		else if (mClutchReleaseTimeLeft > 0.0f)
+		else if (mClutchReleaseTimeLeft > decimal(0.0f))
 		{
 			// After switching the gears we slowly release the clutch
-			mClutchReleaseTimeLeft = max(0.0f, mClutchReleaseTimeLeft - inDeltaTime);
-			mClutchFriction = 1.0f - mClutchReleaseTimeLeft / mClutchReleaseTime;
+			mClutchReleaseTimeLeft = max(decimal(0.0f), mClutchReleaseTimeLeft - inDeltaTime);
+			mClutchFriction = decimal(1.0f) - mClutchReleaseTimeLeft / mClutchReleaseTime;
 		}
 		else
 		{
 			// Clutch has full friction
-			mClutchFriction = 1.0f;
+			mClutchFriction = decimal(1.0f);
 
 			// Count down switch latency
-			mGearSwitchLatencyTimeLeft = max(0.0f, mGearSwitchLatencyTimeLeft - inDeltaTime);
+			mGearSwitchLatencyTimeLeft = max(decimal(0.0f), mGearSwitchLatencyTimeLeft - inDeltaTime);
 		}
 	}
 }
 
-float VehicleTransmission::GetCurrentRatio() const
+decimal VehicleTransmission::GetCurrentRatio() const
 {
 	if (mCurrentGear < 0)
 		return mReverseGearRatios[-mCurrentGear - 1];
 	else if (mCurrentGear == 0)
-		return 0.0f;
+		return decimal(0.0f);
 	else
 		return mGearRatios[mCurrentGear - 1];
 }

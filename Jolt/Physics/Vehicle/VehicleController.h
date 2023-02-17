@@ -49,13 +49,13 @@ protected:
 	virtual bool				AllowSleep() const = 0;
 
 	// Called before the wheel probes have been done
-	virtual void				PreCollide(float inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
+	virtual void				PreCollide(decimal inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
 
 	// Called after the wheel probes have been done
-	virtual void				PostCollide(float inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
+	virtual void				PostCollide(decimal inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
 
 	// Solve longitudinal and lateral constraint parts for all of the wheels
-	virtual bool				SolveLongitudinalAndLateralConstraints(float inDeltaTime) = 0;
+	virtual bool				SolveLongitudinalAndLateralConstraints(decimal inDeltaTime) = 0;
 
 	// Saving state for replay
 	virtual void				SaveState(StateRecorder &inStream) const = 0;

@@ -23,8 +23,8 @@ public:
 	public:
 		JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(Point)
 
-		float			mX = 0.0f;
-		float			mY = 0.0f;
+		decimal			mX = 0.0f;
+		decimal			mY = 0.0f;
 	};
 
 	/// Remove all points
@@ -36,21 +36,21 @@ public:
 	/// Add a point to the curve. Points must be inserted in ascending X or Sort() needs to be called when all points have been added.
 	/// @param inX X value
 	/// @param inY Y value
-	void				AddPoint(float inX, float inY)					{ mPoints.push_back({ inX, inY }); }
+	void				AddPoint(decimal inX, decimal inY)					{ mPoints.push_back({ inX, inY }); }
 
 	/// Sort the points on X ascending
 	void				Sort()											{ QuickSort(mPoints.begin(), mPoints.end(), [](const Point &inLHS, const Point &inRHS) { return inLHS.mX < inRHS.mX; }); }
 
 	/// Get the lowest X value
-	float				GetMinX() const									{ return mPoints.empty()? 0.0f : mPoints.front().mX; }
+	decimal				GetMinX() const									{ return mPoints.empty()? 0.0f : mPoints.front().mX; }
 
 	/// Get the highest X value
-	float				GetMaxX() const									{ return mPoints.empty()? 0.0f : mPoints.back().mX; }
+	decimal				GetMaxX() const									{ return mPoints.empty()? 0.0f : mPoints.back().mX; }
 
 	/// Sample value on the curve
 	/// @param inX X value to sample at
 	/// @return Interpolated Y value
-	float				GetValue(float inX) const;
+	decimal				GetValue(decimal inX) const;
 
 	/// Saves the state of this object in binary form to inStream.
 	void				SaveBinaryState(StreamOut &inStream) const;

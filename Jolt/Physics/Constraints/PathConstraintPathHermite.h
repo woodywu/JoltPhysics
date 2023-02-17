@@ -14,13 +14,13 @@ public:
 	JPH_DECLARE_SERIALIZABLE_VIRTUAL(PathConstraintPathHermite)
 
 	// See PathConstraintPath::GetPathMaxFraction
-	virtual float		GetPathMaxFraction() const override									{ return float(IsLooping()? mPoints.size() : mPoints.size() - 1); }
+	virtual decimal		GetPathMaxFraction() const override									{ return decimal(IsLooping()? mPoints.size() : mPoints.size() - 1); }
 
 	// See PathConstraintPath::GetClosestPoint
-	virtual float		GetClosestPoint(Vec3Arg inPosition) const override;
+	virtual decimal		GetClosestPoint(Vec3Arg inPosition) const override;
 
 	// See PathConstraintPath::GetPointOnPath
-	virtual void		GetPointOnPath(float inFraction, Vec3 &outPathPosition, Vec3 &outPathTangent, Vec3 &outPathNormal, Vec3 &outPathBinormal) const override;
+	virtual void		GetPointOnPath(decimal inFraction, Vec3 &outPathPosition, Vec3 &outPathTangent, Vec3 &outPathNormal, Vec3 &outPathBinormal) const override;
 
 	/// Adds a point to the path
 	void				AddPoint(Vec3Arg inPosition, Vec3Arg inTangent, Vec3Arg inNormal)	{ mPoints.push_back({ inPosition, inTangent, inNormal}); }
@@ -43,7 +43,7 @@ protected:
 
 private:
 	/// Helper function that returns the index of the path segment and the fraction t on the path segment based on the full path fraction
-	inline void			GetIndexAndT(float inFraction, int &outIndex, float &outT) const;
+	inline void			GetIndexAndT(decimal inFraction, int &outIndex, decimal &outT) const;
 
 	using Points = Array<Point>;
 	   

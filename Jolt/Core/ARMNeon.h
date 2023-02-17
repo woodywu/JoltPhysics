@@ -15,9 +15,9 @@
 
 	// Generic shuffle vector template
 	template <unsigned I1, unsigned I2, unsigned I3, unsigned I4>
-	JPH_INLINE float32x4_t NeonShuffleFloat32x4(float32x4_t inV1, float32x4_t inV2)
+	JPH_INLINE decimal32x4_t NeonShuffleFloat32x4(decimal32x4_t inV1, decimal32x4_t inV2)
 	{
-		float32x4_t ret;
+		decimal32x4_t ret;
 		ret = vmovq_n_f32(vgetq_lane_f32(I1 >= 4? inV2 : inV1, I1 & 0b11));
 		ret = vsetq_lane_f32(vgetq_lane_f32(I2 >= 4? inV2 : inV1, I2 & 0b11), ret, 1);
 		ret = vsetq_lane_f32(vgetq_lane_f32(I3 >= 4? inV2 : inV1, I3 & 0b11), ret, 2);
@@ -27,44 +27,44 @@
 
 	// Specializations
 	template <>
-	JPH_INLINE float32x4_t NeonShuffleFloat32x4<0, 1, 2, 2>(float32x4_t inV1, float32x4_t inV2)
+	JPH_INLINE decimal32x4_t NeonShuffleFloat32x4<0, 1, 2, 2>(decimal32x4_t inV1, decimal32x4_t inV2)
 	{
 	    return vcombine_f32(vget_low_f32(inV1), vdup_lane_s32(vget_high_f32(inV1), 0));
 	}
 
 	template <>
-	JPH_INLINE float32x4_t NeonShuffleFloat32x4<0, 1, 3, 3>(float32x4_t inV1, float32x4_t inV2)
+	JPH_INLINE decimal32x4_t NeonShuffleFloat32x4<0, 1, 3, 3>(decimal32x4_t inV1, decimal32x4_t inV2)
 	{
 	    return vcombine_f32(vget_low_f32(inV1), vdup_lane_s32(vget_high_f32(inV1), 1));
 	}
 
 	template <>
-	JPH_INLINE float32x4_t NeonShuffleFloat32x4<0, 1, 2, 3>(float32x4_t inV1, float32x4_t inV2)
+	JPH_INLINE decimal32x4_t NeonShuffleFloat32x4<0, 1, 2, 3>(decimal32x4_t inV1, decimal32x4_t inV2)
 	{
 		return inV1;
 	}
 
 	template <>
-	JPH_INLINE float32x4_t NeonShuffleFloat32x4<1, 0, 3, 2>(float32x4_t inV1, float32x4_t inV2)
+	JPH_INLINE decimal32x4_t NeonShuffleFloat32x4<1, 0, 3, 2>(decimal32x4_t inV1, decimal32x4_t inV2)
 	{
 	    return vcombine_f32(vrev64_f32(vget_low_f32(inV1)), vrev64_f32(vget_high_f32(inV1)));
 	}
 
 	template <>
-	JPH_INLINE float32x4_t NeonShuffleFloat32x4<2, 2, 1, 0>(float32x4_t inV1, float32x4_t inV2)
+	JPH_INLINE decimal32x4_t NeonShuffleFloat32x4<2, 2, 1, 0>(decimal32x4_t inV1, decimal32x4_t inV2)
 	{
 	    return vcombine_f32(vdup_lane_s32(vget_high_f32(inV1), 0), vrev64_f32(vget_low_f32(inV1)));
 	}
 
 	template <>
-	JPH_INLINE float32x4_t NeonShuffleFloat32x4<2, 3, 0, 1>(float32x4_t inV1, float32x4_t inV2)
+	JPH_INLINE decimal32x4_t NeonShuffleFloat32x4<2, 3, 0, 1>(decimal32x4_t inV1, decimal32x4_t inV2)
 	{
 		return vcombine_f32(vget_high_f32(inV1), vget_low_f32(inV1));
 	}
 
 	// Used extensively by cross product
 	template <>
-	JPH_INLINE float32x4_t NeonShuffleFloat32x4<1, 2, 0, 0>(float32x4_t inV1, float32x4_t inV2)
+	JPH_INLINE decimal32x4_t NeonShuffleFloat32x4<1, 2, 0, 0>(decimal32x4_t inV1, decimal32x4_t inV2)
 	{
 		static int8x16_t table = JPH_NEON_INT8x16(0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x00, 0x01, 0x02, 0x03, 0x00, 0x01, 0x02, 0x03);
 	    return vreinterpretq_f32_u8(vqtbl1q_u8(vreinterpretq_u8_f32(inV1), table));

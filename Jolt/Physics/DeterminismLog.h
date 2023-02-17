@@ -20,7 +20,7 @@ JPH_NAMESPACE_BEGIN
 class DeterminismLog
 {
 private:
-	JPH_INLINE uint32		Convert(float inValue) const
+	JPH_INLINE uint32		Convert(decimal inValue) const
 	{
 		return *(uint32 *)&inValue;
 	}
@@ -67,7 +67,7 @@ public:
 		return *this;
 	}
 
-	DeterminismLog &		operator << (float inValue)
+	DeterminismLog &		operator << (decimal inValue)
 	{
 		mLog << std::hex << std::setw(8) << Convert(inValue);
 		return *this;

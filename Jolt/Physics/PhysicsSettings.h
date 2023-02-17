@@ -38,39 +38,39 @@ struct PhysicsSettings
 	int			mStepListenerBatchesPerJob = 1;
 
 	/// Baumgarte stabilization factor (how much of the position error to 'fix' in 1 update) (unit: dimensionless, 0 = nothing, 1 = 100%)
-	decimal		mBaumgarte = 0.2f;
+	decimal		mBaumgarte = decimal(0.2f);
 
 	/// Radius around objects inside which speculative contact points will be detected. Note that if this is too big 
 	/// you will get ghost collisions as speculative contacts are based on the closest points during the collision detection 
 	/// step which may not be the actual closest points by the time the two objects hit (unit: meters)
-	decimal		mSpeculativeContactDistance = 0.02f;
+	decimal		mSpeculativeContactDistance = decimal(0.02f);
 
 	/// How much bodies are allowed to sink into eachother (unit: meters)
-	decimal		mPenetrationSlop = 0.02f;
+	decimal		mPenetrationSlop = decimal(0.02f);
 
 	/// Fraction of its inner radius a body must move per step to enable casting for the LinearCast motion quality
-	decimal		mLinearCastThreshold = 0.75f;
+	decimal		mLinearCastThreshold = decimal(0.75f);
 
 	/// Fraction of its inner radius a body may penetrate another body for the LinearCast motion quality
-	decimal		mLinearCastMaxPenetration = 0.25f;
+	decimal		mLinearCastMaxPenetration = decimal(0.25f);
 
 	/// Max squared distance to use to determine if two points are on the same plane for determining the contact manifold between two shape faces (unit: meter^2)
-	decimal		mManifoldToleranceSq = 1.0e-6f;
+	decimal		mManifoldToleranceSq = decimal(1.0e-6f);
 
 	/// Maximum distance to correct in a single iteration when solving position constraints (unit: meters)
-	decimal		mMaxPenetrationDistance = 0.2f;
+	decimal		mMaxPenetrationDistance = decimal(0.2f);
 
 	/// Maximum relative delta position for body pairs to be able to reuse collision results from last frame (units: meter^2)
-	decimal		mBodyPairCacheMaxDeltaPositionSq = Square(0.001f); ///< 1 mm
+	decimal		mBodyPairCacheMaxDeltaPositionSq = Square(decimal(0.001f)); ///< 1 mm
 
 	/// Maximum relative delta orientation for body pairs to be able to reuse collision results from last frame, stored as cos(max angle / 2)
-	decimal		mBodyPairCacheCosMaxDeltaRotationDiv2 = 0.99984769515639123915701155881391f; ///< cos(2 degrees / 2)
+	decimal		mBodyPairCacheCosMaxDeltaRotationDiv2 = decimal(0.99984769515639123915701155881391f); ///< cos(2 degrees / 2)
 
 	/// Maximum angle between normals that allows manifolds between different sub shapes of the same body pair to be combined
-	decimal		mContactNormalCosMaxDeltaRotation = 0.99619469809174553229501040247389f; ///< cos(5 degree)
+	decimal		mContactNormalCosMaxDeltaRotation = decimal(0.99619469809174553229501040247389f); ///< cos(5 degree)
 
 	/// Maximum allowed distance between old and new contact point to preserve contact forces for warm start (units: meter^2)
-	decimal		mContactPointPreserveLambdaMaxDistSq = Square(0.01f); ///< 1 cm
+	decimal		mContactPointPreserveLambdaMaxDistSq = Square(decimal(0.001f)); ///< 1 cm
 
 	/// Number of solver velocity iterations to run
 	/// Note that this needs to be >= 2 in order for friction to work (friction is applied using the non-penetration impulse from the previous iteration)
@@ -83,10 +83,10 @@ struct PhysicsSettings
 	decimal		mMinVelocityForRestitution = C1;
 
 	/// Time before object is allowed to go to sleep (unit: seconds)
-	decimal		mTimeBeforeSleep = 0.5f;
+	decimal		mTimeBeforeSleep = decimal(0.5f);
 
 	/// Velocity of points on bounding box of object below which an object can be considered sleeping (unit: m/s)
-	decimal		mPointVelocitySleepThreshold = 0.03f;
+	decimal		mPointVelocitySleepThreshold = decimal(0.03f);
 
 	///@name These variables are mainly for debugging purposes, they allow turning on/off certain subsystems. You probably want to leave them alone.
 	///@{

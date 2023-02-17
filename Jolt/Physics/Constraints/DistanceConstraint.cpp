@@ -83,8 +83,8 @@ DistanceConstraint::DistanceConstraint(Body &inBody1, Body &inBody2, const Dista
 	}
 
 	// Store distance we want to keep between the world space points
-	float distance = Vec3(mWorldSpacePosition2 - mWorldSpacePosition1).Length();
-	SetDistance(mMinDistance < 0.0f? distance : mMinDistance, mMaxDistance < 0.0f? distance : mMaxDistance);
+	decimal distance = Vec3(mWorldSpacePosition2 - mWorldSpacePosition1).Length();
+	SetDistance(mMinDistance < decimal(0.0f)? distance : mMinDistance, mMaxDistance < decimal(0.0f)? distance : mMaxDistance);
 
 	// Most likely gravity is going to tear us apart (this is only used when the distance between the points = 0)
 	mWorldSpaceNormal = Vec3::sAxisY(); 
@@ -94,7 +94,7 @@ DistanceConstraint::DistanceConstraint(Body &inBody1, Body &inBody2, const Dista
 	SetDamping(inSettings.mDamping);
 }
 
-void DistanceConstraint::CalculateConstraintProperties(float inDeltaTime)
+void DistanceConstraint::CalculateConstraintProperties(decimal inDeltaTime)
 {
 	// Update world space positions (the bodies may have moved)
 	mWorldSpacePosition1 = mBody1->GetCenterOfMassTransform() * mLocalSpacePosition1;
@@ -102,8 +102,8 @@ void DistanceConstraint::CalculateConstraintProperties(float inDeltaTime)
 
 	// Calculate world space normal
 	Vec3 delta = Vec3(mWorldSpacePosition2 - mWorldSpacePosition1);
-	float delta_len = delta.Length();
-	if (delta_len > 0.0f)
+	decimal delta_len = delta.Length();
+	if (delta_len > decimal(0.0f))
 		mWorldSpaceNormal = delta / delta_len;
 
 	// Calculate points relative to body
@@ -113,43 +113,43 @@ void DistanceConstraint::CalculateConstraintProperties(float inDeltaTime)
 
 	if (mMinDistance == mMaxDistance)
 	{
-		mAxisConstraint.CalculateConstraintProperties(inDeltaTime, *mBody1, r1_plus_u, *mBody2, r2, mWorldSpaceNormal, 0.0f, delta_len - mMinDistance, mFrequency, mDamping);
+		mAxisConstraint.CalculateConstraintProperties(inDeltaTime, *mBody1, r1_plus_u, *mBody2, r2, mWorldSpaceNormal, decimal(0.0f), delta_len - mMinDistance, mFrequency, mDamping);
 
 		// Single distance, allow constraint forces in both directions
-		mMinLambda = -FLT_MAX;
-		mMaxLambda = FLT_MAX;
+		mMinLambda = FIX_MIN;
+		mMaxLambda = FIX_MAX;
 	}
 	if (delta_len <= mMinDistance)
 	{
-		mAxisConstraint.CalculateConstraintProperties(inDeltaTime, *mBody1, r1_plus_u, *mBody2, r2, mWorldSpaceNormal, 0.0f, delta_len - mMinDistance, mFrequency, mDamping);
+		mAxisConstraint.CalculateConstraintProperties(inDeltaTime, *mBody1, r1_plus_u, *mBody2, r2, mWorldSpaceNormal, decimal(0.0f), delta_len - mMinDistance, mFrequency, mDamping);
 
 		// Allow constraint forces to make distance bigger only
 		mMinLambda = 0;
-		mMaxLambda = FLT_MAX;
+		mMaxLambda = FIX_MAX;
 	}
 	else if (delta_len >= mMaxDistance)
 	{
-		mAxisConstraint.CalculateConstraintProperties(inDeltaTime, *mBody1, r1_plus_u, *mBody2, r2, mWorldSpaceNormal, 0.0f, delta_len - mMaxDistance, mFrequency, mDamping);
+		mAxisConstraint.CalculateConstraintProperties(inDeltaTime, *mBody1, r1_plus_u, *mBody2, r2, mWorldSpaceNormal, decimal(0.0f), delta_len - mMaxDistance, mFrequency, mDamping);
 
 		// Allow constraint forces to make distance smaller only
-		mMinLambda = -FLT_MAX;
+		mMinLambda = FIX_MIN;
 		mMaxLambda = 0;
 	}
 	else
 		mAxisConstraint.Deactivate();
 }
 
-void DistanceConstraint::SetupVelocityConstraint(float inDeltaTime)
+void DistanceConstraint::SetupVelocityConstraint(decimal inDeltaTime)
 {
 	CalculateConstraintProperties(inDeltaTime);
 }
 
-void DistanceConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio)
+void DistanceConstraint::WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio)
 {
 	mAxisConstraint.WarmStart(*mBody1, *mBody2, mWorldSpaceNormal, inWarmStartImpulseRatio);
 }
 
-bool DistanceConstraint::SolveVelocityConstraint(float inDeltaTime)
+bool DistanceConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 {
 	if (mAxisConstraint.IsActive())
 		return mAxisConstraint.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceNormal, mMinLambda, mMaxLambda);
@@ -157,18 +157,18 @@ bool DistanceConstraint::SolveVelocityConstraint(float inDeltaTime)
 		return false;
 }
 
-bool DistanceConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgarte)
+bool DistanceConstraint::SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte)
 {
-	float distance = Vec3(mWorldSpacePosition2 - mWorldSpacePosition1).Dot(mWorldSpaceNormal);
+	decimal distance = Vec3(mWorldSpacePosition2 - mWorldSpacePosition1).Dot(mWorldSpaceNormal);
 
 	// Calculate position error
-	float position_error = 0.0f;
+	decimal position_error = decimal(0.0f);
 	if (distance < mMinDistance)
 		position_error = distance - mMinDistance;
 	else if (distance > mMaxDistance)
 		position_error = distance - mMaxDistance;
 
-	if (position_error != 0.0f)
+	if (position_error != decimal(0.0f))
 	{
 		// Update constraint properties (bodies may have moved)
 		CalculateConstraintProperties(inDeltaTime);
@@ -184,16 +184,16 @@ void DistanceConstraint::DrawConstraint(DebugRenderer *inRenderer) const
 {
 	// Draw constraint
 	Vec3 delta = Vec3(mWorldSpacePosition2 - mWorldSpacePosition1);
-	float len = delta.Length();
+	decimal len = delta.Length();
 	if (len < mMinDistance)
 	{
-		RVec3 real_end_pos = mWorldSpacePosition1 + (len > 0.0f? delta * mMinDistance / len : Vec3(0, len, 0));
+		RVec3 real_end_pos = mWorldSpacePosition1 + (len > decimal(0.0f)? delta * mMinDistance / len : Vec3(0, len, 0));
 		inRenderer->DrawLine(mWorldSpacePosition1, mWorldSpacePosition2, Color::sGreen);
 		inRenderer->DrawLine(mWorldSpacePosition2, real_end_pos, Color::sYellow);
 	}
 	else if (len > mMaxDistance)
 	{
-		RVec3 real_end_pos = mWorldSpacePosition1 + (len > 0.0f? delta * mMaxDistance / len : Vec3(0, len, 0));
+		RVec3 real_end_pos = mWorldSpacePosition1 + (len > decimal(0.0f)? delta * mMaxDistance / len : Vec3(0, len, 0));
 		inRenderer->DrawLine(mWorldSpacePosition1, real_end_pos, Color::sGreen);
 		inRenderer->DrawLine(real_end_pos, mWorldSpacePosition2, Color::sRed);
 	}
@@ -201,8 +201,8 @@ void DistanceConstraint::DrawConstraint(DebugRenderer *inRenderer) const
 		inRenderer->DrawLine(mWorldSpacePosition1, mWorldSpacePosition2, Color::sGreen);
 
 	// Draw constraint end points
-	inRenderer->DrawMarker(mWorldSpacePosition1, Color::sWhite, 0.1f);
-	inRenderer->DrawMarker(mWorldSpacePosition2, Color::sWhite, 0.1f);
+	inRenderer->DrawMarker(mWorldSpacePosition1, Color::sWhite, decimal(0.1f));
+	inRenderer->DrawMarker(mWorldSpacePosition2, Color::sWhite, decimal(0.1f));
 
 	// Draw current length
 	inRenderer->DrawText3D(0.5_r * (mWorldSpacePosition1 + mWorldSpacePosition2), StringFormat("%.2f", (double)len));

@@ -27,7 +27,7 @@ public:
 	UVec4			mIsParallel;					///< for each component if it is parallel to the coordinate axis
 };
 
-/// Intersect AABB with ray, returns minimal distance along ray or FLT_MAX if no hit
+/// Intersect AABB with ray, returns minimal distance along ray or FIX_MAX if no hit
 /// Note: Can return negative value if ray starts in box
 JPH_INLINE decimal RayAABox(Vec3Arg inOrigin, const RayInvDirection &inInvDirection, Vec3Arg inBoundsMin, Vec3Arg inBoundsMax)
 {
@@ -52,13 +52,13 @@ JPH_INLINE decimal RayAABox(Vec3Arg inOrigin, const RayInvDirection &inInvDirect
 	t_max = Vec3::sMin(t_max, t_max.Swizzle<SWIZZLE_Y, SWIZZLE_Z, SWIZZLE_X>());
 	t_max = Vec3::sMin(t_max, t_max.Swizzle<SWIZZLE_Z, SWIZZLE_X, SWIZZLE_Y>());
 
-	// if (t_min > t_max) return FLT_MAX;
+	// if (t_min > t_max) return FIX_MAX;
 	UVec4 no_intersection = Vec3::sGreater(t_min, t_max);
 
-	// if (t_max < 0.0f) return FLT_MAX;
+	// if (t_max < 0.0f) return FIX_MAX;
 	no_intersection = UVec4::sOr(no_intersection, Vec3::sLess(t_max, Vec3::sZero()));
 
-	// if (inInvDirection.mIsParallel && !(Min <= inOrigin && inOrigin <= Max)) return FLT_MAX; else return t_min;
+	// if (inInvDirection.mIsParallel && !(Min <= inOrigin && inOrigin <= Max)) return FIX_MAX; else return t_min;
 	UVec4 no_parallel_overlap = UVec4::sOr(Vec3::sLess(inOrigin, inBoundsMin), Vec3::sGreater(inOrigin, inBoundsMax));
 	no_intersection = UVec4::sOr(no_intersection, UVec4::sAnd(inInvDirection.mIsParallel, no_parallel_overlap));
 	no_intersection = UVec4::sOr(no_intersection, no_intersection.SplatY());
@@ -66,7 +66,7 @@ JPH_INLINE decimal RayAABox(Vec3Arg inOrigin, const RayInvDirection &inInvDirect
 	return Vec3::sSelect(t_min, flt_max, no_intersection).GetX();
 }
 
-/// Intersect 4 AABBs with ray, returns minimal distance along ray or FLT_MAX if no hit
+/// Intersect 4 AABBs with ray, returns minimal distance along ray or FIX_MAX if no hit
 /// Note: Can return negative value if ray starts in box
 JPH_INLINE Vec4 RayAABox4(Vec3Arg inOrigin, const RayInvDirection &inInvDirection, Vec4Arg inBoundsMinX, Vec4Arg inBoundsMinY, Vec4Arg inBoundsMinZ, Vec4Arg inBoundsMaxX, Vec4Arg inBoundsMaxY, Vec4Arg inBoundsMaxZ)
 {
@@ -112,17 +112,17 @@ JPH_INLINE Vec4 RayAABox4(Vec3Arg inOrigin, const RayInvDirection &inInvDirectio
 	// t_max.xyz = minimum(t_max.x, t_max.y, t_max.z);
 	Vec4 t_max = Vec4::sMin(Vec4::sMin(t_maxx, t_maxy), t_maxz);
 
-	// if (t_min > t_max) return FLT_MAX;
+	// if (t_min > t_max) return FIX_MAX;
 	UVec4 no_intersection = Vec4::sGreater(t_min, t_max);
 
-	// if (t_max < 0.0f) return FLT_MAX;
+	// if (t_max < 0.0f) return FIX_MAX;
 	no_intersection = UVec4::sOr(no_intersection, Vec4::sLess(t_max, Vec4::sZero()));
 
 	// if bounds are invalid return FLOAT_MAX;
 	UVec4 bounds_invalid = UVec4::sOr(UVec4::sOr(Vec4::sGreater(inBoundsMinX, inBoundsMaxX), Vec4::sGreater(inBoundsMinY, inBoundsMaxY)), Vec4::sGreater(inBoundsMinZ, inBoundsMaxZ));
 	no_intersection = UVec4::sOr(no_intersection, bounds_invalid);
 
-	// if (inInvDirection.mIsParallel && !(Min <= inOrigin && inOrigin <= Max)) return FLT_MAX; else return t_min;
+	// if (inInvDirection.mIsParallel && !(Min <= inOrigin && inOrigin <= Max)) return FIX_MAX; else return t_min;
 	UVec4 no_parallel_overlapx = UVec4::sAnd(parallelx, UVec4::sOr(Vec4::sLess(originx, inBoundsMinX), Vec4::sGreater(originx, inBoundsMaxX)));
 	UVec4 no_parallel_overlapy = UVec4::sAnd(parallely, UVec4::sOr(Vec4::sLess(originy, inBoundsMinY), Vec4::sGreater(originy, inBoundsMaxY)));
 	UVec4 no_parallel_overlapz = UVec4::sAnd(parallelz, UVec4::sOr(Vec4::sLess(originz, inBoundsMinZ), Vec4::sGreater(originz, inBoundsMaxZ)));
@@ -130,7 +130,7 @@ JPH_INLINE Vec4 RayAABox4(Vec3Arg inOrigin, const RayInvDirection &inInvDirectio
 	return Vec4::sSelect(t_min, flt_max, no_intersection);
 }
 
-/// Intersect AABB with ray, returns minimal and maximal distance along ray or FLT_MAX, -FLT_MAX if no hit
+/// Intersect AABB with ray, returns minimal and maximal distance along ray or FIX_MAX, FIX_MIN if no hit
 /// Note: Can return negative value for outMin if ray starts in box
 JPH_INLINE void RayAABox(Vec3Arg inOrigin, const RayInvDirection &inInvDirection, Vec3Arg inBoundsMin, Vec3Arg inBoundsMax, decimal &outMin, decimal &outMax)
 {
@@ -155,13 +155,13 @@ JPH_INLINE void RayAABox(Vec3Arg inOrigin, const RayInvDirection &inInvDirection
 	t_max = Vec3::sMin(t_max, t_max.Swizzle<SWIZZLE_Y, SWIZZLE_Z, SWIZZLE_X>());
 	t_max = Vec3::sMin(t_max, t_max.Swizzle<SWIZZLE_Z, SWIZZLE_X, SWIZZLE_Y>());
 
-	// if (t_min > t_max) return FLT_MAX;
+	// if (t_min > t_max) return FIX_MAX;
 	UVec4 no_intersection = Vec3::sGreater(t_min, t_max);
 
-	// if (t_max < 0.0f) return FLT_MAX;
+	// if (t_max < 0.0f) return FIX_MAX;
 	no_intersection = UVec4::sOr(no_intersection, Vec3::sLess(t_max, Vec3::sZero()));
 
-	// if (inInvDirection.mIsParallel && !(Min <= inOrigin && inOrigin <= Max)) return FLT_MAX; else return t_min;
+	// if (inInvDirection.mIsParallel && !(Min <= inOrigin && inOrigin <= Max)) return FIX_MAX; else return t_min;
 	UVec4 no_parallel_overlap = UVec4::sOr(Vec3::sLess(inOrigin, inBoundsMin), Vec3::sGreater(inOrigin, inBoundsMax));
 	no_intersection = UVec4::sOr(no_intersection, UVec4::sAnd(inInvDirection.mIsParallel, no_parallel_overlap));
 	no_intersection = UVec4::sOr(no_intersection, no_intersection.SplatY());

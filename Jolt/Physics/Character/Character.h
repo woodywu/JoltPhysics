@@ -18,7 +18,7 @@ public:
 	ObjectLayer							mLayer = 0;
 
 	/// Mass of the character
-	decimal								mMass = decimal(80.0f);
+	decimal								mMass = decimal(decimal(80.0f));
 
 	/// Friction for the character
 	decimal								mFriction = decimal(0.2f);
@@ -106,7 +106,7 @@ public:
 	/// Update the layer of the character
 	void								SetLayer(ObjectLayer inLayer, bool inLockBodies = true);
 
-	/// Switch the shape of the character (e.g. for stance). When inMaxPenetrationDepth is not FLT_MAX, it checks
+	/// Switch the shape of the character (e.g. for stance). When inMaxPenetrationDepth is not FIX_MAX, it checks
 	/// if the new shape collides before switching shape. Returns true if the switch succeeded.
 	bool								SetShape(const Shape *inShape, decimal inMaxPenetrationDepth, bool inLockBodies = true);
 

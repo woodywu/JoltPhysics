@@ -29,7 +29,7 @@ void SkeletonMapper::Initialize(const Skeleton *inSkeleton1, const Mat44 *inNeut
 				Mat44 joint_1_to_2 = inNeutralPose1[j1].Inversed() * inNeutralPose2[j2];
 
 				// Ensure bottom right element is 1 (numerical imprecision in the inverse can make this not so)
-				joint_1_to_2(3, 3) = 1.0f;
+				joint_1_to_2(3, 3) = decimal(1.0f);
 
 				mMappings.emplace_back(j1, j2, joint_1_to_2);
 				mapped1[j1] = true;

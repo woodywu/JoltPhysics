@@ -56,15 +56,15 @@ void WheelTV::CalculateAngularVelocity(const VehicleConstraint &inConstraint)
 	mAngularVelocity = track.mAngularVelocity * wheels[track.mDrivenWheel]->GetSettings()->mRadius / settings->mRadius;
 }
 
-void WheelTV::Update(float inDeltaTime, const VehicleConstraint &inConstraint)
+void WheelTV::Update(decimal inDeltaTime, const VehicleConstraint &inConstraint)
 {
 	CalculateAngularVelocity(inConstraint);
 
 	// Update rotation of wheel
-	mAngle = fmod(mAngle + mAngularVelocity * inDeltaTime, 2.0f * JPH_PI);
+	mAngle = fmod(mAngle + mAngularVelocity * inDeltaTime, decimal(2.0f) * JPH_PI);
 
 	// Reset brake impulse, will be set during post collision again
-	mBrakeImpulse = 0.0f;
+	mBrakeImpulse = decimal(0.0f);
 
 	if (mContactBody != nullptr)
 	{
@@ -76,7 +76,7 @@ void WheelTV::Update(float inDeltaTime, const VehicleConstraint &inConstraint)
 	else
 	{
 		// No collision
-		mCombinedLongitudinalFriction = mCombinedLateralFriction = 0.0f;
+		mCombinedLongitudinalFriction = mCombinedLateralFriction = decimal(0.0f);
 	}
 }
 
@@ -88,14 +88,14 @@ VehicleController *TrackedVehicleControllerSettings::ConstructController(Vehicle
 TrackedVehicleControllerSettings::TrackedVehicleControllerSettings()
 {
 	// Numbers guestimated from: https://en.wikipedia.org/wiki/M1_Abrams
-	mEngine.mMinRPM = 500.0f;
-	mEngine.mMaxRPM = 4000.0f;
-	mEngine.mMaxTorque = 500.0f; // Note actual torque for M1 is around 5000 but we need a reduced mass in order to keep the simulation sane
+	mEngine.mMinRPM = decimal(500.0f);
+	mEngine.mMaxRPM = decimal(4000.0f);
+	mEngine.mMaxTorque = decimal(500.0f); // Note actual torque for M1 is around 5000 but we need a reduced mass in order to keep the simulation sane
 
-	mTransmission.mShiftDownRPM = 1000.0f;
-	mTransmission.mShiftUpRPM = 3500.0f;
-	mTransmission.mGearRatios = { 4.0f, 3.0f, 2.0f, 1.0f };
-	mTransmission.mReverseGearRatios = { -4.0f, -3.0f };
+	mTransmission.mShiftDownRPM = decimal(1000.0f);
+	mTransmission.mShiftUpRPM = decimal(3500.0f);
+	mTransmission.mGearRatios = { decimal(4.0f), decimal(3.0f), decimal(2.0f), decimal(1.0f) };
+	mTransmission.mReverseGearRatios = { -decimal(4.0f), -decimal(3.0f) };
 }
 
 void TrackedVehicleControllerSettings::SaveBinaryState(StreamOut &inStream) const
@@ -123,19 +123,19 @@ TrackedVehicleController::TrackedVehicleController(const TrackedVehicleControlle
 {
 	// Copy engine settings
 	static_cast<VehicleEngineSettings &>(mEngine) = inSettings.mEngine;
-	JPH_ASSERT(inSettings.mEngine.mMinRPM >= 0.0f);
+	JPH_ASSERT(inSettings.mEngine.mMinRPM >= decimal(0.0f));
 	JPH_ASSERT(inSettings.mEngine.mMinRPM <= inSettings.mEngine.mMaxRPM);
 
 	// Copy transmission settings
 	static_cast<VehicleTransmissionSettings &>(mTransmission) = inSettings.mTransmission;
 #ifdef JPH_ENABLE_ASSERTS
-	for (float r : inSettings.mTransmission.mGearRatios)
-		JPH_ASSERT(r > 0.0f);
-	for (float r : inSettings.mTransmission.mReverseGearRatios)
-		JPH_ASSERT(r < 0.0f);
+	for (decimal r : inSettings.mTransmission.mGearRatios)
+		JPH_ASSERT(r > decimal(0.0f));
+	for (decimal r : inSettings.mTransmission.mReverseGearRatios)
+		JPH_ASSERT(r < decimal(0.0f));
 #endif // JPH_ENABLE_ASSERTS
-	JPH_ASSERT(inSettings.mTransmission.mSwitchTime >= 0.0f);
-	JPH_ASSERT(inSettings.mTransmission.mShiftDownRPM > 0.0f);
+	JPH_ASSERT(inSettings.mTransmission.mSwitchTime >= decimal(0.0f));
+	JPH_ASSERT(inSettings.mTransmission.mShiftDownRPM > decimal(0.0f));
 	JPH_ASSERT(inSettings.mTransmission.mMode != ETransmissionMode::Auto || inSettings.mTransmission.mShiftUpRPM < inSettings.mEngine.mMaxRPM);
 	JPH_ASSERT(inSettings.mTransmission.mShiftUpRPM > inSettings.mTransmission.mShiftDownRPM);
 
@@ -144,14 +144,14 @@ TrackedVehicleController::TrackedVehicleController(const TrackedVehicleControlle
 	{
 		const VehicleTrackSettings &d = inSettings.mTracks[i];
 		static_cast<VehicleTrackSettings &>(mTracks[i]) = d;
-		JPH_ASSERT(d.mInertia >= 0.0f);
-		JPH_ASSERT(d.mAngularDamping >= 0.0f);
-		JPH_ASSERT(d.mMaxBrakeTorque >= 0.0f);
-		JPH_ASSERT(d.mDifferentialRatio > 0.0f);
+		JPH_ASSERT(d.mInertia >= decimal(0.0f));
+		JPH_ASSERT(d.mAngularDamping >= decimal(0.0f));
+		JPH_ASSERT(d.mMaxBrakeTorque >= decimal(0.0f));
+		JPH_ASSERT(d.mDifferentialRatio > decimal(0.0f));
 	}
 }
 
-void TrackedVehicleController::PreCollide(float inDeltaTime, PhysicsSystem &inPhysicsSystem)
+void TrackedVehicleController::PreCollide(decimal inDeltaTime, PhysicsSystem &inPhysicsSystem)
 {
 	Wheels &wheels = mConstraint.GetWheels();
 
@@ -165,7 +165,7 @@ void TrackedVehicleController::PreCollide(float inDeltaTime, PhysicsSystem &inPh
 	// Taylor expansion of e^(-c * dt) = 1 - c * dt + ...
 	// Since dt is usually in the order of 1/60 and c is a low number too this approximation is good enough
 	for (VehicleTrack &t : mTracks)
-		t.mAngularVelocity *= max(0.0f, 1.0f - t.mAngularDamping * inDeltaTime);
+		t.mAngularVelocity *= max(decimal(0.0f), decimal(1.0f) - t.mAngularDamping * inDeltaTime);
 }
 
 void TrackedVehicleController::SyncLeftRightTracks()
@@ -174,23 +174,23 @@ void TrackedVehicleController::SyncLeftRightTracks()
 	VehicleTrack &tl = mTracks[(int)ETrackSide::Left];
 	VehicleTrack &tr = mTracks[(int)ETrackSide::Right];
 
-	if (mLeftRatio * mRightRatio > 0.0f)
+	if (mLeftRatio * mRightRatio > decimal(0.0f))
 	{
 		// Solve: (tl.mAngularVelocity + dl) / (tr.mAngularVelocity + dr) = mLeftRatio / mRightRatio and dl * tr.mInertia = -dr * tl.mInertia, where dl/dr are the delta angular velocities for left and right tracks
-		float impulse = (mLeftRatio * tr.mAngularVelocity - mRightRatio * tl.mAngularVelocity) / (mLeftRatio * tr.mInertia + mRightRatio * tl.mInertia);
+		decimal impulse = (mLeftRatio * tr.mAngularVelocity - mRightRatio * tl.mAngularVelocity) / (mLeftRatio * tr.mInertia + mRightRatio * tl.mInertia);
 		tl.mAngularVelocity += impulse * tl.mInertia;
 		tr.mAngularVelocity -= impulse * tr.mInertia;
 	}
 	else
 	{
 		// Solve: (tl.mAngularVelocity + dl) / (tr.mAngularVelocity + dr) = mLeftRatio / mRightRatio and dl * tr.mInertia = dr * tl.mInertia, where dl/dr are the delta angular velocities for left and right tracks
-		float impulse = (mLeftRatio * tr.mAngularVelocity - mRightRatio * tl.mAngularVelocity) / (mRightRatio * tl.mInertia - mLeftRatio * tr.mInertia);
+		decimal impulse = (mLeftRatio * tr.mAngularVelocity - mRightRatio * tl.mAngularVelocity) / (mRightRatio * tl.mInertia - mLeftRatio * tr.mInertia);
 		tl.mAngularVelocity += impulse * tl.mInertia;
 		tr.mAngularVelocity += impulse * tr.mInertia;
 	}
 }
 
-void TrackedVehicleController::PostCollide(float inDeltaTime, PhysicsSystem &inPhysicsSystem)
+void TrackedVehicleController::PostCollide(decimal inDeltaTime, PhysicsSystem &inPhysicsSystem)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -205,11 +205,11 @@ void TrackedVehicleController::PostCollide(float inDeltaTime, PhysicsSystem &inP
 	
 	// First calculate engine speed based on speed of all wheels
 	bool can_engine_apply_torque = false;
-	if (mTransmission.GetCurrentGear() != 0 && mTransmission.GetClutchFriction() > 1.0e-3f)
+	if (mTransmission.GetCurrentGear() != 0 && mTransmission.GetClutchFriction() > decimal(1.0e-3f))
 	{
-		float transmission_ratio = mTransmission.GetCurrentRatio();
-		bool forward = transmission_ratio >= 0.0f;
-		float fastest_wheel_speed = forward? -FLT_MAX : FLT_MAX;
+		decimal transmission_ratio = mTransmission.GetCurrentRatio();
+		bool forward = transmission_ratio >= decimal(0.0f);
+		decimal fastest_wheel_speed = forward? FIX_MIN : FIX_MAX;
 		for (const VehicleTrack &t : mTracks)
 		{
 			if (forward)
@@ -225,7 +225,7 @@ void TrackedVehicleController::PostCollide(float inDeltaTime, PhysicsSystem &inP
 		}
 
 		// Update RPM only if the tracks are connected to the engine
-		if (fastest_wheel_speed > -FLT_MAX && fastest_wheel_speed < FLT_MAX)
+		if (fastest_wheel_speed > FIX_MIN && fastest_wheel_speed < FIX_MAX)
 			mEngine.SetCurrentRPM(fastest_wheel_speed * mTransmission.GetCurrentRatio() * VehicleEngine::cAngularVelocityToRPM);
 	}
 	else
@@ -234,7 +234,7 @@ void TrackedVehicleController::PostCollide(float inDeltaTime, PhysicsSystem &inP
 		mEngine.ApplyDamping(inDeltaTime);
 
 		// In auto transmission mode, don't accelerate the engine when switching gears
-		float forward_input = mTransmission.mMode == ETransmissionMode::Manual? abs(mForwardInput) : 0.0f;
+		decimal forward_input = mTransmission.mMode == ETransmissionMode::Manual? abs(mForwardInput) : decimal(0.0f);
 
 		// Engine not connected to wheels, update RPM based on engine inertia alone
 		mEngine.ApplyTorque(mEngine.GetTorque(forward_input), inDeltaTime);
@@ -242,12 +242,12 @@ void TrackedVehicleController::PostCollide(float inDeltaTime, PhysicsSystem &inP
 
 	// Update transmission
 	// Note: only allow switching gears up when the tracks are rolling in the same direction
-	mTransmission.Update(inDeltaTime, mEngine.GetCurrentRPM(), mForwardInput, mLeftRatio * mRightRatio > 0.0f && can_engine_apply_torque);
+	mTransmission.Update(inDeltaTime, mEngine.GetCurrentRPM(), mForwardInput, mLeftRatio * mRightRatio > decimal(0.0f) && can_engine_apply_torque);
 
 	// Calculate the amount of torque the transmission gives to the differentials
-	float transmission_ratio = mTransmission.GetCurrentRatio();
-	float transmission_torque = mTransmission.GetClutchFriction() * transmission_ratio * mEngine.GetTorque(abs(mForwardInput));
-	if (transmission_torque != 0.0f)
+	decimal transmission_ratio = mTransmission.GetCurrentRatio();
+	decimal transmission_torque = mTransmission.GetClutchFriction() * transmission_ratio * mEngine.GetTorque(abs(mForwardInput));
+	if (transmission_torque != decimal(0.0f))
 	{
 		// Apply the transmission torque to the wheels
 		for (uint i = 0; i < size(mTracks); ++i)
@@ -255,17 +255,17 @@ void TrackedVehicleController::PostCollide(float inDeltaTime, PhysicsSystem &inP
 			VehicleTrack &t = mTracks[i];
 
 			// Get wheel rotation ratio for this track
-			float ratio = i == 0? mLeftRatio : mRightRatio;
+			decimal ratio = i == 0? mLeftRatio : mRightRatio;
 
 			// Calculate the max angular velocity of the driven wheel of the track given current engine RPM
 			// Note this adds 0.1% slop to avoid numerical accuracy issues
-			float track_max_angular_velocity = mEngine.GetCurrentRPM() / (transmission_ratio * t.mDifferentialRatio * ratio * VehicleEngine::cAngularVelocityToRPM) * 1.001f;
+			decimal track_max_angular_velocity = mEngine.GetCurrentRPM() / (transmission_ratio * t.mDifferentialRatio * ratio * VehicleEngine::cAngularVelocityToRPM) * decimal(1.001f);
 
 			// Calculate torque on the driven wheel
-			float differential_torque = t.mDifferentialRatio * ratio * transmission_torque;
+			decimal differential_torque = t.mDifferentialRatio * ratio * transmission_torque;
 
 			// Apply torque to driven wheel
-			if (t.mAngularVelocity * track_max_angular_velocity < 0.0f || abs(t.mAngularVelocity) < abs(track_max_angular_velocity))
+			if (t.mAngularVelocity * track_max_angular_velocity < decimal(0.0f) || abs(t.mAngularVelocity) < abs(track_max_angular_velocity))
 				t.mAngularVelocity += differential_torque * inDeltaTime / t.mInertia;
 		}
 	}
@@ -277,15 +277,15 @@ void TrackedVehicleController::PostCollide(float inDeltaTime, PhysicsSystem &inP
 	for (VehicleTrack &t : mTracks)
 	{
 		// Calculate brake torque
-		float brake_torque = mBrakeInput * t.mMaxBrakeTorque;
-		if (brake_torque > 0.0f)
+		decimal brake_torque = mBrakeInput * t.mMaxBrakeTorque;
+		if (brake_torque > decimal(0.0f))
 		{
 			// Calculate how much torque is needed to stop the track from rotating in this time step
-			float brake_torque_to_lock_track = abs(t.mAngularVelocity) * t.mInertia / inDeltaTime;
+			decimal brake_torque_to_lock_track = abs(t.mAngularVelocity) * t.mInertia / inDeltaTime;
 			if (brake_torque > brake_torque_to_lock_track)
 			{
 				// Wheels are locked
-				t.mAngularVelocity = 0.0f;
+				t.mAngularVelocity = decimal(0.0f);
 				brake_torque -= brake_torque_to_lock_track;
 			}
 			else
@@ -295,10 +295,10 @@ void TrackedVehicleController::PostCollide(float inDeltaTime, PhysicsSystem &inP
 			}
 		}
 
-		if (brake_torque > 0.0f)
+		if (brake_torque > decimal(0.0f))
 		{
 			// Sum the radius of all wheels touching the floor
-			float total_radius = 0.0f;
+			decimal total_radius = decimal(0.0f);
 			for (uint wheel_index : t.mWheels)
 			{
 				const WheelTV *w = static_cast<WheelTV *>(wheels[wheel_index]);
@@ -307,7 +307,7 @@ void TrackedVehicleController::PostCollide(float inDeltaTime, PhysicsSystem &inP
 					total_radius += w->GetSettings()->mRadius;
 			}
 
-			if (total_radius > 0.0f)
+			if (total_radius > decimal(0.0f))
 			{
 				brake_torque /= total_radius;
 				for (uint wheel_index : t.mWheels)
@@ -331,7 +331,7 @@ void TrackedVehicleController::PostCollide(float inDeltaTime, PhysicsSystem &inP
 	}
 }
 
-bool TrackedVehicleController::SolveLongitudinalAndLateralConstraints(float inDeltaTime) 
+bool TrackedVehicleController::SolveLongitudinalAndLateralConstraints(decimal inDeltaTime) 
 {
 	bool impulse = false;
 
@@ -343,28 +343,28 @@ bool TrackedVehicleController::SolveLongitudinalAndLateralConstraints(float inDe
 			VehicleTrack &track = mTracks[w->mTrackIndex];
 
 			// Calculate max impulse that we can apply on the ground
-			float max_longitudinal_friction_impulse = w->mCombinedLongitudinalFriction * w->GetSuspensionLambda();
+			decimal max_longitudinal_friction_impulse = w->mCombinedLongitudinalFriction * w->GetSuspensionLambda();
 
 			// Calculate relative velocity between wheel contact point and floor in longitudinal direction
 			Vec3 relative_velocity = mConstraint.GetVehicleBody()->GetPointVelocity(w->GetContactPosition()) - w->GetContactPointVelocity();
-			float relative_longitudinal_velocity = relative_velocity.Dot(w->GetContactLongitudinal());
+			decimal relative_longitudinal_velocity = relative_velocity.Dot(w->GetContactLongitudinal());
 
 			// Calculate brake force to apply
-			float min_longitudinal_impulse, max_longitudinal_impulse;
-			if (w->mBrakeImpulse != 0.0f)
+			decimal min_longitudinal_impulse, max_longitudinal_impulse;
+			if (w->mBrakeImpulse != decimal(0.0f))
 			{
 				// Limit brake force by max tire friction
-				float brake_impulse = min(w->mBrakeImpulse, max_longitudinal_friction_impulse);
+				decimal brake_impulse = min(w->mBrakeImpulse, max_longitudinal_friction_impulse);
 
 				// Check which direction the brakes should be applied (we don't want to apply an impulse that would accelerate the vehicle)
-				if (relative_longitudinal_velocity >= 0.0f)
+				if (relative_longitudinal_velocity >= decimal(0.0f))
 				{
 					min_longitudinal_impulse = -brake_impulse;
-					max_longitudinal_impulse = 0.0f;
+					max_longitudinal_impulse = decimal(0.0f);
 				}
 				else
 				{
-					min_longitudinal_impulse = 0.0f;
+					min_longitudinal_impulse = decimal(0.0f);
 					max_longitudinal_impulse = brake_impulse;
 				}
 
@@ -374,14 +374,14 @@ bool TrackedVehicleController::SolveLongitudinalAndLateralConstraints(float inDe
 			else
 			{
 				// Assume we want to apply an angular impulse that makes the delta velocity between track and ground zero in one time step, calculate the amount of linear impulse needed to do that
-				float desired_angular_velocity = relative_longitudinal_velocity / settings->mRadius;
-				float linear_impulse = (track.mAngularVelocity - desired_angular_velocity) * track.mInertia / settings->mRadius;
+				decimal desired_angular_velocity = relative_longitudinal_velocity / settings->mRadius;
+				decimal linear_impulse = (track.mAngularVelocity - desired_angular_velocity) * track.mInertia / settings->mRadius;
 
 				// Limit the impulse by max track friction
 				min_longitudinal_impulse = max_longitudinal_impulse = w->GetLongitudinalLambda() + Sign(linear_impulse) * min(abs(linear_impulse), max_longitudinal_friction_impulse);
 
 				// Longitudinal impulse
-				float prev_lambda = w->GetLongitudinalLambda();
+				decimal prev_lambda = w->GetLongitudinalLambda();
 				impulse |= w->SolveLongitudinalConstraintPart(mConstraint, min_longitudinal_impulse, max_longitudinal_impulse);
 
 				// Update the angular velocity of the track according to the lambda that was applied
@@ -399,7 +399,7 @@ bool TrackedVehicleController::SolveLongitudinalAndLateralConstraints(float inDe
 			w->CalculateAngularVelocity(mConstraint);
 
 			// Lateral friction
-			float max_lateral_friction_impulse = w->mCombinedLateralFriction * w->GetSuspensionLambda();
+			decimal max_lateral_friction_impulse = w->mCombinedLateralFriction * w->GetSuspensionLambda();
 			impulse |= w->SolveLateralConstraintPart(mConstraint, -max_lateral_friction_impulse, max_lateral_friction_impulse);
 		}
 
@@ -432,7 +432,7 @@ void TrackedVehicleController::Draw(DebugRenderer *inRenderer) const
 		// Calculate where the suspension attaches to the body in world space
 		RVec3 ws_position = body->GetCenterOfMassPosition() + body->GetRotation() * (settings->mPosition - body->GetShape()->GetCenterOfMass());
 
-		DebugRenderer::sInstance->DrawText3D(ws_position, StringFormat("W: %.1f", (double)t.mAngularVelocity), Color::sWhite, 0.1f);
+		DebugRenderer::sInstance->DrawText3D(ws_position, StringFormat("W: %.1f", (double)t.mAngularVelocity), Color::sWhite, decimal(0.1f));
 	}
 
 	for (const Wheel *w_base : mConstraint.GetWheels())
@@ -451,7 +451,7 @@ void TrackedVehicleController::Draw(DebugRenderer *inRenderer) const
 			inRenderer->DrawLine(w->GetContactPosition(), w->GetContactPosition() + w->GetContactLongitudinal(), Color::sRed);
 			inRenderer->DrawLine(w->GetContactPosition(), w->GetContactPosition() + w->GetContactLateral(), Color::sBlue);
 
-			DebugRenderer::sInstance->DrawText3D(w->GetContactPosition(), StringFormat("S: %.2f", (double)w->GetSuspensionLength()), Color::sWhite, 0.1f);
+			DebugRenderer::sInstance->DrawText3D(w->GetContactPosition(), StringFormat("S: %.2f", (double)w->GetSuspensionLength()), Color::sWhite, decimal(0.1f));
 		}
 		else
 		{

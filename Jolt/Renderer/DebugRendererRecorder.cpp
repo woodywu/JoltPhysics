@@ -61,7 +61,7 @@ DebugRenderer::Batch DebugRendererRecorder::CreateTriangleBatch(const Vertex *in
 	return new BatchImpl(batch_id);
 }
 
-void DebugRendererRecorder::DrawGeometry(RMat44Arg inModelMatrix, const AABox &inWorldSpaceBounds, float inLODScaleSq, ColorArg inModelColor, const GeometryRef &inGeometry, ECullMode inCullMode, ECastShadow inCastShadow, EDrawMode inDrawMode)
+void DebugRendererRecorder::DrawGeometry(RMat44Arg inModelMatrix, const AABox &inWorldSpaceBounds, decimal inLODScaleSq, ColorArg inModelColor, const GeometryRef &inGeometry, ECullMode inCullMode, ECastShadow inCastShadow, EDrawMode inDrawMode)
 {
 	lock_guard lock(mMutex);
 
@@ -92,7 +92,7 @@ void DebugRendererRecorder::DrawGeometry(RMat44Arg inModelMatrix, const AABox &i
 	mCurrentFrame.mGeometries.push_back({ inModelMatrix, inModelColor, geometry_id, inCullMode, inCastShadow, inDrawMode });
 }
 
-void DebugRendererRecorder::DrawText3D(RVec3Arg inPosition, const string_view &inString, ColorArg inColor, float inHeight)
+void DebugRendererRecorder::DrawText3D(RVec3Arg inPosition, const string_view &inString, ColorArg inColor, decimal inHeight)
 { 	
 	lock_guard lock(mMutex);  
 

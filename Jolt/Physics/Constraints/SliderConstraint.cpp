@@ -150,7 +150,7 @@ SliderConstraint::SliderConstraint(Body &inBody1, Body &inBody2, const SliderCon
 	mLocalSpaceNormal2 = mLocalSpaceSliderAxis1.Cross(mLocalSpaceNormal1);
 
 	// Store limits
-	JPH_ASSERT(inSettings.mLimitsMin != inSettings.mLimitsMax || inSettings.mFrequency > 0.0f, "Better use a fixed constraint");
+	JPH_ASSERT(inSettings.mLimitsMin != inSettings.mLimitsMax || inSettings.mFrequency > decimal(0.0f), "Better use a fixed constraint");
 	SetLimits(inSettings.mLimitsMin, inSettings.mLimitsMax);
 
 	// Store frequency and damping
@@ -158,7 +158,7 @@ SliderConstraint::SliderConstraint(Body &inBody1, Body &inBody2, const SliderCon
 	SetDamping(inSettings.mDamping);
 }
 
-float SliderConstraint::GetCurrentPosition() const
+decimal SliderConstraint::GetCurrentPosition() const
 {
 	// See: CalculateR1R2U and CalculateSlidingAxisAndPosition
 	Vec3 r1 = mBody1->GetRotation() * mLocalSpacePosition1;
@@ -167,13 +167,13 @@ float SliderConstraint::GetCurrentPosition() const
 	return u.Dot(mBody1->GetRotation() * mLocalSpaceSliderAxis1);
 }
 
-void SliderConstraint::SetLimits(float inLimitsMin, float inLimitsMax)
+void SliderConstraint::SetLimits(decimal inLimitsMin, decimal inLimitsMax)
 {
-	JPH_ASSERT(inLimitsMin <= 0.0f);
-	JPH_ASSERT(inLimitsMax >= 0.0f);
+	JPH_ASSERT(inLimitsMin <= decimal(0.0f));
+	JPH_ASSERT(inLimitsMax >= decimal(0.0f));
 	mLimitsMin = inLimitsMin;
 	mLimitsMax = inLimitsMax;
-	mHasLimits = mLimitsMin != -FLT_MAX || mLimitsMax != FLT_MAX;
+	mHasLimits = mLimitsMin != FIX_MIN || mLimitsMax != FIX_MAX;
 }
 
 void SliderConstraint::CalculateR1R2U(Mat44Arg inRotation1, Mat44Arg inRotation2)
@@ -197,7 +197,7 @@ void SliderConstraint::CalculatePositionConstraintProperties(Mat44Arg inRotation
 
 void SliderConstraint::CalculateSlidingAxisAndPosition(Mat44Arg inRotation1)
 {
-	if (mHasLimits || mMotorState != EMotorState::Off || mMaxFrictionForce > 0.0f)
+	if (mHasLimits || mMotorState != EMotorState::Off || mMaxFrictionForce > decimal(0.0f))
 	{
 		// Calculate world space slider axis
 		mWorldSpaceSliderAxis = inRotation1 * mLocalSpaceSliderAxis1;
@@ -207,22 +207,22 @@ void SliderConstraint::CalculateSlidingAxisAndPosition(Mat44Arg inRotation1)
 	}
 }
 
-void SliderConstraint::CalculatePositionLimitsConstraintProperties(float inDeltaTime)
+void SliderConstraint::CalculatePositionLimitsConstraintProperties(decimal inDeltaTime)
 {
 	// Check if distance is within limits
 	bool below_min = mD <= mLimitsMin;
 	if (mHasLimits && (below_min || mD >= mLimitsMax))
-		mPositionLimitsConstraintPart.CalculateConstraintProperties(inDeltaTime, *mBody1, mR1 + mU, *mBody2, mR2, mWorldSpaceSliderAxis, 0.0f, mD - (below_min? mLimitsMin : mLimitsMax), mFrequency, mDamping);
+		mPositionLimitsConstraintPart.CalculateConstraintProperties(inDeltaTime, *mBody1, mR1 + mU, *mBody2, mR2, mWorldSpaceSliderAxis, decimal(0.0f), mD - (below_min? mLimitsMin : mLimitsMax), mFrequency, mDamping);
 	else
 		mPositionLimitsConstraintPart.Deactivate();
 }
 
-void SliderConstraint::CalculateMotorConstraintProperties(float inDeltaTime)
+void SliderConstraint::CalculateMotorConstraintProperties(decimal inDeltaTime)
 {
 	switch (mMotorState)
 	{
 	case EMotorState::Off:
-		if (mMaxFrictionForce > 0.0f)
+		if (mMaxFrictionForce > decimal(0.0f))
 			mMotorConstraintPart.CalculateConstraintProperties(inDeltaTime, *mBody1, mR1 + mU, *mBody2, mR2, mWorldSpaceSliderAxis);
 		else
 			mMotorConstraintPart.Deactivate();
@@ -233,12 +233,12 @@ void SliderConstraint::CalculateMotorConstraintProperties(float inDeltaTime)
 		break;
 
 	case EMotorState::Position:
-		mMotorConstraintPart.CalculateConstraintProperties(inDeltaTime, *mBody1, mR1 + mU, *mBody2, mR2, mWorldSpaceSliderAxis, 0.0f, mD - mTargetPosition, mMotorSettings.mFrequency, mMotorSettings.mDamping);
+		mMotorConstraintPart.CalculateConstraintProperties(inDeltaTime, *mBody1, mR1 + mU, *mBody2, mR2, mWorldSpaceSliderAxis, decimal(0.0f), mD - mTargetPosition, mMotorSettings.mFrequency, mMotorSettings.mDamping);
 		break;
 	}	
 }
 
-void SliderConstraint::SetupVelocityConstraint(float inDeltaTime)
+void SliderConstraint::SetupVelocityConstraint(decimal inDeltaTime)
 {
 	// Calculate constraint properties that are constant while bodies don't move
 	Mat44 rotation1 = Mat44::sRotation(mBody1->GetRotation());
@@ -251,7 +251,7 @@ void SliderConstraint::SetupVelocityConstraint(float inDeltaTime)
 	CalculateMotorConstraintProperties(inDeltaTime);
 }
 
-void SliderConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio)
+void SliderConstraint::WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio)
 {
 	// Warm starting: Apply previous frame impulse
 	mMotorConstraintPart.WarmStart(*mBody1, *mBody2, mWorldSpaceSliderAxis, inWarmStartImpulseRatio);
@@ -260,7 +260,7 @@ void SliderConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio
 	mPositionLimitsConstraintPart.WarmStart(*mBody1, *mBody2, mWorldSpaceSliderAxis, inWarmStartImpulseRatio);
 }
 
-bool SliderConstraint::SolveVelocityConstraint(float inDeltaTime)
+bool SliderConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 {
 	// Solve motor
 	bool motor = false;
@@ -270,7 +270,7 @@ bool SliderConstraint::SolveVelocityConstraint(float inDeltaTime)
 		{
 		case EMotorState::Off:
 			{
-				float max_lambda = mMaxFrictionForce * inDeltaTime;
+				decimal max_lambda = mMaxFrictionForce * inDeltaTime;
 				motor = mMotorConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceSliderAxis, -max_lambda, max_lambda);
 				break;
 			}	
@@ -293,18 +293,18 @@ bool SliderConstraint::SolveVelocityConstraint(float inDeltaTime)
 	if (mPositionLimitsConstraintPart.IsActive())
 	{
 		if (mD <= mLimitsMin)
-			limit = mPositionLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceSliderAxis, 0, FLT_MAX);
+			limit = mPositionLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceSliderAxis, 0, FIX_MAX);
 		else
 		{
 			JPH_ASSERT(mD >= mLimitsMax);
-			limit = mPositionLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceSliderAxis, -FLT_MAX, 0);
+			limit = mPositionLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceSliderAxis, FIX_MIN, 0);
 		}
 	}
 
 	return motor || pos || rot || limit;
 }
 
-bool SliderConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgarte)
+bool SliderConstraint::SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte)
 {
 	// Motor operates on velocities only, don't call SolvePositionConstraint
 
@@ -321,7 +321,7 @@ bool SliderConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumga
 
 	// Solve limits along slider axis
 	bool limit = false;
-	if (mHasLimits && mFrequency <= 0.0f)
+	if (mHasLimits && mFrequency <= decimal(0.0f))
 	{
 		rotation1 = Mat44::sRotation(mBody1->GetRotation());
 		rotation2 = Mat44::sRotation(mBody2->GetRotation());
@@ -355,22 +355,22 @@ void SliderConstraint::DrawConstraint(DebugRenderer *inRenderer) const
 	RVec3 position2 = transform2 * mLocalSpacePosition2;
 
 	// Draw constraint
-	inRenderer->DrawMarker(position1, Color::sRed, 0.1f);
-	inRenderer->DrawMarker(position2, Color::sGreen, 0.1f);
+	inRenderer->DrawMarker(position1, Color::sRed, decimal(0.1f));
+	inRenderer->DrawMarker(position2, Color::sGreen, decimal(0.1f));
 	inRenderer->DrawLine(position1, position2, Color::sGreen);
 
 	// Draw motor
 	switch (mMotorState)
 	{
 	case EMotorState::Position:
-		inRenderer->DrawMarker(position1 + mTargetPosition * slider_axis, Color::sYellow, 1.0f);
+		inRenderer->DrawMarker(position1 + mTargetPosition * slider_axis, Color::sYellow, decimal(1.0f));
 		break;
 
 	case EMotorState::Velocity:
 		{
 			Vec3 cur_vel = (mBody2->GetLinearVelocity() - mBody1->GetLinearVelocity()).Dot(slider_axis) * slider_axis;
 			inRenderer->DrawLine(position2, position2 + cur_vel, Color::sBlue);
-			inRenderer->DrawArrow(position2 + cur_vel, position2 + mTargetVelocity * slider_axis, Color::sRed, 0.1f);
+			inRenderer->DrawArrow(position2 + cur_vel, position2 + mTargetVelocity * slider_axis, Color::sRed, decimal(0.1f));
 			break;
 		}
 
@@ -398,8 +398,8 @@ void SliderConstraint::DrawConstraintLimits(DebugRenderer *inRenderer) const
 		inRenderer->DrawLine(limits_min, position1, Color::sWhite);
 		inRenderer->DrawLine(position2, limits_max, Color::sWhite);
 
-		inRenderer->DrawMarker(limits_min, Color::sWhite, 0.1f);
-		inRenderer->DrawMarker(limits_max, Color::sWhite, 0.1f);
+		inRenderer->DrawMarker(limits_min, Color::sWhite, decimal(0.1f));
+		inRenderer->DrawMarker(limits_max, Color::sWhite, decimal(0.1f));
 	}
 }
 #endif // JPH_DEBUG_RENDERER

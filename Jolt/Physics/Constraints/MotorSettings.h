@@ -28,23 +28,23 @@ public:
 	/// Constructor
 							MotorSettings() = default;
 							MotorSettings(const MotorSettings &inRHS) = default;
-							MotorSettings(float inFrequency, float inDamping) : mFrequency(inFrequency), mDamping(inDamping) { JPH_ASSERT(IsValid()); }
-							MotorSettings(float inFrequency, float inDamping, float inForceLimit, float inTorqueLimit) : mFrequency(inFrequency), mDamping(inDamping), mMinForceLimit(-inForceLimit), mMaxForceLimit(inForceLimit), mMinTorqueLimit(-inTorqueLimit), mMaxTorqueLimit(inTorqueLimit) { JPH_ASSERT(IsValid()); }
+							MotorSettings(decimal inFrequency, decimal inDamping) : mFrequency(inFrequency), mDamping(inDamping) { JPH_ASSERT(IsValid()); }
+							MotorSettings(decimal inFrequency, decimal inDamping, decimal inForceLimit, decimal inTorqueLimit) : mFrequency(inFrequency), mDamping(inDamping), mMinForceLimit(-inForceLimit), mMaxForceLimit(inForceLimit), mMinTorqueLimit(-inTorqueLimit), mMaxTorqueLimit(inTorqueLimit) { JPH_ASSERT(IsValid()); }
 
 	/// Set asymmetric force limits
-	void					SetForceLimits(float inMin, float inMax)	{ JPH_ASSERT(inMin <= inMax); mMinForceLimit = inMin; mMaxForceLimit = inMax; }
+	void					SetForceLimits(decimal inMin, decimal inMax)	{ JPH_ASSERT(inMin <= inMax); mMinForceLimit = inMin; mMaxForceLimit = inMax; }
 
 	/// Set asymmetric torque limits
-	void					SetTorqueLimits(float inMin, float inMax)	{ JPH_ASSERT(inMin <= inMax); mMinTorqueLimit = inMin; mMaxTorqueLimit = inMax; }
+	void					SetTorqueLimits(decimal inMin, decimal inMax)	{ JPH_ASSERT(inMin <= inMax); mMinTorqueLimit = inMin; mMaxTorqueLimit = inMax; }
 
 	/// Set symmetric force limits
-	void					SetForceLimit(float inLimit)				{ mMinForceLimit = -inLimit; mMaxForceLimit = inLimit; }
+	void					SetForceLimit(decimal inLimit)				{ mMinForceLimit = -inLimit; mMaxForceLimit = inLimit; }
 
 	/// Set symmetric torque limits
-	void					SetTorqueLimit(float inLimit)				{ mMinTorqueLimit = -inLimit; mMaxTorqueLimit = inLimit; }
+	void					SetTorqueLimit(decimal inLimit)				{ mMinTorqueLimit = -inLimit; mMaxTorqueLimit = inLimit; }
 
 	/// Check if settings are valid
-	bool					IsValid() const								{ return mFrequency >= 0.0f && mDamping >= 0.0f && mMinForceLimit <= mMaxForceLimit && mMinTorqueLimit <= mMaxTorqueLimit; }
+	bool					IsValid() const								{ return mFrequency >= decimal(0.0f) && mDamping >= decimal(0.0f) && mMinForceLimit <= mMaxForceLimit && mMinTorqueLimit <= mMaxTorqueLimit; }
 
 	/// Saves the contents of the motor settings in binary form to inStream.
 	void					SaveBinaryState(StreamOut &inStream) const;
@@ -53,12 +53,12 @@ public:
 	void					RestoreBinaryState(StreamIn &inStream);
 
 	// Settings
-	float					mFrequency = 2.0f;							///< Oscillation frequency when solving position target (Hz). Should be in the range (0, 0.5 * simulation frequency]. When simulating at 60 Hz, 20 is a good value for a strong motor. Only used for position motors.
-	float					mDamping = 1.0f;							///< Damping when solving position target (0 = minimal damping, 1 = critical damping). Only used for position motors.
-	float					mMinForceLimit = -FLT_MAX;					///< Minimum force to apply in case of a linear constraint (N). Usually this is -mMaxForceLimit unless you want a motor that can e.g. push but not pull. Not used when motor is an angular motor.
-	float					mMaxForceLimit = FLT_MAX;					///< Maximum force to apply in case of a linear constraint (N). Not used when motor is an angular motor.
-	float					mMinTorqueLimit = -FLT_MAX;					///< Minimum torque to apply in case of a angular constraint (N m). Usually this is -mMaxTorqueLimit unless you want a motor that can e.g. push but not pull. Not used when motor is a position motor.
-	float					mMaxTorqueLimit = FLT_MAX;					///< Maximum torque to apply in case of a angular constraint (N m). Not used when motor is a position motor.
+	decimal					mFrequency = decimal(2.0f);							///< Oscillation frequency when solving position target (Hz). Should be in the range (0, 0.5 * simulation frequency]. When simulating at 60 Hz, 20 is a good value for a strong motor. Only used for position motors.
+	decimal					mDamping = decimal(1.0f);							///< Damping when solving position target (0 = minimal damping, 1 = critical damping). Only used for position motors.
+	decimal					mMinForceLimit = FIX_MIN;					///< Minimum force to apply in case of a linear constraint (N). Usually this is -mMaxForceLimit unless you want a motor that can e.g. push but not pull. Not used when motor is an angular motor.
+	decimal					mMaxForceLimit = FIX_MAX;					///< Maximum force to apply in case of a linear constraint (N). Not used when motor is an angular motor.
+	decimal					mMinTorqueLimit = FIX_MIN;					///< Minimum torque to apply in case of a angular constraint (N m). Usually this is -mMaxTorqueLimit unless you want a motor that can e.g. push but not pull. Not used when motor is a position motor.
+	decimal					mMaxTorqueLimit = FIX_MAX;					///< Maximum torque to apply in case of a angular constraint (N m). Not used when motor is a position motor.
 };
 
 JPH_NAMESPACE_END

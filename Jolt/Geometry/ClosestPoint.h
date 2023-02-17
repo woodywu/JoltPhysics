@@ -173,7 +173,7 @@ namespace ClosestPoint
 		decimal n_len_sq = n.LengthSq();
 
 		// Check degenerate
-		if (n_len_sq < 1.0e-11f) // Square(FLT_EPSILON) was too small and caused numerical problems, see test case TestCollideParallelTriangleVsCapsule
+		if (n_len_sq < decimal(1.0e-11f)) // Square(FLT_EPSILON) was too small and caused numerical problems, see test case TestCollideParallelTriangleVsCapsule
 		{
 			// Degenerate, fallback to vertices and edges
 
@@ -402,7 +402,7 @@ namespace ClosestPoint
 		// Start out assuming point inside all halfspaces, so closest to itself 
 		uint32 closest_set = 0b1111;
 		Vec3 closest_point = Vec3::sZero(); 
-		decimal best_dist_sq = FLT_MAX; 
+		decimal best_dist_sq = FIX_MAX; 
 		
 		// Determine for each of the faces of the tetrahedron if the origin is in front of the plane
 		UVec4 origin_out_of_planes = OriginOutsideOfTetrahedronPlanes(inA, inB, inC, inD);

@@ -9,7 +9,7 @@ JPH_NAMESPACE_BEGIN
 
 #ifdef JPH_USE_SSE
 
-/// Helper class that needs to be put on the stack to update the state of the floating point control word.
+/// Helper class that needs to be put on the stack to update the state of the decimaling point control word.
 /// This state is kept per thread.
 template <uint Value, uint Mask>
 class FPControlWord : public NonCopyable
@@ -32,7 +32,7 @@ private:
 
 #elif defined(JPH_CPU_ARM) && defined(JPH_COMPILER_MSVC)
 
-/// Helper class that needs to be put on the stack to update the state of the floating point control word.
+/// Helper class that needs to be put on the stack to update the state of the decimaling point control word.
 /// This state is kept per thread.
 template <unsigned int Value, unsigned int Mask>
 class FPControlWord : public NonCopyable
@@ -61,7 +61,7 @@ private:
 
 #elif defined(JPH_CPU_ARM)
 
-/// Helper class that needs to be put on the stack to update the state of the floating point control word.
+/// Helper class that needs to be put on the stack to update the state of the decimaling point control word.
 /// This state is kept per thread.
 template <uint64 Value, uint64 Mask>
 class FPControlWord : public NonCopyable

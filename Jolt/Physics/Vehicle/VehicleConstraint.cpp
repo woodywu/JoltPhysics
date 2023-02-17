@@ -94,7 +94,7 @@ VehicleConstraint::VehicleConstraint(Body &inVehicleBody, const VehicleConstrain
 	{
 		const VehicleAntiRollBar &r = inSettings.mAntiRollBars[i];
 		mAntiRollBars[i] = r;
-		JPH_ASSERT(r.mStiffness >= 0.0f);
+		JPH_ASSERT(r.mStiffness >= decimal(0.0f));
 	}
 
 	// Construct our controler class
@@ -204,7 +204,7 @@ void VehicleConstraint::OnStep(decimal inDeltaTime, PhysicsSystem &inPhysicsSyst
 		else
 		{
 			// When one of the wheels is not on the ground we don't apply any impulses
-			lw->mAntiRollBarImpulse = rw->mAntiRollBarImpulse = 0.0f;
+			lw->mAntiRollBarImpulse = rw->mAntiRollBarImpulse = decimal(0.0f);
 		}
 	}
 
@@ -215,7 +215,7 @@ void VehicleConstraint::OnStep(decimal inDeltaTime, PhysicsSystem &inPhysicsSyst
 	bool allow_sleep = mController->AllowSleep();
 	if (allow_sleep)
 		for (const Wheel *w : mWheels)
-			if (abs(w->mAngularVelocity) > DegreesToRadians(10.0f))
+			if (abs(w->mAngularVelocity) > DegreesToRadians(decimal(10.0f)))
 			{
 				allow_sleep = false;
 				break;
@@ -299,7 +299,7 @@ void VehicleConstraint::CalculatePitchRollConstraintProperties(decimal inDeltaTi
 			// Calculate rotation axis to rotate vehicle towards up
 			Vec3 rotation_axis = mUp.Cross(vehicle_up);
 			decimal len = rotation_axis.Length();
-			if (len > 0.0f)
+			if (len > decimal(0.0f))
 				mPitchRollRotationAxis = rotation_axis / len;
 
 			mPitchRollPart.CalculateConstraintProperties(inDeltaTime, *mBody, Body::sFixedToWorld, mPitchRollRotationAxis);
@@ -331,14 +331,14 @@ void VehicleConstraint::SetupVelocityConstraint(decimal inDeltaTime)
 
 			// Check if we reached the 'max up' position
 			decimal max_up_error = w->mContactLength - settings->mRadius - settings->mSuspensionMinLength;
-			if (max_up_error < 0.0f)
-				w->mSuspensionMaxUpPart.CalculateConstraintProperties(inDeltaTime, *mBody, r1_plus_u, *w->mContactBody, r2, w->mWSDirection, 0.0f, max_up_error);
+			if (max_up_error < decimal(0.0f))
+				w->mSuspensionMaxUpPart.CalculateConstraintProperties(inDeltaTime, *mBody, r1_plus_u, *w->mContactBody, r2, w->mWSDirection, decimal(0.0f), max_up_error);
 			else
 				w->mSuspensionMaxUpPart.Deactivate();
 			
 			// Friction and propulsion
-			w->mLongitudinalPart.CalculateConstraintProperties(inDeltaTime, *mBody, r1_plus_u, *w->mContactBody, r2, -w->mContactLongitudinal, 0.0f, 0.0f, 0.0f, 0.0f);
-			w->mLateralPart.CalculateConstraintProperties(inDeltaTime, *mBody, r1_plus_u, *w->mContactBody, r2, -w->mContactLateral, 0.0f, 0.0f, 0.0f, 0.0f);
+			w->mLongitudinalPart.CalculateConstraintProperties(inDeltaTime, *mBody, r1_plus_u, *w->mContactBody, r2, -w->mContactLongitudinal, decimal(0.0f), decimal(0.0f), decimal(0.0f), decimal(0.0f));
+			w->mLateralPart.CalculateConstraintProperties(inDeltaTime, *mBody, r1_plus_u, *w->mContactBody, r2, -w->mContactLateral, decimal(0.0f), decimal(0.0f), decimal(0.0f), decimal(0.0f));
 		}
 		else
 		{
@@ -359,7 +359,7 @@ void VehicleConstraint::WarmStartVelocityConstraint(decimal inWarmStartImpulseRa
 		{
 			w->mSuspensionPart.WarmStart(*mBody, *w->mContactBody, w->mWSDirection, inWarmStartImpulseRatio);
 			w->mSuspensionMaxUpPart.WarmStart(*mBody, *w->mContactBody, w->mWSDirection, inWarmStartImpulseRatio);
-			w->mLongitudinalPart.WarmStart(*mBody, *w->mContactBody, -w->mContactLongitudinal, 0.0f); // Don't warm start the longitudinal part (the engine/brake force, we don't want to preserve anything from the last frame)
+			w->mLongitudinalPart.WarmStart(*mBody, *w->mContactBody, -w->mContactLongitudinal, decimal(0.0f)); // Don't warm start the longitudinal part (the engine/brake force, we don't want to preserve anything from the last frame)
 			w->mLateralPart.WarmStart(*mBody, *w->mContactBody, -w->mContactLateral, inWarmStartImpulseRatio);	
 		}
 
@@ -376,11 +376,11 @@ bool VehicleConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 		{
 			// Suspension spring, note that it can only push and not pull
 			if (w->mSuspensionPart.IsActive())
-				impulse |= w->mSuspensionPart.SolveVelocityConstraint(*mBody, *w->mContactBody, w->mWSDirection, 0.0f, FLT_MAX);
+				impulse |= w->mSuspensionPart.SolveVelocityConstraint(*mBody, *w->mContactBody, w->mWSDirection, decimal(0.0f), FIX_MAX);
 
 			// When reaching the minimal suspension length only allow forces pushing the bodies away
 			if (w->mSuspensionMaxUpPart.IsActive())
-				impulse |= w->mSuspensionMaxUpPart.SolveVelocityConstraint(*mBody, *w->mContactBody, w->mWSDirection, 0.0f, FLT_MAX);
+				impulse |= w->mSuspensionMaxUpPart.SolveVelocityConstraint(*mBody, *w->mContactBody, w->mWSDirection, decimal(0.0f), FIX_MAX);
 		}
 
 	// Solve the horizontal movement of the vehicle
@@ -388,7 +388,7 @@ bool VehicleConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 
 	// Apply the pitch / roll constraint to avoid the vehicle from toppling over
 	if (mPitchRollPart.IsActive())
-		impulse |= mPitchRollPart.SolveVelocityConstraint(*mBody, Body::sFixedToWorld, mPitchRollRotationAxis, 0, FLT_MAX);
+		impulse |= mPitchRollPart.SolveVelocityConstraint(*mBody, Body::sFixedToWorld, mPitchRollRotationAxis, 0, FIX_MAX);
 
 	return impulse;
 }
@@ -412,12 +412,12 @@ bool VehicleConstraint::SolvePositionConstraint(decimal inDeltaTime, decimal inB
 
 			// Check if we reached the 'max up' position
 			decimal max_up_error = contact_length - settings->mRadius - settings->mSuspensionMinLength;
-			if (max_up_error < 0.0f)
+			if (max_up_error < decimal(0.0f))
 			{
 				// Recalculate constraint properties since the body may have moved
 				Vec3 r1_plus_u, r2;
 				CalculateWheelContactPoint(body_transform, *w, r1_plus_u, r2);
-				w->mSuspensionMaxUpPart.CalculateConstraintProperties(inDeltaTime, *mBody, r1_plus_u, *w->mContactBody, r2, ws_direction, 0.0f, max_up_error);
+				w->mSuspensionMaxUpPart.CalculateConstraintProperties(inDeltaTime, *mBody, r1_plus_u, *w->mContactBody, r2, ws_direction, decimal(0.0f), max_up_error);
 
 				impulse |= w->mSuspensionMaxUpPart.SolvePositionConstraint(*mBody, *w->mContactBody, ws_direction, max_up_error, inBaumgarte);
 			}

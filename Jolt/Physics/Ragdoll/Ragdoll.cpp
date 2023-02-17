@@ -97,50 +97,50 @@ bool RagdollSettings::Stabilize()
 			if (indices.size() == 1)
 				continue;
 
-			const float cMinMassRatio = 0.8f;
-			const float cMaxMassRatio = 1.2f;
+			const decimal cMinMassRatio = decimal(0.8f);
+			const decimal cMaxMassRatio = decimal(1.2f);
 	
 			// Ensure that the mass ratio from parent to child is within a range
-			float total_mass_ratio = 1.0f;
-			Array<float> mass_ratios;
+			decimal total_mass_ratio = decimal(1.0f);
+			Array<decimal> mass_ratios;
 			mass_ratios.resize(mSkeleton->GetJointCount());
-			mass_ratios[indices[0]] = 1.0f;
+			mass_ratios[indices[0]] = decimal(1.0f);
 			for (int i = 1; i < (int)indices.size(); ++i)
 			{
 				int child_idx = indices[i];
 				int parent_idx = mSkeleton->GetJoint(child_idx).mParentJointIndex;
-				float ratio = mParts[child_idx].mMassPropertiesOverride.mMass / mParts[parent_idx].mMassPropertiesOverride.mMass;
+				decimal ratio = mParts[child_idx].mMassPropertiesOverride.mMass / mParts[parent_idx].mMassPropertiesOverride.mMass;
 				mass_ratios[child_idx] = mass_ratios[parent_idx] * Clamp(ratio, cMinMassRatio, cMaxMassRatio);
 				total_mass_ratio += mass_ratios[child_idx];
 			}
 
 			// Calculate total mass of this chain
-			float total_mass = 0.0f;
+			decimal total_mass = decimal(0.0f);
 			for (int idx : indices)
 				total_mass += mParts[idx].mMassPropertiesOverride.mMass;
 
 			// Calculate how much mass belongs to a ratio of 1
-			float ratio_to_mass = total_mass / total_mass_ratio;
+			decimal ratio_to_mass = total_mass / total_mass_ratio;
 
 			// Adjust all masses and inertia tensors for the new mass
 			for (int i : indices)
 			{
 				Part &p = mParts[i];
-				float old_mass = p.mMassPropertiesOverride.mMass;
-				float new_mass = mass_ratios[i] * ratio_to_mass;
+				decimal old_mass = p.mMassPropertiesOverride.mMass;
+				decimal new_mass = mass_ratios[i] * ratio_to_mass;
 				p.mMassPropertiesOverride.mMass = new_mass;
 				p.mMassPropertiesOverride.mInertia *= new_mass / old_mass;
-				p.mMassPropertiesOverride.mInertia.SetColumn4(3, Vec4(0, 0, 0, 1));
+				p.mMassPropertiesOverride.mInertia.SetColumn4(3, Vec4(C0, C0, C0, C1));
 			}
 
-			const float cMaxInertiaIncrease = 2.0f;
+			const decimal cMaxInertiaIncrease = decimal(2.0f);
 
 			// Get the principal moments of inertia for all parts
 			struct Principal
 			{
 				Mat44	mRotation;
 				Vec3	mDiagonal;
-				float	mChildSum = 0.0f;
+				decimal	mChildSum = decimal(0.0f);
 			};	
 			Array<Principal> principals;
 			principals.resize(mParts.size());
@@ -165,10 +165,10 @@ bool RagdollSettings::Stabilize()
 			{
 				Part &p = mParts[i];
 				Principal &principal = principals[i];
-				if (principal.mChildSum != 0.0f)
+				if (principal.mChildSum != decimal(0.0f))
 				{
 					// Calculate minimum inertia this object should have based on it children
-					float minimum = min(cMaxInertiaIncrease * principal.mDiagonal[0], principal.mChildSum);
+					decimal minimum = min(cMaxInertiaIncrease * principal.mDiagonal[0], principal.mChildSum);
 					principal.mDiagonal = Vec3::sMax(principal.mDiagonal, Vec3::sReplicate(minimum));
 
 					// Recalculate moment of inertia in body space
@@ -181,7 +181,7 @@ bool RagdollSettings::Stabilize()
 	return true;
 }
 
-void RagdollSettings::DisableParentChildCollisions(const Mat44 *inJointMatrices, float inMinSeparationDistance)
+void RagdollSettings::DisableParentChildCollisions(const Mat44 *inJointMatrices, decimal inMinSeparationDistance)
 {
 	int joint_count = mSkeleton->GetJointCount();
 	JPH_ASSERT(joint_count == (int)mParts.size());
@@ -507,25 +507,25 @@ void Ragdoll::GetPose(RVec3 &outRootOffset, Mat44 *outJointMatrices, bool inLock
 	const Body *root = lock.GetBody(0);
 	RMat44 root_transform = root->GetWorldTransform();
 	outRootOffset = root_transform.GetTranslation();
-	outJointMatrices[0] = Mat44(root_transform.GetColumn4(0), root_transform.GetColumn4(1), root_transform.GetColumn4(2), Vec4(0, 0, 0, 1));
+	outJointMatrices[0] = Mat44(root_transform.GetColumn4(0), root_transform.GetColumn4(1), root_transform.GetColumn4(2), Vec4(C0, C0, C0, C1));
 
 	// Get other matrices
 	for (int b = 1; b < body_count; ++b)
 	{
 		const Body *body = lock.GetBody(b);
 		RMat44 transform = body->GetWorldTransform();
-		outJointMatrices[b] = Mat44(transform.GetColumn4(0), transform.GetColumn4(1), transform.GetColumn4(2), Vec4(Vec3(transform.GetTranslation() - outRootOffset), 1));
+		outJointMatrices[b] = Mat44(transform.GetColumn4(0), transform.GetColumn4(1), transform.GetColumn4(2), Vec4(Vec3(transform.GetTranslation() - outRootOffset), C1));
 	}
 }
 
-void Ragdoll::DriveToPoseUsingKinematics(const SkeletonPose &inPose, float inDeltaTime, bool inLockBodies)
+void Ragdoll::DriveToPoseUsingKinematics(const SkeletonPose &inPose, decimal inDeltaTime, bool inLockBodies)
 {
 	JPH_ASSERT(inPose.GetSkeleton() == mRagdollSettings->mSkeleton);
 
 	DriveToPoseUsingKinematics(inPose.GetRootOffset(), inPose.GetJointMatrices().data(), inDeltaTime, inLockBodies);
 }
 
-void Ragdoll::DriveToPoseUsingKinematics(RVec3Arg inRootOffset, const Mat44 *inJointMatrices, float inDeltaTime, bool inLockBodies)
+void Ragdoll::DriveToPoseUsingKinematics(RVec3Arg inRootOffset, const Mat44 *inJointMatrices, decimal inDeltaTime, bool inLockBodies)
 {
 	// Move bodies into the correct position using kinematics
 	BodyInterface &bi = sGetBodyInterface(mSystem, inLockBodies);

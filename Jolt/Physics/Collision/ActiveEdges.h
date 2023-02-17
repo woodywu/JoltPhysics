@@ -18,7 +18,7 @@ namespace ActiveEdges
 	{
 		// If normals are opposite the edges are active (the triangles are back to back)
 		decimal cos_angle_normals = inNormal1.Dot(inNormal2);
-		if (cos_angle_normals < -0.99984769515639123915701155881391f) // cos(179 degrees)
+		if (cos_angle_normals < -decimal(0.99984769515639123915701155881391f)) // cos(179 degrees)
 			return true;
 			
 		// Check if concave edge, if so we are not active
@@ -26,7 +26,7 @@ namespace ActiveEdges
 			return false;
 
 		// Convex edge, active when angle bigger than threshold
-		return cos_angle_normals < 0.99619469809174553229501040247389f; // cos(5 degrees)
+		return cos_angle_normals < decimal(0.99619469809174553229501040247389f); // cos(5 degrees)
 	}
 
 	/// Replace normal by triangle normal if a hit is hitting an inactive edge
@@ -57,7 +57,7 @@ namespace ActiveEdges
 
 		// Some edges are active.
 		// If normal is parallel to the triangle normal we don't need to check the active edges.
-		if (inTriangleNormal.Dot(inNormal) > 0.99619469809174553229501040247389f * normal_length * triangle_normal_length) // cos(5 degrees)
+		if (inTriangleNormal.Dot(inNormal) > decimal(0.99619469809174553229501040247389f) * normal_length * triangle_normal_length) // cos(5 degrees)
 			return inNormal;
 
 		const decimal cEpsilon = decimal(1.0e-4f);

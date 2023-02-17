@@ -32,15 +32,15 @@ public:
 	RVec3						mPoint2 = RVec3::sZero();
 
 	/// Ability to override the distance range at which the two points are kept apart. If the value is negative, it will be replaced by the distance between mPoint1 and mPoint2 (works only if mSpace is world space).
-	float						mMinDistance = -1.0f;
-	float						mMaxDistance = -1.0f;
+	decimal						mMinDistance = -decimal(1.0f);
+	decimal						mMaxDistance = -decimal(1.0f);
 
 	/// If mFrequency > 0 the constraint will be soft and mFrequency specifies the oscillation frequency in Hz and mDamping the damping ratio (0 = no damping, 1 = critical damping).
 	/// If mFrequency <= 0, mDamping is ignored and the distance constraint will have hard limits (as hard as the time step / the number of velocity / position solver steps allows).
 	/// Note that if you set mDamping = 0, you will not get an infinite oscillation. Because we integrate physics using an explicit Euler scheme, there is always energy loss.
 	/// This is done to keep the simulation from exploding, because with a damping of 0 and even the slightest rounding error, the oscillation could become bigger and bigger until the simluation explodes.
-	float						mFrequency = 0.0f;
-	float						mDamping = 0.0f;
+	decimal						mFrequency = decimal(0.0f);
+	decimal						mDamping = decimal(0.0f);
 
 protected:
 	// See: ConstraintSettings::RestoreBinaryState
@@ -58,10 +58,10 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override									{ return EConstraintSubType::Distance; }
-	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
-	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
-	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;
-	virtual bool				SolvePositionConstraint(float inDeltaTime, float inBaumgarte) override;
+	virtual void				SetupVelocityConstraint(decimal inDeltaTime) override;
+	virtual void				WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio) override;
+	virtual bool				SolveVelocityConstraint(decimal inDeltaTime) override;
+	virtual bool				SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte) override;
 #ifdef JPH_DEBUG_RENDERER
 	virtual void				DrawConstraint(DebugRenderer *inRenderer) const override;
 #endif // JPH_DEBUG_RENDERER
@@ -74,24 +74,24 @@ public:
 	virtual Mat44				GetConstraintToBody2Matrix() const override					{ return Mat44::sTranslation(mLocalSpacePosition2); } // Note: Incorrect rotation as we don't track the original rotation difference, should not matter though as the constraint is not limiting rotation.
 
 	/// Update the minimum and maximum distance for the constraint
-	void						SetDistance(float inMinDistance, float inMaxDistance)		{ JPH_ASSERT(inMinDistance <= inMaxDistance); mMinDistance = inMinDistance; mMaxDistance = inMaxDistance; }
-	float						GetMinDistance() const										{ return mMinDistance; }
-	float						GetMaxDistance() const										{ return mMaxDistance; }
+	void						SetDistance(decimal inMinDistance, decimal inMaxDistance)		{ JPH_ASSERT(inMinDistance <= inMaxDistance); mMinDistance = inMinDistance; mMaxDistance = inMaxDistance; }
+	decimal						GetMinDistance() const										{ return mMinDistance; }
+	decimal						GetMaxDistance() const										{ return mMaxDistance; }
 
 	/// Update the spring frequency for the constraint
-	void						SetFrequency(float inFrequency)								{ JPH_ASSERT(inFrequency >= 0.0f); mFrequency = inFrequency; }
-	float						GetFrequency() const										{ return mFrequency; }
+	void						SetFrequency(decimal inFrequency)								{ JPH_ASSERT(inFrequency >= decimal(0.0f)); mFrequency = inFrequency; }
+	decimal						GetFrequency() const										{ return mFrequency; }
 
 	/// Update the spring damping for the constraint
-	void						SetDamping(float inDamping)									{ JPH_ASSERT(inDamping >= 0.0f); mDamping = inDamping; }
-	float						GetDamping() const											{ return mDamping; }
+	void						SetDamping(decimal inDamping)									{ JPH_ASSERT(inDamping >= decimal(0.0f)); mDamping = inDamping; }
+	decimal						GetDamping() const											{ return mDamping; }
 
 	///@name Get Lagrange multiplier from last physics update (relates to how much force/torque was applied to satisfy the constraint)
-	inline float	 			GetTotalLambdaPosition() const								{ return mAxisConstraint.GetTotalLambda(); }
+	inline decimal	 			GetTotalLambdaPosition() const								{ return mAxisConstraint.GetTotalLambda(); }
 
 private:
 	// Internal helper function to calculate the values below
-	void						CalculateConstraintProperties(float inDeltaTime);
+	void						CalculateConstraintProperties(decimal inDeltaTime);
 
 	// CONFIGURATION PROPERTIES FOLLOW
 
@@ -100,12 +100,12 @@ private:
 	Vec3						mLocalSpacePosition2;
 
 	// Min/max distance that must be kept between the world space points
-	float						mMinDistance;
-	float						mMaxDistance;
+	decimal						mMinDistance;
+	decimal						mMaxDistance;
 
 	// Soft constraint properties (see DistanceConstraintSettings)
-	float						mFrequency;
-	float						mDamping;
+	decimal						mFrequency;
+	decimal						mDamping;
 
 	// RUN TIME PROPERTIES FOLLOW
 
@@ -115,8 +115,8 @@ private:
 	Vec3						mWorldSpaceNormal;
 
 	// Depending on if the distance < min or distance > max we can apply forces to prevent further violations
-	float						mMinLambda;
-	float						mMaxLambda;
+	decimal						mMinLambda;
+	decimal						mMaxLambda;
 
 	// The constraint part
 	AxisConstraintPart			mAxisConstraint;

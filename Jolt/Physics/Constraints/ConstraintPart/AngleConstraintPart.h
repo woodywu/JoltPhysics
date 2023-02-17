@@ -34,10 +34,10 @@ JPH_NAMESPACE_BEGIN
 class AngleConstraintPart
 {
 	/// Internal helper function to update velocities of bodies after Lagrange multiplier is calculated
-	JPH_INLINE bool				ApplyVelocityStep(Body &ioBody1, Body &ioBody2, float inLambda) const
+	JPH_INLINE bool				ApplyVelocityStep(Body &ioBody1, Body &ioBody2, decimal inLambda) const
 	{
 		// Apply impulse if delta is not zero
-		if (inLambda != 0.0f)
+		if (inLambda != decimal(0.0f))
 		{
 			// Calculate velocity change due to constraint
 			//
@@ -67,16 +67,16 @@ public:
 	///	@param inC Value of the constraint equation (C)
 	///	@param inFrequency Oscillation frequency (Hz)
 	///	@param inDamping Damping factor (0 = no damping, 1 = critical damping)
-	inline void					CalculateConstraintProperties(float inDeltaTime, const Body &inBody1, const Body &inBody2, Vec3Arg inWorldSpaceAxis, float inBias = 0.0f, float inC = 0.0f, float inFrequency = 0.0f, float inDamping = 0.0f)
+	inline void					CalculateConstraintProperties(decimal inDeltaTime, const Body &inBody1, const Body &inBody2, Vec3Arg inWorldSpaceAxis, decimal inBias = decimal(0.0f), decimal inC = decimal(0.0f), decimal inFrequency = decimal(0.0f), decimal inDamping = decimal(0.0f))
 	{
-		JPH_ASSERT(inWorldSpaceAxis.IsNormalized(1.0e-4f));
+		JPH_ASSERT(inWorldSpaceAxis.IsNormalized(decimal(1.0e-4f)));
 
 		// Calculate properties used below
 		mInvI1_Axis = inBody1.IsDynamic()? inBody1.GetMotionProperties()->MultiplyWorldSpaceInverseInertiaByVector(inBody1.GetRotation(), inWorldSpaceAxis) : Vec3::sZero();
 		mInvI2_Axis = inBody2.IsDynamic()? inBody2.GetMotionProperties()->MultiplyWorldSpaceInverseInertiaByVector(inBody2.GetRotation(), inWorldSpaceAxis) : Vec3::sZero();
 	
 		// Calculate inverse effective mass: K = J M^-1 J^T
-		float inv_effective_mass = inWorldSpaceAxis.Dot(mInvI1_Axis + mInvI2_Axis);
+		decimal inv_effective_mass = inWorldSpaceAxis.Dot(mInvI1_Axis + mInvI2_Axis);
 
 		// Calculate effective mass and spring properties
 		mSpringPart.CalculateSpringProperties(inDeltaTime, inv_effective_mass, inBias, inC, inFrequency, inDamping, mEffectiveMass);
@@ -85,21 +85,21 @@ public:
 	/// Deactivate this constraint
 	inline void					Deactivate()
 	{
-		mEffectiveMass = 0.0f;
-		mTotalLambda = 0.0f;
+		mEffectiveMass = decimal(0.0f);
+		mTotalLambda = decimal(0.0f);
 	}
 
 	/// Check if constraint is active
 	inline bool					IsActive() const
 	{
-		return mEffectiveMass != 0.0f;
+		return mEffectiveMass != decimal(0.0f);
 	}
 
 	/// Must be called from the WarmStartVelocityConstraint call to apply the previous frame's impulses
 	/// @param ioBody1 The first body that this constraint is attached to
 	/// @param ioBody2 The second body that this constraint is attached to
 	/// @param inWarmStartImpulseRatio Ratio of new step to old time step (dt_new / dt_old) for scaling the lagrange multiplier of the previous frame
-	inline void					WarmStart(Body &ioBody1, Body &ioBody2, float inWarmStartImpulseRatio)
+	inline void					WarmStart(Body &ioBody1, Body &ioBody2, decimal inWarmStartImpulseRatio)
 	{
 		mTotalLambda *= inWarmStartImpulseRatio;
 		ApplyVelocityStep(ioBody1, ioBody2, mTotalLambda);
@@ -111,13 +111,13 @@ public:
 	/// @param inWorldSpaceAxis The axis of rotation along which the constraint acts (normalized)
 	/// @param inMinLambda Minimum angular impulse to apply (N m s)
 	/// @param inMaxLambda Maximum angular impulse to apply (N m s)
-	inline bool					SolveVelocityConstraint(Body &ioBody1, Body &ioBody2, Vec3Arg inWorldSpaceAxis, float inMinLambda, float inMaxLambda)
+	inline bool					SolveVelocityConstraint(Body &ioBody1, Body &ioBody2, Vec3Arg inWorldSpaceAxis, decimal inMinLambda, decimal inMaxLambda)
 	{
 		// Lagrange multiplier is:
 		//
 		// lambda = -K^-1 (J v + b)
-		float lambda = mEffectiveMass * (inWorldSpaceAxis.Dot(ioBody1.GetAngularVelocity() - ioBody2.GetAngularVelocity()) - mSpringPart.GetBias(mTotalLambda));
-		float new_lambda = Clamp(mTotalLambda + lambda, inMinLambda, inMaxLambda); // Clamp impulse
+		decimal lambda = mEffectiveMass * (inWorldSpaceAxis.Dot(ioBody1.GetAngularVelocity() - ioBody2.GetAngularVelocity()) - mSpringPart.GetBias(mTotalLambda));
+		decimal new_lambda = Clamp(mTotalLambda + lambda, inMinLambda, inMaxLambda); // Clamp impulse
 		lambda = new_lambda - mTotalLambda; // Lambda potentially got clamped, calculate the new impulse to apply
 		mTotalLambda = new_lambda; // Store accumulated impulse
 
@@ -125,7 +125,7 @@ public:
 	}
 
 	/// Return lagrange multiplier
-	float						GetTotalLambda() const
+	decimal						GetTotalLambda() const
 	{
 		return mTotalLambda;
 	}
@@ -135,17 +135,17 @@ public:
 	/// @param ioBody2 The second body that this constraint is attached to
 	/// @param inC Value of the constraint equation (C)
 	/// @param inBaumgarte Baumgarte constant (fraction of the error to correct)
-	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, float inC, float inBaumgarte) const
+	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, decimal inC, decimal inBaumgarte) const
 	{
 		// Only apply position constraint when the constraint is hard, otherwise the velocity bias will fix the constraint
-		if (inC != 0.0f && !mSpringPart.IsActive())
+		if (inC != decimal(0.0f) && !mSpringPart.IsActive())
 		{
 			// Calculate lagrange multiplier (lambda) for Baumgarte stabilization:
 			//
 			// lambda = -K^-1 * beta / dt * C
 			//
 			// We should divide by inDeltaTime, but we should multiply by inDeltaTime in the Euler step below so they're cancelled out
-			float lambda = -mEffectiveMass * inBaumgarte * inC; 
+			decimal lambda = -mEffectiveMass * inBaumgarte * inC; 
 
 			// Directly integrate velocity change for one time step
 			//
@@ -187,9 +187,9 @@ public:
 private:
 	Vec3						mInvI1_Axis;
 	Vec3						mInvI2_Axis;
-	float						mEffectiveMass = 0.0f;
+	decimal						mEffectiveMass = decimal(0.0f);
 	SpringPart					mSpringPart;
-	float						mTotalLambda = 0.0f;
+	decimal						mTotalLambda = decimal(0.0f);
 };
 
 JPH_NAMESPACE_END

@@ -527,7 +527,7 @@ void JobSystemThreadPool::ThreadMain(int inThreadIndex)
 	SetThreadName(name);
 #endif // JPH_PLATFORM_WINDOWS && !JPH_COMPILER_MINGW
 
-	// Enable floating point exceptions
+	// Enable decimaling point exceptions
 	FPExceptionsEnable enable_exceptions;
 	JPH_UNUSED(enable_exceptions);
 

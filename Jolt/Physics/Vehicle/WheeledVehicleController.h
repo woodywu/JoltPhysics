@@ -27,13 +27,13 @@ public:
 	virtual void				SaveBinaryState(StreamOut &inStream) const override;
 	virtual void				RestoreBinaryState(StreamIn &inStream) override;
 
-	float						mInertia = 0.9f;							///< Moment of inertia (kg m^2), for a cylinder this would be 0.5 * M * R^2 which is 0.9 for a wheel with a mass of 20 kg and radius 0.3 m
-	float						mAngularDamping = 0.2f;						///< Angular damping factor of the wheel: dw/dt = -c * w
-	float						mMaxSteerAngle = DegreesToRadians(70.0f);	///< How much this wheel can steer (radians)
+	decimal						mInertia = decimal(0.9f);							///< Moment of inertia (kg m^2), for a cylinder this would be 0.5 * M * R^2 which is 0.9 for a wheel with a mass of 20 kg and radius 0.3 m
+	decimal						mAngularDamping = decimal(0.2f);						///< Angular damping factor of the wheel: dw/dt = -c * w
+	decimal						mMaxSteerAngle = DegreesToRadians(decimal(70.0f));	///< How much this wheel can steer (radians)
 	LinearCurve					mLongitudinalFriction;						///< Friction in forward direction of tire as a function of the slip ratio (fraction): (omega_wheel * r_wheel - v_longitudinal) / |v_longitudinal|
 	LinearCurve					mLateralFriction;							///< Friction in sideway direction of tire as a function of the slip angle (degrees): angle between relative contact velocity and vehicle direction
-	float						mMaxBrakeTorque = 1500.0f;					///< How much torque (Nm) the brakes can apply to this wheel
-	float						mMaxHandBrakeTorque = 4000.0f;				///< How much torque (Nm) the hand brake can apply to this wheel (usually only applied to the rear wheels)
+	decimal						mMaxBrakeTorque = decimal(1500.0f);					///< How much torque (Nm) the brakes can apply to this wheel
+	decimal						mMaxHandBrakeTorque = decimal(4000.0f);				///< How much torque (Nm) the hand brake can apply to this wheel (usually only applied to the rear wheels)
 };
 
 /// Wheel object specifically for WheeledVehicleController
@@ -49,18 +49,18 @@ public:
 	const WheelSettingsWV *		GetSettings() const							{ return static_cast<const WheelSettingsWV *>(mSettings.GetPtr()); }
 
 	/// Apply a torque (N m) to the wheel for a particular delta time
-	void						ApplyTorque(float inTorque, float inDeltaTime)
+	void						ApplyTorque(decimal inTorque, decimal inDeltaTime)
 	{
 		mAngularVelocity += inTorque * inDeltaTime / GetSettings()->mInertia;
 	}
 
 	/// Update the wheel rotation based on the current angular velocity
-	void						Update(float inDeltaTime, const VehicleConstraint &inConstraint);
+	void						Update(decimal inDeltaTime, const VehicleConstraint &inConstraint);
 
-	float						mLongitudinalSlip = 0.0f;					///< Velocity difference between ground and wheel relative to ground velocity
-	float						mCombinedLongitudinalFriction = 0.0f;		///< Combined friction coefficient in longitudinal direction (combines terrain and tires)
-	float						mCombinedLateralFriction = 0.0f;			///< Combined friction coefficient in lateral direction (combines terrain and tires)
-	float						mBrakeImpulse = 0.0f;						///< Amount of impulse that the brakes can apply to the floor (excluding friction)
+	decimal						mLongitudinalSlip = decimal(0.0f);					///< Velocity difference between ground and wheel relative to ground velocity
+	decimal						mCombinedLongitudinalFriction = decimal(0.0f);		///< Combined friction coefficient in longitudinal direction (combines terrain and tires)
+	decimal						mCombinedLateralFriction = decimal(0.0f);			///< Combined friction coefficient in lateral direction (combines terrain and tires)
+	decimal						mBrakeImpulse = decimal(0.0f);						///< Amount of impulse that the brakes can apply to the floor (excluding friction)
 };
 
 /// Settings of a vehicle with regular wheels
@@ -80,7 +80,7 @@ public:
 	VehicleEngineSettings		mEngine;									///< The properties of the engine
 	VehicleTransmissionSettings	mTransmission;								///< The properties of the transmission (aka gear box)
 	Array<VehicleDifferentialSettings> mDifferentials;						///< List of differentials and their properties
-	float						mDifferentialLimitedSlipRatio = 1.4f;		///< Ratio max / min average wheel speed of each differential (measured at the clutch). When the ratio is exceeded all torque gets distributed to the differential with the minimal average velocity. This allows implementing a limited slip differential between differentials. Set to FLT_MAX for an open differential. Value should be > 1.
+	decimal						mDifferentialLimitedSlipRatio = decimal(1.4f);		///< Ratio max / min average wheel speed of each differential (measured at the clutch). When the ratio is exceeded all torque gets distributed to the differential with the minimal average velocity. This allows implementing a limited slip differential between differentials. Set to FIX_MAX for an open differential. Value should be > 1.
 };
 
 /// Runtime controller class
@@ -100,7 +100,7 @@ public:
 	/// @param inRight Value between -1 and 1 indicating desired steering angle (1 = right)
 	/// @param inBrake Value between 0 and 1 indicating how strong the brake pedal is pressed
 	/// @param inHandBrake Value between 0 and 1 indicating how strong the hand brake is pulled
-	void						SetDriverInput(float inForward, float inRight, float inBrake, float inHandBrake) { mForwardInput = inForward; mRightInput = inRight; mBrakeInput = inBrake; mHandBrakeInput = inHandBrake; }
+	void						SetDriverInput(decimal inForward, decimal inRight, decimal inBrake, decimal inHandBrake) { mForwardInput = inForward; mRightInput = inRight; mBrakeInput = inBrake; mHandBrakeInput = inHandBrake; }
 
 	/// Get current engine state
 	const VehicleEngine &		GetEngine() const							{ return mEngine; }
@@ -121,21 +121,21 @@ public:
 	Differentials &				GetDifferentials()							{ return mDifferentials; }
 
 	/// Ratio max / min average wheel speed of each differential (measured at the clutch).
-	float						GetDifferentialLimitedSlipRatio() const		{ return mDifferentialLimitedSlipRatio; }
-	void						SetDifferentialLimitedSlipRatio(float inV)	{ mDifferentialLimitedSlipRatio = inV; }
+	decimal						GetDifferentialLimitedSlipRatio() const		{ return mDifferentialLimitedSlipRatio; }
+	void						SetDifferentialLimitedSlipRatio(decimal inV)	{ mDifferentialLimitedSlipRatio = inV; }
 
 #ifdef JPH_DEBUG_RENDERER
 	/// Debug drawing of RPM meter
-	void						SetRPMMeter(Vec3Arg inPosition, float inSize) { mRPMMeterPosition = inPosition; mRPMMeterSize = inSize; }
+	void						SetRPMMeter(Vec3Arg inPosition, decimal inSize) { mRPMMeterPosition = inPosition; mRPMMeterSize = inSize; }
 #endif // JPH_DEBUG_RENDERER
 
 protected:
 	// See: VehicleController
 	virtual Wheel *				ConstructWheel(const WheelSettings &inWheel) const override { JPH_ASSERT(IsKindOf(&inWheel, JPH_RTTI(WheelSettingsWV))); return new WheelWV(static_cast<const WheelSettingsWV &>(inWheel)); }
-	virtual bool				AllowSleep() const override					{ return mForwardInput == 0.0f; }
-	virtual void				PreCollide(float inDeltaTime, PhysicsSystem &inPhysicsSystem) override;
-	virtual void				PostCollide(float inDeltaTime, PhysicsSystem &inPhysicsSystem) override;
-	virtual bool				SolveLongitudinalAndLateralConstraints(float inDeltaTime) override;
+	virtual bool				AllowSleep() const override					{ return mForwardInput == decimal(0.0f); }
+	virtual void				PreCollide(decimal inDeltaTime, PhysicsSystem &inPhysicsSystem) override;
+	virtual void				PostCollide(decimal inDeltaTime, PhysicsSystem &inPhysicsSystem) override;
+	virtual bool				SolveLongitudinalAndLateralConstraints(decimal inDeltaTime) override;
 	virtual void				SaveState(StateRecorder &inStream) const override;
 	virtual void				RestoreState(StateRecorder &inStream) override;
 #ifdef JPH_DEBUG_RENDERER
@@ -143,21 +143,21 @@ protected:
 #endif // JPH_DEBUG_RENDERER
 
 	// Control information
-	float						mForwardInput = 0.0f;						///< Value between -1 and 1 for auto transmission and value between 0 and 1 indicating desired driving direction and amount the gas pedal is pressed
-	float						mRightInput = 0.0f;							///< Value between -1 and 1 indicating desired steering angle
-	float						mBrakeInput = 0.0f;							///< Value between 0 and 1 indicating how strong the brake pedal is pressed
-	float						mHandBrakeInput = 0.0f;						///< Value between 0 and 1 indicating how strong the hand brake is pulled
+	decimal						mForwardInput = decimal(0.0f);						///< Value between -1 and 1 for auto transmission and value between 0 and 1 indicating desired driving direction and amount the gas pedal is pressed
+	decimal						mRightInput = decimal(0.0f);							///< Value between -1 and 1 indicating desired steering angle
+	decimal						mBrakeInput = decimal(0.0f);							///< Value between 0 and 1 indicating how strong the brake pedal is pressed
+	decimal						mHandBrakeInput = decimal(0.0f);						///< Value between 0 and 1 indicating how strong the hand brake is pulled
 
 	// Simluation information
 	VehicleEngine				mEngine;									///< Engine state of the vehicle
 	VehicleTransmission			mTransmission;								///< Transmission state of the vehicle
 	Differentials				mDifferentials;								///< Differential states of the vehicle
-	float						mDifferentialLimitedSlipRatio;				///< Ratio max / min average wheel speed of each differential (measured at the clutch).
+	decimal						mDifferentialLimitedSlipRatio;				///< Ratio max / min average wheel speed of each differential (measured at the clutch).
 
 #ifdef JPH_DEBUG_RENDERER
 	// Debug settings
 	Vec3						mRPMMeterPosition { 0, 1, 0 };				///< Position (in local space of the body) of the RPM meter when drawing the constraint
-	float						mRPMMeterSize = 0.5f;						///< Size of the RPM meter when drawing the constraint
+	decimal						mRPMMeterSize = decimal(0.5f);						///< Size of the RPM meter when drawing the constraint
 #endif // JPH_DEBUG_RENDERER
 };
 

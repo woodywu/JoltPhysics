@@ -33,7 +33,7 @@ void TriangleGrouperMorton::Group(const VertexList &inVertices, const IndexedTri
 		centroid_bounds.Encapsulate(centroids[t]);
 
 	// Make sure box is not degenerate
-	centroid_bounds.EnsureMinimalEdgeLength(1.0e-5f);
+	centroid_bounds.EnsureMinimalEdgeLength(decimal(1.0e-5f));
 
 	// Calculate morton code for each centroid
 	Array<uint32> morton_codes;

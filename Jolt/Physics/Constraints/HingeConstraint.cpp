@@ -111,7 +111,7 @@ HingeConstraint::HingeConstraint(Body &inBody1, Body &inBody2, const HingeConstr
 	}
 }
 
-float HingeConstraint::GetCurrentAngle() const
+decimal HingeConstraint::GetCurrentAngle() const
 {
 	// See: CalculateA1AndTheta
 	Quat rotation1 = mBody1->GetRotation();
@@ -119,10 +119,10 @@ float HingeConstraint::GetCurrentAngle() const
 	return diff.GetRotationAngle(rotation1 * mLocalSpaceHingeAxis1);
 }
 
-void HingeConstraint::SetLimits(float inLimitsMin, float inLimitsMax)
+void HingeConstraint::SetLimits(decimal inLimitsMin, decimal inLimitsMax)
 {
-	JPH_ASSERT(inLimitsMin <= 0.0f && inLimitsMin >= -JPH_PI);
-	JPH_ASSERT(inLimitsMax >= 0.0f && inLimitsMax <= JPH_PI);
+	JPH_ASSERT(inLimitsMin <= decimal(0.0f) && inLimitsMin >= -JPH_PI);
+	JPH_ASSERT(inLimitsMax >= decimal(0.0f) && inLimitsMax <= JPH_PI);
 	mLimitsMin = inLimitsMin;
 	mLimitsMax = inLimitsMax;
 	mHasLimits = mLimitsMin > -JPH_PI && mLimitsMax < JPH_PI;
@@ -130,7 +130,7 @@ void HingeConstraint::SetLimits(float inLimitsMin, float inLimitsMax)
 
 void HingeConstraint::CalculateA1AndTheta()
 {
-	if (mHasLimits || mMotorState != EMotorState::Off || mMaxFrictionTorque > 0.0f)
+	if (mHasLimits || mMotorState != EMotorState::Off || mMaxFrictionTorque > decimal(0.0f))
 	{
 		Quat rotation1 = mBody1->GetRotation();
 
@@ -159,7 +159,7 @@ void HingeConstraint::CalculateA1AndTheta()
 	}
 }
 
-void HingeConstraint::CalculateRotationLimitsConstraintProperties(float inDeltaTime)
+void HingeConstraint::CalculateRotationLimitsConstraintProperties(decimal inDeltaTime)
 {
 	// Apply constraint if outside of limits
 	if (mHasLimits && (mTheta <= mLimitsMin || mTheta >= mLimitsMax))
@@ -168,12 +168,12 @@ void HingeConstraint::CalculateRotationLimitsConstraintProperties(float inDeltaT
 		mRotationLimitsConstraintPart.Deactivate();
 }
 
-void HingeConstraint::CalculateMotorConstraintProperties(float inDeltaTime)
+void HingeConstraint::CalculateMotorConstraintProperties(decimal inDeltaTime)
 {
 	switch (mMotorState)
 	{
 	case EMotorState::Off:
-		if (mMaxFrictionTorque > 0.0f)
+		if (mMaxFrictionTorque > decimal(0.0f))
 			mMotorConstraintPart.CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, mA1);
 		else
 			mMotorConstraintPart.Deactivate();
@@ -184,12 +184,12 @@ void HingeConstraint::CalculateMotorConstraintProperties(float inDeltaTime)
 		break;
 
 	case EMotorState::Position:
-		mMotorConstraintPart.CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, mA1, 0.0f, CenterAngleAroundZero(mTheta - mTargetAngle), mMotorSettings.mFrequency, mMotorSettings.mDamping);
+		mMotorConstraintPart.CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, mA1, decimal(0.0f), CenterAngleAroundZero(mTheta - mTargetAngle), mMotorSettings.mFrequency, mMotorSettings.mDamping);
 		break;
 	}	
 }
 
-void HingeConstraint::SetupVelocityConstraint(float inDeltaTime)
+void HingeConstraint::SetupVelocityConstraint(decimal inDeltaTime)
 {
 	// Cache constraint values that are valid until the bodies move
 	Mat44 rotation1 = Mat44::sRotation(mBody1->GetRotation());
@@ -201,7 +201,7 @@ void HingeConstraint::SetupVelocityConstraint(float inDeltaTime)
 	CalculateMotorConstraintProperties(inDeltaTime);
 }
 
-void HingeConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio)
+void HingeConstraint::WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio)
 {
 	// Warm starting: Apply previous frame impulse
 	mMotorConstraintPart.WarmStart(*mBody1, *mBody2, inWarmStartImpulseRatio);
@@ -210,14 +210,14 @@ void HingeConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio)
 	mRotationLimitsConstraintPart.WarmStart(*mBody1, *mBody2, inWarmStartImpulseRatio);
 }
 
-float HingeConstraint::GetSmallestAngleToLimit() const
+decimal HingeConstraint::GetSmallestAngleToLimit() const
 {
-	float dist_to_min = CenterAngleAroundZero(mTheta - mLimitsMin);
-	float dist_to_max = CenterAngleAroundZero(mTheta - mLimitsMax);
+	decimal dist_to_min = CenterAngleAroundZero(mTheta - mLimitsMin);
+	decimal dist_to_max = CenterAngleAroundZero(mTheta - mLimitsMax);
 	return abs(dist_to_min) < abs(dist_to_max)? dist_to_min : dist_to_max;
 }
 
-bool HingeConstraint::SolveVelocityConstraint(float inDeltaTime)
+bool HingeConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 {
 	// Solve motor
 	bool motor = false;
@@ -227,7 +227,7 @@ bool HingeConstraint::SolveVelocityConstraint(float inDeltaTime)
 		{
 		case EMotorState::Off:
 			{
-				float max_lambda = mMaxFrictionTorque * inDeltaTime;
+				decimal max_lambda = mMaxFrictionTorque * inDeltaTime;
 				motor = mMotorConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mA1, -max_lambda, max_lambda);
 				break;
 			}	
@@ -249,16 +249,16 @@ bool HingeConstraint::SolveVelocityConstraint(float inDeltaTime)
 	bool limit = false;
 	if (mRotationLimitsConstraintPart.IsActive())
 	{
-		if (GetSmallestAngleToLimit() < 0.0f)
-			limit = mRotationLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mA1, 0, FLT_MAX);
+		if (GetSmallestAngleToLimit() < decimal(0.0f))
+			limit = mRotationLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mA1, 0, FIX_MAX);
 		else
-			limit = mRotationLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mA1, -FLT_MAX, 0);
+			limit = mRotationLimitsConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mA1, FIX_MIN, 0);
 	}
 
 	return motor || pos || rot || limit;
 }
 
-bool HingeConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgarte)
+bool HingeConstraint::SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte)
 {
 	// Motor operates on velocities only, don't call SolvePositionConstraint
 
@@ -290,11 +290,11 @@ void HingeConstraint::DrawConstraint(DebugRenderer *inRenderer) const
 
 	// Draw constraint
 	RVec3 constraint_pos1 = transform1 * mLocalSpacePosition1;
-	inRenderer->DrawMarker(constraint_pos1, Color::sRed, 0.1f);
+	inRenderer->DrawMarker(constraint_pos1, Color::sRed, decimal(0.1f));
 	inRenderer->DrawLine(constraint_pos1, transform1 * (mLocalSpacePosition1 + mDrawConstraintSize * mLocalSpaceHingeAxis1), Color::sRed);
 
 	RVec3 constraint_pos2 = transform2 * mLocalSpacePosition2;
-	inRenderer->DrawMarker(constraint_pos2, Color::sGreen, 0.1f);
+	inRenderer->DrawMarker(constraint_pos2, Color::sGreen, decimal(0.1f));
 	inRenderer->DrawLine(constraint_pos2, transform2 * (mLocalSpacePosition2 + mDrawConstraintSize * mLocalSpaceHingeAxis2), Color::sGreen);
 	inRenderer->DrawLine(constraint_pos2, transform2 * (mLocalSpacePosition2 + mDrawConstraintSize * mLocalSpaceNormalAxis2), Color::sWhite);
 }

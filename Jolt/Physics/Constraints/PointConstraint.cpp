@@ -83,23 +83,23 @@ void PointConstraint::CalculateConstraintProperties()
 	mPointConstraintPart.CalculateConstraintProperties(*mBody1, Mat44::sRotation(mBody1->GetRotation()), mLocalSpacePosition1, *mBody2, Mat44::sRotation(mBody2->GetRotation()), mLocalSpacePosition2);
 }
 
-void PointConstraint::SetupVelocityConstraint(float inDeltaTime)
+void PointConstraint::SetupVelocityConstraint(decimal inDeltaTime)
 {
 	CalculateConstraintProperties();
 }
 
-void PointConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio)
+void PointConstraint::WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio)
 {
 	// Warm starting: Apply previous frame impulse
 	mPointConstraintPart.WarmStart(*mBody1, *mBody2, inWarmStartImpulseRatio);
 }
 
-bool PointConstraint::SolveVelocityConstraint(float inDeltaTime)
+bool PointConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 {
 	return mPointConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2);
 }
 
-bool PointConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgarte)
+bool PointConstraint::SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte)
 {
 	// Update constraint properties (bodies may have moved)
 	CalculateConstraintProperties();
@@ -111,8 +111,8 @@ bool PointConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgar
 void PointConstraint::DrawConstraint(DebugRenderer *inRenderer) const
 {
 	// Draw constraint
-	inRenderer->DrawMarker(mBody1->GetCenterOfMassTransform() * mLocalSpacePosition1, Color::sRed, 0.1f);
-	inRenderer->DrawMarker(mBody2->GetCenterOfMassTransform() * mLocalSpacePosition2, Color::sGreen, 0.1f);
+	inRenderer->DrawMarker(mBody1->GetCenterOfMassTransform() * mLocalSpacePosition1, Color::sRed, decimal(0.1f));
+	inRenderer->DrawMarker(mBody2->GetCenterOfMassTransform() * mLocalSpacePosition2, Color::sGreen, decimal(0.1f));
 }
 #endif // JPH_DEBUG_RENDERER
 

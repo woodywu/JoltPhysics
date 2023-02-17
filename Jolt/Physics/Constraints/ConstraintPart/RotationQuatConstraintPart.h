@@ -128,7 +128,7 @@ public:
 	inline void					CalculateConstraintProperties(const Body &inBody1, Mat44Arg inRotation1, const Body &inBody2, Mat44Arg inRotation2, QuatArg inInvInitialOrientation)
 	{
 		// Calculate: JP = 1/2 A ML(q1^*) MR(q2 r0^*) A^T
-		Mat44 jp = (Mat44::sQuatLeftMultiply(0.5f * inBody1.GetRotation().Conjugated()) * Mat44::sQuatRightMultiply(inBody2.GetRotation() * inInvInitialOrientation)).GetRotationSafe();
+		Mat44 jp = (Mat44::sQuatLeftMultiply(decimal(0.5f) * inBody1.GetRotation().Conjugated()) * Mat44::sQuatRightMultiply(inBody2.GetRotation() * inInvInitialOrientation)).GetRotationSafe();
 
 		// Calculate properties used during constraint solving
 		Mat44 invi1 = inBody1.IsDynamic()? inBody1.GetMotionProperties()->GetInverseInertiaForRotation(inRotation1) : Mat44::sZero();
@@ -144,7 +144,7 @@ public:
 	}
 
 	/// Must be called from the WarmStartVelocityConstraint call to apply the previous frame's impulses
-	inline void					WarmStart(Body &ioBody1, Body &ioBody2, float inWarmStartImpulseRatio)
+	inline void					WarmStart(Body &ioBody1, Body &ioBody2, decimal inWarmStartImpulseRatio)
 	{
 		mTotalLambda *= inWarmStartImpulseRatio;
 		ApplyVelocityStep(ioBody1, ioBody2, mTotalLambda);
@@ -162,7 +162,7 @@ public:
 	}
 
 	/// Iteratively update the position constraint. Makes sure C(...) = 0.
-	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, QuatArg inInvInitialOrientation, float inBaumgarte) const
+	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, QuatArg inInvInitialOrientation, decimal inBaumgarte) const
 	{
 		// Calculate constraint equation
 		Vec3 c = (ioBody1.GetRotation().Conjugated() * ioBody2.GetRotation() * inInvInitialOrientation).GetXYZ();

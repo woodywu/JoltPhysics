@@ -26,9 +26,9 @@ public:
 	/// @param inNumTeethRack Number of teeth that the rack has
 	/// @param inRackLength Length of the rack
 	/// @param inNumTeethPinion Number of teeth the pinion has
-	void						SetRatio(int inNumTeethRack, float inRackLength, int inNumTeethPinion)
+	void						SetRatio(int inNumTeethRack, decimal inRackLength, int inNumTeethPinion)
 	{
-		mRatio = 2.0f * JPH_PI * inNumTeethRack / (inRackLength * inNumTeethPinion);
+		mRatio = decimal(2.0f) * JPH_PI * inNumTeethRack / (inRackLength * inNumTeethPinion);
 	}
 
 	/// This determines in which space the constraint is setup, all properties below should be in the specified space
@@ -41,7 +41,7 @@ public:
 	Vec3						mSliderAxis = Vec3::sAxisX();
 
 	/// Ratio between the rack and pinion, see SetRatio.
-	float						mRatio = 1.0f;
+	decimal						mRatio = decimal(1.0f);
 
 protected:
 	// See: ConstraintSettings::RestoreBinaryState
@@ -60,10 +60,10 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override												{ return EConstraintSubType::RackAndPinion; }
-	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
-	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
-	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;
-	virtual bool				SolvePositionConstraint(float inDeltaTime, float inBaumgarte) override;
+	virtual void				SetupVelocityConstraint(decimal inDeltaTime) override;
+	virtual void				WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio) override;
+	virtual bool				SolveVelocityConstraint(decimal inDeltaTime) override;
+	virtual bool				SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte) override;
 #ifdef JPH_DEBUG_RENDERER
 	virtual void				DrawConstraint(DebugRenderer *inRenderer) const override;
 #endif // JPH_DEBUG_RENDERER
@@ -79,7 +79,7 @@ public:
 	void						SetConstraints(const Constraint *inPinion, const Constraint *inRack)	{ mPinionConstraint = inPinion; mRackConstraint = inRack; }
 
 	///@name Get Lagrange multiplier from last physics update (relates to how much force/torque was applied to satisfy the constraint)
-	inline float				GetTotalLambda() const													{ return mRackAndPinionConstraintPart.GetTotalLambda(); }
+	inline decimal				GetTotalLambda() const													{ return mRackAndPinionConstraintPart.GetTotalLambda(); }
 
 private:
 	// Internal helper function to calculate the values below
@@ -94,7 +94,7 @@ private:
 	Vec3						mLocalSpaceSliderAxis;
 
 	// Ratio between rack and pinion
-	float						mRatio;
+	decimal						mRatio;
 
 	// The constraints that constrain the rack and pinion (a slider and a hinge), optional and used to calculate the position error and fix numerical drift.
 	RefConst<Constraint>		mPinionConstraint;

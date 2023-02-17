@@ -11,24 +11,24 @@ JPH_NAMESPACE_BEGIN
 
 #if defined(JPH_USE_SSE)
 
-/// Enable floating point divide by zero exception and exceptions on invalid numbers
+/// Enable decimaling point divide by zero exception and exceptions on invalid numbers
 class FPExceptionsEnable : public FPControlWord<0, _MM_MASK_DIV_ZERO | _MM_MASK_INVALID> { };
 
-/// Disable invalid floating point value exceptions
+/// Disable invalid decimaling point value exceptions
 class FPExceptionDisableInvalid : public FPControlWord<_MM_MASK_INVALID, _MM_MASK_INVALID> { };
 
-/// Disable division by zero floating point exceptions
+/// Disable division by zero decimaling point exceptions
 class FPExceptionDisableDivByZero : public FPControlWord<_MM_MASK_DIV_ZERO, _MM_MASK_DIV_ZERO> { };
 
 #elif defined(JPH_CPU_ARM) && defined(JPH_COMPILER_MSVC)
 
-/// Enable floating point divide by zero exception and exceptions on invalid numbers
+/// Enable decimaling point divide by zero exception and exceptions on invalid numbers
 class FPExceptionsEnable : public FPControlWord<0, _EM_INVALID | _EM_ZERODIVIDE> { };
 
-/// Disable invalid floating point value exceptions
+/// Disable invalid decimaling point value exceptions
 class FPExceptionDisableInvalid : public FPControlWord<_EM_INVALID, _EM_INVALID> { };
 
-/// Disable division by zero floating point exceptions
+/// Disable division by zero decimaling point exceptions
 class FPExceptionDisableDivByZero : public FPControlWord<_EM_ZERODIVIDE, _EM_ZERODIVIDE> { };
 
 #elif defined(JPH_CPU_ARM)
@@ -39,13 +39,13 @@ static constexpr uint64 FP_IOE = 1 << 8;
 /// Enable divide by zero exception bit
 static constexpr uint64 FP_DZE = 1 << 9;
 
-/// Enable floating point divide by zero exception and exceptions on invalid numbers
+/// Enable decimaling point divide by zero exception and exceptions on invalid numbers
 class FPExceptionsEnable : public FPControlWord<FP_IOE | FP_DZE, FP_IOE | FP_DZE> { };
 
-/// Disable invalid floating point value exceptions
+/// Disable invalid decimaling point value exceptions
 class FPExceptionDisableInvalid : public FPControlWord<0, FP_IOE> { };
 
-/// Disable division by zero floating point exceptions
+/// Disable division by zero decimaling point exceptions
 class FPExceptionDisableDivByZero : public FPControlWord<0, FP_DZE> { };
 
 #elif defined(JPH_CPU_WASM)

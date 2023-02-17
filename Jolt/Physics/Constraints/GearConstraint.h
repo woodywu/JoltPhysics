@@ -26,7 +26,7 @@ public:
 	/// @param inNumTeethGear2 Number of teeth that body 2 has
 	void						SetRatio(int inNumTeethGear1, int inNumTeethGear2)
 	{
-		mRatio = float(inNumTeethGear2) / float(inNumTeethGear1);
+		mRatio = decimal(inNumTeethGear2) / decimal(inNumTeethGear1);
 	}
 
 	/// This determines in which space the constraint is setup, all properties below should be in the specified space
@@ -39,7 +39,7 @@ public:
 	Vec3						mHingeAxis2 = Vec3::sAxisX();
 
 	/// Ratio between both gears, see SetRatio.
-	float						mRatio = 1.0f;
+	decimal						mRatio = decimal(1.0f);
 
 protected:
 	// See: ConstraintSettings::RestoreBinaryState
@@ -58,10 +58,10 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override								{ return EConstraintSubType::Gear; }
-	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
-	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
-	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;
-	virtual bool				SolvePositionConstraint(float inDeltaTime, float inBaumgarte) override;
+	virtual void				SetupVelocityConstraint(decimal inDeltaTime) override;
+	virtual void				WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio) override;
+	virtual bool				SolveVelocityConstraint(decimal inDeltaTime) override;
+	virtual bool				SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte) override;
 #ifdef JPH_DEBUG_RENDERER
 	virtual void				DrawConstraint(DebugRenderer *inRenderer) const override;
 #endif // JPH_DEBUG_RENDERER
@@ -77,7 +77,7 @@ public:
 	void						SetConstraints(const Constraint *inGear1, const Constraint *inGear2)	{ mGear1Constraint = inGear1; mGear2Constraint = inGear2; }
 
 	///@name Get Lagrange multiplier from last physics update (relates to how much force/torque was applied to satisfy the constraint)
-	inline float				GetTotalLambda() const									{ return mGearConstraintPart.GetTotalLambda(); }
+	inline decimal				GetTotalLambda() const									{ return mGearConstraintPart.GetTotalLambda(); }
 
 private:
 	// Internal helper function to calculate the values below
@@ -92,7 +92,7 @@ private:
 	Vec3						mLocalSpaceHingeAxis2;
 
 	// Ratio between gear 1 and 2
-	float						mRatio;
+	decimal						mRatio;
 
 	// The constraints that constrain both gears (2 hinges), optional and used to calculate the rotation error and fix numerical drift.
 	RefConst<Constraint>		mGear1Constraint;

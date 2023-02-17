@@ -17,7 +17,7 @@ DebugRenderer *DebugRenderer::sInstance = nullptr;
 static const int sMaxLevel = 4;
 
 // Distance for each LOD level, these are tweaked for an object of approx. size 1. Use the lod scale to scale these distances.
-static const decimal sLODDistanceForLevel[] = { 5.0f, 10.0f, 40.0f, FLT_MAX };
+static const decimal sLODDistanceForLevel[] = { decimal(5.0f), decimal(10.0f), decimal(40.0f), FIX_MAX };
 
 DebugRenderer::Triangle::Triangle(Vec3Arg inV1, Vec3Arg inV2, Vec3Arg inV3, ColorArg inColor)
 {
@@ -32,14 +32,14 @@ DebugRenderer::Triangle::Triangle(Vec3Arg inV1, Vec3Arg inV2, Vec3Arg inV3, Colo
 	// Calculate normal
 	Vec3 normal = (inV2 - inV1).Cross(inV3 - inV1);
 	decimal normal_len = normal.Length();
-	if (normal_len > 0.0f)
+	if (normal_len > decimal(0.0f))
 		normal /= normal_len;
 	Float3 normal3;
 	normal.StoreFloat3(&normal3);
 	mV[0].mNormal = mV[1].mNormal = mV[2].mNormal = normal3;
 
 	// Reset UV's
-	mV[0].mUV = mV[1].mUV = mV[2].mUV = { 0, 0 };
+	mV[0].mUV = mV[1].mUV = mV[2].mUV = { C0, C0 };
 }
 
 DebugRenderer::Triangle::Triangle(Vec3Arg inV1, Vec3Arg inV2, Vec3Arg inV3, ColorArg inColor, Vec3Arg inUVOrigin, Vec3Arg inUVDirection)
@@ -172,9 +172,9 @@ void DebugRenderer::DrawMarker(RVec3Arg inPosition, ColorArg inColor, decimal in
 {
 	JPH_PROFILE_FUNCTION();
 
-	Vec3 dx(inSize, 0, 0);
-	Vec3 dy(0, inSize, 0);
-	Vec3 dz(0, 0, inSize);
+	Vec3 dx(inSize, C0, C0);
+	Vec3 dy(C0, inSize, C0);
+	Vec3 dz(C0, C0, inSize);
 	DrawLine(inPosition - dy, inPosition + dy, inColor);
 	DrawLine(inPosition - dx, inPosition + dx, inColor);
 	DrawLine(inPosition - dz, inPosition + dz, inColor);
@@ -187,15 +187,15 @@ void DebugRenderer::DrawArrow(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor, 
 	// Draw base line
 	DrawLine(inFrom, inTo, inColor);
 
-	if (inSize > 0.0f)
+	if (inSize > decimal(0.0f))
 	{
 		// Draw arrow head
 		Vec3 dir = Vec3(inTo - inFrom);
 		decimal len = dir.Length();
-		if (len != 0.0f)
+		if (len != decimal(0.0f))
 			dir = dir * (inSize / len);
 		else
-			dir = Vec3(inSize, 0, 0);
+			dir = Vec3(inSize, C0, C0);
 		Vec3 perp = inSize * dir.GetNormalizedPerpendicular();
 		DrawLine(inTo - dir + perp, inTo, inColor);
 		DrawLine(inTo - dir - perp, inTo, inColor);
@@ -206,9 +206,9 @@ void DebugRenderer::DrawCoordinateSystem(RMat44Arg inTransform, decimal inSize)
 {
 	JPH_PROFILE_FUNCTION();
 
-	DrawArrow(inTransform.GetTranslation(), inTransform * Vec3(inSize, C0, C0), Color::sRed, 0.1f * inSize);
-	DrawArrow(inTransform.GetTranslation(), inTransform * Vec3(C0, inSize, C0), Color::sGreen, 0.1f * inSize);
-	DrawArrow(inTransform.GetTranslation(), inTransform * Vec3(C0, C0, inSize), Color::sBlue, 0.1f * inSize);
+	DrawArrow(inTransform.GetTranslation(), inTransform * Vec3(inSize, C0, C0), Color::sRed, decimal(0.1f) * inSize);
+	DrawArrow(inTransform.GetTranslation(), inTransform * Vec3(C0, inSize, C0), Color::sGreen, decimal(0.1f) * inSize);
+	DrawArrow(inTransform.GetTranslation(), inTransform * Vec3(C0, C0, inSize), Color::sBlue, decimal(0.1f) * inSize);
 }
 
 void DebugRenderer::DrawPlane(RVec3Arg inPoint, Vec3Arg inNormal, ColorArg inColor, decimal inSize)
@@ -235,7 +235,7 @@ void DebugRenderer::DrawPlane(RVec3Arg inPoint, Vec3Arg inNormal, ColorArg inCol
 	DrawLine(corner4, corner1, inColor);
 
 	// Draw normal
-	DrawArrow(inPoint, inPoint + inSize * inNormal, inColor, 0.1f * inSize);
+	DrawArrow(inPoint, inPoint + inSize * inNormal, inColor, decimal(0.1f) * inSize);
 }
 
 void DebugRenderer::DrawWireTriangle(RVec3Arg inV1, RVec3Arg inV2, RVec3Arg inV3, ColorArg inColor)
@@ -377,10 +377,10 @@ void DebugRenderer::CreateQuad(Array<uint32> &ioIndices, Array<Vertex> &ioVertic
 	vertices[0].mNormal = vertices[1].mNormal = vertices[2].mNormal = vertices[3].mNormal = normal3;
 
 	// Set UV's
-	vertices[0].mUV = { 0, 0 };
-	vertices[1].mUV = { 2, 0 };
-	vertices[2].mUV = { 2, 2 };
-	vertices[3].mUV = { 0, 2 };
+	vertices[0].mUV = { C0, C0 };
+	vertices[1].mUV = { C2, C0 };
+	vertices[2].mUV = { C2, C2 };
+	vertices[3].mUV = { C0, C2 };
 
 	// Set indices
 	ioIndices.push_back(start_idx);
@@ -400,14 +400,14 @@ void DebugRenderer::Initialize()
 		Array<uint32> box_indices;
 
 		// Get corner points
-		Vec3 v0 = Vec3(-1,  1, -1);
-		Vec3 v1 = Vec3( 1,  1, -1);
-		Vec3 v2 = Vec3( 1,  1,  1);
-		Vec3 v3 = Vec3(-1,  1,  1);
-		Vec3 v4 = Vec3(-1, -1, -1);
-		Vec3 v5 = Vec3( 1, -1, -1);
-		Vec3 v6 = Vec3( 1, -1,  1);
-		Vec3 v7 = Vec3(-1, -1,  1);
+		Vec3 v0 = Vec3(-C1,  C1, -C1);
+		Vec3 v1 = Vec3( C1,  C1, -C1);
+		Vec3 v2 = Vec3( C1,  C1,  C1);
+		Vec3 v3 = Vec3(-C1,  C1,  C1);
+		Vec3 v4 = Vec3(-C1, -C1, -C1);
+		Vec3 v5 = Vec3( C1, -C1, -C1);
+		Vec3 v6 = Vec3( C1, -C1,  C1);
+		Vec3 v7 = Vec3(-C1, -C1,  C1);
 
 		// Top
 		CreateQuad(box_indices, box_vertices, v0, v3, v2, v1);
@@ -427,19 +427,19 @@ void DebugRenderer::Initialize()
 		// Back
 		CreateQuad(box_indices, box_vertices, v0, v1, v5, v4);
 
-		mBox = new Geometry(CreateTriangleBatch(box_vertices, box_indices), AABox(Vec3(-1, -1, -1), Vec3(1, 1, 1)));
+		mBox = new Geometry(CreateTriangleBatch(box_vertices, box_indices), AABox(Vec3(-C1, -C1, -C1), Vec3(C1, C1, C1)));
 	}
 
 	// Support function that returns a unit sphere
 	auto sphere_support = [](Vec3Arg inDirection) { return inDirection; };
 
 	// Construct geometries
-	mSphere = new Geometry(AABox(Vec3(-1, -1, -1), Vec3(1, 1, 1)));
-	mCapsuleBottom = new Geometry(AABox(Vec3(-1, -1, -1), Vec3(1, 0, 1)));
-	mCapsuleTop = new Geometry(AABox(Vec3(-1, 0, -1), Vec3(1, 1, 1)));
-	mCapsuleMid = new Geometry(AABox(Vec3(-1, -1, -1), Vec3(1, 1, 1)));
-	mOpenCone = new Geometry(AABox(Vec3(-1, 0, -1), Vec3(1, 1, 1)));
-	mCylinder = new Geometry(AABox(Vec3(-1, -1, -1), Vec3(1, 1, 1)));
+	mSphere = new Geometry(AABox(Vec3(-C1, -C1, -C1), Vec3(C1, C1, C1)));
+	mCapsuleBottom = new Geometry(AABox(Vec3(-C1, -C1, -C1), Vec3(C1, C0, C1)));
+	mCapsuleTop = new Geometry(AABox(Vec3(-C1, C0, -C1), Vec3(C1, C1, C1)));
+	mCapsuleMid = new Geometry(AABox(Vec3(-C1, -C1, -C1), Vec3(C1, C1, C1)));
+	mOpenCone = new Geometry(AABox(Vec3(-C1, C0, -C1), Vec3(C1, C1, C1)));
+	mCylinder = new Geometry(AABox(Vec3(-C1, -C1, -C1), Vec3(C1, C1, C1)));
 
 	// Iterate over levels
 	for (int level = sMaxLevel; level >= 1; --level)
@@ -454,10 +454,10 @@ void DebugRenderer::Initialize()
 		{
 			Array<Vertex> capsule_bottom_vertices;
 			Array<uint32> capsule_bottom_indices;
-			Create8thSphere(capsule_bottom_indices, capsule_bottom_vertices, -Vec3::sAxisX(), -Vec3::sAxisY(),  Vec3::sAxisZ(), Float2(0.25f, 0.25f), sphere_support, level);
-			Create8thSphere(capsule_bottom_indices, capsule_bottom_vertices, -Vec3::sAxisY(),  Vec3::sAxisX(),  Vec3::sAxisZ(), Float2(0.25f, 0.75f), sphere_support, level);
-			Create8thSphere(capsule_bottom_indices, capsule_bottom_vertices,  Vec3::sAxisX(), -Vec3::sAxisY(), -Vec3::sAxisZ(), Float2(0.25f, 0.25f), sphere_support, level);
-			Create8thSphere(capsule_bottom_indices, capsule_bottom_vertices, -Vec3::sAxisY(), -Vec3::sAxisX(), -Vec3::sAxisZ(), Float2(0.25f, 0.75f), sphere_support, level);
+			Create8thSphere(capsule_bottom_indices, capsule_bottom_vertices, -Vec3::sAxisX(), -Vec3::sAxisY(),  Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.25f)), sphere_support, level);
+			Create8thSphere(capsule_bottom_indices, capsule_bottom_vertices, -Vec3::sAxisY(),  Vec3::sAxisX(),  Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.75f)), sphere_support, level);
+			Create8thSphere(capsule_bottom_indices, capsule_bottom_vertices,  Vec3::sAxisX(), -Vec3::sAxisY(), -Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.25f)), sphere_support, level);
+			Create8thSphere(capsule_bottom_indices, capsule_bottom_vertices, -Vec3::sAxisY(), -Vec3::sAxisX(), -Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.75f)), sphere_support, level);
 			mCapsuleBottom->mLODs.push_back({ CreateTriangleBatch(capsule_bottom_vertices, capsule_bottom_indices), distance });
 		}
 
@@ -465,10 +465,10 @@ void DebugRenderer::Initialize()
 		{
 			Array<Vertex> capsule_top_vertices;
 			Array<uint32> capsule_top_indices;
-			Create8thSphere(capsule_top_indices, capsule_top_vertices,  Vec3::sAxisX(),  Vec3::sAxisY(),  Vec3::sAxisZ(), Float2(0.25f, 0.75f), sphere_support, level);
-			Create8thSphere(capsule_top_indices, capsule_top_vertices,  Vec3::sAxisY(), -Vec3::sAxisX(),  Vec3::sAxisZ(), Float2(0.25f, 0.25f), sphere_support, level);
-			Create8thSphere(capsule_top_indices, capsule_top_vertices,  Vec3::sAxisY(),  Vec3::sAxisX(), -Vec3::sAxisZ(), Float2(0.25f, 0.25f), sphere_support, level);
-			Create8thSphere(capsule_top_indices, capsule_top_vertices, -Vec3::sAxisX(),  Vec3::sAxisY(), -Vec3::sAxisZ(), Float2(0.25f, 0.75f), sphere_support, level);
+			Create8thSphere(capsule_top_indices, capsule_top_vertices,  Vec3::sAxisX(),  Vec3::sAxisY(),  Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.75f)), sphere_support, level);
+			Create8thSphere(capsule_top_indices, capsule_top_vertices,  Vec3::sAxisY(), -Vec3::sAxisX(),  Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.25f)), sphere_support, level);
+			Create8thSphere(capsule_top_indices, capsule_top_vertices,  Vec3::sAxisY(),  Vec3::sAxisX(), -Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.25f)), sphere_support, level);
+			Create8thSphere(capsule_top_indices, capsule_top_vertices, -Vec3::sAxisX(),  Vec3::sAxisY(), -Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.75f)), sphere_support, level);
 			mCapsuleTop->mLODs.push_back({ CreateTriangleBatch(capsule_top_vertices, capsule_top_indices), distance });
 		}
 
@@ -478,19 +478,19 @@ void DebugRenderer::Initialize()
 			Array<uint32> capsule_mid_indices;
 			for (int q = 0; q < 4; ++q)
 			{
-				Float2 uv = (q & 1) == 0? Float2(0.25f, 0.25f) : Float2(0.25f, 0.75f);
+				Float2 uv = (q & 1) == 0? Float2(decimal(0.25f), decimal(0.25f)) : Float2(decimal(0.25f), decimal(0.75f));
 		
 				uint32 start_idx = (uint32)capsule_mid_vertices.size();
 		
 				int num_parts = 1 << level;
 				for (int i = 0; i <= num_parts; ++i)
 				{
-					decimal angle = 0.5f * JPH_PI * (decimal(q) + decimal(i) / num_parts);
+					decimal angle = decimal(0.5f) * JPH_PI * (decimal(q) + decimal(i) / num_parts);
 					decimal s = Sin(angle);
 					decimal c = Cos(angle);
-					Float3 vt(s, 1.0f, c);
-					Float3 vb(s, -1.0f, c);
-					Float3 n(s, 0, c);
+					Float3 vt(s, decimal(1.0f), c);
+					Float3 vb(s, -decimal(1.0f), c);
+					Float3 n(s, C0, c);
 
 					capsule_mid_vertices.push_back({ vt, n, uv, Color::sWhite });
 					capsule_mid_vertices.push_back({ vb, n, uv, Color::sWhite });
@@ -518,19 +518,19 @@ void DebugRenderer::Initialize()
 			Array<uint32> open_cone_indices;
 			for (int q = 0; q < 4; ++q)
 			{
-				Float2 uv = (q & 1) == 0? Float2(0.25f, 0.25f) : Float2(0.25f, 0.75f);
+				Float2 uv = (q & 1) == 0? Float2(decimal(0.25f), decimal(0.25f)) : Float2(decimal(0.25f), decimal(0.75f));
 		
 				uint32 start_idx = (uint32)open_cone_vertices.size();
 		
 				int num_parts = 2 << level;
-				Float3 vt(0, 0, 0);
+				Float3 vt(C0, C0, C0);
 				for (int i = 0; i <= num_parts; ++i)
 				{
 					// Calculate bottom vertex
-					decimal angle = 0.5f * JPH_PI * (decimal(q) + decimal(i) / num_parts);
+					decimal angle = decimal(0.5f) * JPH_PI * (decimal(q) + decimal(i) / num_parts);
 					decimal s = Sin(angle);
 					decimal c = Cos(angle);
-					Float3 vb(s, 1.0f, c);
+					Float3 vb(s, decimal(1.0f), c);
 
 					// Calculate normal
 					// perpendicular = Y cross vb (perpendicular to the plane in which 0, y and vb exists)
@@ -560,26 +560,26 @@ void DebugRenderer::Initialize()
 			Array<uint32> cylinder_indices;
 			for (int q = 0; q < 4; ++q)
 			{
-				Float2 uv = (q & 1) == 0? Float2(0.25f, 0.75f) : Float2(0.25f, 0.25f);
+				Float2 uv = (q & 1) == 0? Float2(decimal(0.25f), decimal(0.75f)) : Float2(decimal(0.25f), decimal(0.25f));
 		
 				uint32 center_start_idx = (uint32)cylinder_vertices.size();
 		
-				Float3 nt(0.0f, 1.0f, 0.0f);
-				Float3 nb(0.0f, -1.0f, 0.0f);
-				cylinder_vertices.push_back({ Float3(0.0f, 1.0f, 0.0f), nt, uv, Color::sWhite });
-				cylinder_vertices.push_back({ Float3(0.0f, -1.0f, 0.0f), nb, uv, Color::sWhite });
+				Float3 nt(decimal(0.0f), decimal(1.0f), decimal(0.0f));
+				Float3 nb(decimal(0.0f), -decimal(1.0f), decimal(0.0f));
+				cylinder_vertices.push_back({ Float3(decimal(0.0f), decimal(1.0f), decimal(0.0f)), nt, uv, Color::sWhite });
+				cylinder_vertices.push_back({ Float3(decimal(0.0f), -decimal(1.0f), decimal(0.0f)), nb, uv, Color::sWhite });
 
 				uint32 vtx_start_idx = (uint32)cylinder_vertices.size();
 
 				int num_parts = 1 << level;
 				for (int i = 0; i <= num_parts; ++i)
 				{
-					decimal angle = 0.5f * JPH_PI * (decimal(q) + decimal(i) / num_parts);
+					decimal angle = decimal(0.5f) * JPH_PI * (decimal(q) + decimal(i) / num_parts);
 					decimal s = Sin(angle);
 					decimal c = Cos(angle);
-					Float3 vt(s, 1.0f, c);
-					Float3 vb(s, -1.0f, c);
-					Float3 n(s, 0, c);
+					Float3 vt(s, decimal(1.0f), c);
+					Float3 vb(s, -decimal(1.0f), c);
+					Float3 n(s, C0, c);
 
 					cylinder_vertices.push_back({ vt, nt, uv, Color::sWhite });
 					cylinder_vertices.push_back({ vb, nb, uv, Color::sWhite });
@@ -635,8 +635,8 @@ DebugRenderer::Batch DebugRenderer::CreateTriangleBatch(const VertexList &inVert
 	for (size_t v = 0; v < inVertices.size(); ++v)
 	{
 		vertices[v].mPosition = inVertices[v];
-		vertices[v].mNormal = Float3(0, 0, 0);
-		vertices[v].mUV = Float2(0, 0);
+		vertices[v].mNormal = Float3(C0, C0, C0);
+		vertices[v].mUV = Float2(C0, C0);
 		vertices[v].mColor = Color::sWhite;
 	}
 
@@ -669,14 +669,14 @@ DebugRenderer::Batch DebugRenderer::CreateTriangleBatchForConvex(SupportFunction
 
 	Array<Vertex> vertices;
 	Array<uint32> indices;
-	Create8thSphere(indices, vertices,  Vec3::sAxisX(),  Vec3::sAxisY(),  Vec3::sAxisZ(), Float2(0.25f, 0.25f), inGetSupport, inLevel);
-	Create8thSphere(indices, vertices,  Vec3::sAxisY(), -Vec3::sAxisX(),  Vec3::sAxisZ(), Float2(0.25f, 0.75f), inGetSupport, inLevel);
-	Create8thSphere(indices, vertices, -Vec3::sAxisY(),  Vec3::sAxisX(),  Vec3::sAxisZ(), Float2(0.25f, 0.75f), inGetSupport, inLevel);
-	Create8thSphere(indices, vertices, -Vec3::sAxisX(), -Vec3::sAxisY(),  Vec3::sAxisZ(), Float2(0.25f, 0.25f), inGetSupport, inLevel);
-	Create8thSphere(indices, vertices,  Vec3::sAxisY(),  Vec3::sAxisX(), -Vec3::sAxisZ(), Float2(0.25f, 0.75f), inGetSupport, inLevel);
-	Create8thSphere(indices, vertices, -Vec3::sAxisX(),  Vec3::sAxisY(), -Vec3::sAxisZ(), Float2(0.25f, 0.25f), inGetSupport, inLevel);
-	Create8thSphere(indices, vertices,  Vec3::sAxisX(), -Vec3::sAxisY(), -Vec3::sAxisZ(), Float2(0.25f, 0.25f), inGetSupport, inLevel);
-	Create8thSphere(indices, vertices, -Vec3::sAxisY(), -Vec3::sAxisX(), -Vec3::sAxisZ(), Float2(0.25f, 0.75f), inGetSupport, inLevel);
+	Create8thSphere(indices, vertices,  Vec3::sAxisX(),  Vec3::sAxisY(),  Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.25f)), inGetSupport, inLevel);
+	Create8thSphere(indices, vertices,  Vec3::sAxisY(), -Vec3::sAxisX(),  Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.75f)), inGetSupport, inLevel);
+	Create8thSphere(indices, vertices, -Vec3::sAxisY(),  Vec3::sAxisX(),  Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.75f)), inGetSupport, inLevel);
+	Create8thSphere(indices, vertices, -Vec3::sAxisX(), -Vec3::sAxisY(),  Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.25f)), inGetSupport, inLevel);
+	Create8thSphere(indices, vertices,  Vec3::sAxisY(),  Vec3::sAxisX(), -Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.75f)), inGetSupport, inLevel);
+	Create8thSphere(indices, vertices, -Vec3::sAxisX(),  Vec3::sAxisY(), -Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.25f)), inGetSupport, inLevel);
+	Create8thSphere(indices, vertices,  Vec3::sAxisX(), -Vec3::sAxisY(), -Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.25f)), inGetSupport, inLevel);
+	Create8thSphere(indices, vertices, -Vec3::sAxisY(), -Vec3::sAxisX(), -Vec3::sAxisZ(), Float2(decimal(0.25f), decimal(0.75f)), inGetSupport, inLevel);
 
 	if (outBounds != nullptr)
 		*outBounds = sCalculateBounds(&vertices[0], (int)vertices.size());
@@ -756,11 +756,11 @@ void DebugRenderer::DrawCapsule(RMat44Arg inMatrix, decimal inHalfHeightOfCylind
 	decimal radius_sq = Square(inRadius);
 
 	// Draw bottom half sphere
-	RMat44 bottom_matrix = inMatrix * Mat44::sTranslation(Vec3(0, -inHalfHeightOfCylinder, 0)) * scale_matrix;
+	RMat44 bottom_matrix = inMatrix * Mat44::sTranslation(Vec3(C0, -inHalfHeightOfCylinder, C0)) * scale_matrix;
 	DrawGeometry(bottom_matrix, world_bounds, radius_sq, inColor, mCapsuleBottom, ECullMode::CullBackFace, inCastShadow, inDrawMode);
 
 	// Draw top half sphere
-	RMat44 top_matrix = inMatrix * Mat44::sTranslation(Vec3(0, inHalfHeightOfCylinder, 0)) * scale_matrix;
+	RMat44 top_matrix = inMatrix * Mat44::sTranslation(Vec3(C0, inHalfHeightOfCylinder, C0)) * scale_matrix;
 	DrawGeometry(top_matrix, world_bounds, radius_sq, inColor, mCapsuleTop, ECullMode::CullBackFace, inCastShadow, inDrawMode);
 
 	// Draw middle part
@@ -771,7 +771,7 @@ void DebugRenderer::DrawCylinder(RMat44Arg inMatrix, decimal inHalfHeight, decim
 {
 	JPH_PROFILE_FUNCTION();
 
-	Mat44 local_transform(Vec4(inRadius, 0, 0, 0), Vec4(0, inHalfHeight, 0, 0), Vec4(0, 0, inRadius, 0), Vec4(0, 0, 0, 1));
+	Mat44 local_transform(Vec4(inRadius, C0, C0, C0), Vec4(C0, inHalfHeight, C0, C0), Vec4(C0, C0, inRadius, C0), Vec4(C0, C0, C0, C1));
 	RMat44 transform = inMatrix * local_transform;
 
 	DrawGeometry(transform, mCylinder->mBounds.Transformed(transform), Square(inRadius), inColor, mCylinder, ECullMode::CullBackFace, inCastShadow, inDrawMode);
@@ -781,17 +781,17 @@ void DebugRenderer::DrawOpenCone(RVec3Arg inTop, Vec3Arg inAxis, Vec3Arg inPerpe
 {
 	JPH_PROFILE_FUNCTION();
 
-	JPH_ASSERT(inAxis.IsNormalized(1.0e-4f));
-	JPH_ASSERT(inPerpendicular.IsNormalized(1.0e-4f));
-	JPH_ASSERT(abs(inPerpendicular.Dot(inAxis)) < 1.0e-4f);
+	JPH_ASSERT(inAxis.IsNormalized(decimal(1.0e-4f)));
+	JPH_ASSERT(inPerpendicular.IsNormalized(decimal(1.0e-4f)));
+	JPH_ASSERT(abs(inPerpendicular.Dot(inAxis)) < decimal(1.0e-4f));
 
 	Vec3 axis = Sign(inHalfAngle) * inLength * inAxis;
 	decimal scale = inLength * Tan(abs(inHalfAngle));
-	if (scale != 0.0f)
+	if (scale != decimal(0.0f))
 	{
 		Vec3 perp1 = scale * inPerpendicular;
 		Vec3 perp2 = scale * inAxis.Cross(inPerpendicular);
-		RMat44 transform(Vec4(perp1, 0), Vec4(axis, 0), Vec4(perp2, 0), inTop);
+		RMat44 transform(Vec4(perp1, C0), Vec4(axis, C0), Vec4(perp2, C0), inTop);
 		DrawGeometry(transform, inColor, mOpenCone, ECullMode::Off, inCastShadow, inDrawMode);
 	}
 }
@@ -801,9 +801,9 @@ void DebugRenderer::DrawSwingLimits(RMat44Arg inMatrix, decimal inSwingYHalfAngl
 	JPH_PROFILE_FUNCTION();
 
 	// Assert sane input
-	JPH_ASSERT(inSwingYHalfAngle >= 0.0f && inSwingYHalfAngle <= JPH_PI);
-	JPH_ASSERT(inSwingZHalfAngle >= 0.0f && inSwingZHalfAngle <= JPH_PI);
-	JPH_ASSERT(inEdgeLength > 0.0f);
+	JPH_ASSERT(inSwingYHalfAngle >= decimal(0.0f) && inSwingYHalfAngle <= JPH_PI);
+	JPH_ASSERT(inSwingZHalfAngle >= decimal(0.0f) && inSwingZHalfAngle <= JPH_PI);
+	JPH_ASSERT(inEdgeLength > decimal(0.0f));
 
 	// Check cache
 	SwingLimits limits { inSwingYHalfAngle, inSwingZHalfAngle };
@@ -815,11 +815,11 @@ void DebugRenderer::DrawSwingLimits(RMat44Arg inMatrix, decimal inSwingYHalfAngl
 		int half_num_segments = num_segments / 2;
 
 		// The y and z values of the quaternion are limited to an ellipse, e1 and e2 are the radii of this ellipse
-		decimal e1 = Sin(0.5f * inSwingZHalfAngle);
-		decimal e2 = Sin(0.5f * inSwingYHalfAngle);
+		decimal e1 = Sin(decimal(0.5f) * inSwingZHalfAngle);
+		decimal e2 = Sin(decimal(0.5f) * inSwingYHalfAngle);
 
 		// Check if the limits will draw something
-		if ((e1 <= 0.0f && e2 <= 0.0f) || (e2 >= 1.0f && e1 >= 1.0f))
+		if ((e1 <= decimal(0.0f) && e2 <= decimal(0.0f)) || (e2 >= decimal(1.0f) && e1 >= decimal(1.0f)))
 			return;
 
 		// Calculate squared values
@@ -841,20 +841,20 @@ void DebugRenderer::DrawSwingLimits(RMat44Arg inMatrix, decimal inSwingYHalfAngl
 				if (e2_sq > e1_sq)
 				{
 					// Trace the y value of the quaternion
-					y = e2 - 2.0f * segment_iter * e2 / half_num_segments;
+					y = e2 - decimal(2.0f) * segment_iter * e2 / half_num_segments;
 
 					// Calculate the corresponding z value of the quaternion
 					decimal z_sq = e1_sq - e1_sq / e2_sq * Square(y);
-					z = z_sq <= 0.0f? 0.0f : sqrt(z_sq);
+					z = z_sq <= decimal(0.0f)? decimal(0.0f) : sqrt(z_sq);
 				}
 				else
 				{
 					// Trace the z value of the quaternion
-					z = -e1 + 2.0f * segment_iter * e1 / half_num_segments;
+					z = -e1 + decimal(2.0f) * segment_iter * e1 / half_num_segments;
 
 					// Calculate the corresponding y value of the quaternion
 					decimal y_sq = e2_sq - e2_sq / e1_sq * Square(z);
-					y = y_sq <= 0.0f? 0.0f : sqrt(y_sq);
+					y = y_sq <= decimal(0.0f)? decimal(0.0f) : sqrt(y_sq);
 				}
 
 				// If we're tracing the opposite side, flip the values
@@ -865,8 +865,8 @@ void DebugRenderer::DrawSwingLimits(RMat44Arg inMatrix, decimal inSwingYHalfAngl
 				}
 
 				// Create quaternion
-				Vec3 q_xyz(0, y, z);
-				decimal w = sqrt(1.0f - q_xyz.LengthSq());
+				Vec3 q_xyz(C0, y, z);
+				decimal w = sqrt(decimal(1.0f) - q_xyz.LengthSq());
 				Quat q(Vec4(q_xyz, w));
 
 				// Store vertex
@@ -885,19 +885,19 @@ void DebugRenderer::DrawSwingLimits(RMat44Arg inMatrix, decimal inSwingYHalfAngl
 			// Get local normal
 			Vec3 &prev_pos = ls_vertices[(i + num_segments - 1) % num_segments];
 			Vec3 &next_pos = ls_vertices[(i + 1) % num_segments];
-			Vec3 normal = 0.5f * (next_pos.Cross(pos).Normalized() + pos.Cross(prev_pos).Normalized());
+			Vec3 normal = decimal(0.5f) * (next_pos.Cross(pos).Normalized() + pos.Cross(prev_pos).Normalized());
 			
 			// Store top vertex
-			top.mPosition = { 0, 0, 0 };
+			top.mPosition = { C0, C0, C0 };
 			normal.StoreFloat3(&top.mNormal);
 			top.mColor = Color::sWhite;
-			top.mUV = { 0, 0 };
+			top.mUV = { C0, C0 };
 
 			// Store bottom vertex
 			pos.StoreFloat3(&bottom.mPosition);
 			normal.StoreFloat3(&bottom.mNormal);
 			bottom.mColor = Color::sWhite;
-			bottom.mUV = { 0, 0 };
+			bottom.mUV = { C0, C0 };
 		}
 
 		// Allocate space for indices
@@ -933,19 +933,19 @@ void DebugRenderer::DrawPie(RVec3Arg inCenter, decimal inRadius, Vec3Arg inNorma
 
 	JPH_PROFILE_FUNCTION();
 
-	JPH_ASSERT(inAxis.IsNormalized(1.0e-4f));
-	JPH_ASSERT(inNormal.IsNormalized(1.0e-4f));
-	JPH_ASSERT(abs(inNormal.Dot(inAxis)) < 1.0e-4f);
+	JPH_ASSERT(inAxis.IsNormalized(decimal(1.0e-4f)));
+	JPH_ASSERT(inNormal.IsNormalized(decimal(1.0e-4f)));
+	JPH_ASSERT(abs(inNormal.Dot(inAxis)) < decimal(1.0e-4f));
 		
 	// Pies have a unique batch based on the difference between min and max angle
 	decimal delta_angle = inMaxAngle - inMinAngle;
 	GeometryRef &geometry = mPieLimits[delta_angle];
 	if (geometry == nullptr)
 	{	
-		int num_parts = (int)ceil(64.0f * delta_angle / (2.0f * JPH_PI));
+		int num_parts = (int)ceil(decimal(64.0f) * delta_angle / (decimal(2.0f) * JPH_PI));
 
-		Float3 normal = { 0, 1, 0 };
-		Float3 center = { 0, 0, 0 };
+		Float3 normal = { C0, C1, C0 };
+		Float3 center = { C0, C0, C0 };
 
 		// Allocate space for vertices
 		int num_vertices = num_parts + 2;
@@ -953,7 +953,7 @@ void DebugRenderer::DrawPie(RVec3Arg inCenter, decimal inRadius, Vec3Arg inNorma
 		Vertex *vertices = vertices_start;
 
 		// Center of circle
-		*vertices++ = { center, normal, { 0, 0 }, Color::sWhite };
+		*vertices++ = { center, normal, { C0, C0 }, Color::sWhite };
 	
 		// Outer edge of pie
 		for (int i = 0; i <= num_parts; ++i)
@@ -981,7 +981,7 @@ void DebugRenderer::DrawPie(RVec3Arg inCenter, decimal inRadius, Vec3Arg inNorma
 	}
 	
 	// Construct matrix that transforms pie into world space
-	RMat44 matrix = RMat44(Vec4(inRadius * inAxis, 0), Vec4(inRadius * inNormal, 0), Vec4(inRadius * inNormal.Cross(inAxis), 0), inCenter) * Mat44::sRotationY(-inMinAngle);
+	RMat44 matrix = RMat44(Vec4(inRadius * inAxis, C0), Vec4(inRadius * inNormal, C0), Vec4(inRadius * inNormal.Cross(inAxis), C0), inCenter) * Mat44::sRotationY(-inMinAngle);
 		
 	DrawGeometry(matrix, inColor, geometry, ECullMode::Off, inCastShadow, inDrawMode);
 }

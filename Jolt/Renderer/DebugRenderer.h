@@ -54,7 +54,7 @@ public:
 
 	/// Draw a wireframe polygon
 	template <class VERTEX_ARRAY>
-	void								DrawWirePolygon(RMat44Arg inTransform, const VERTEX_ARRAY &inVertices, ColorArg inColor, decimal inArrowSize = 0.0f) { for (typename VERTEX_ARRAY::size_type i = 0; i < inVertices.size(); ++i) DrawArrow(inTransform * inVertices[i], inTransform * inVertices[(i + 1) % inVertices.size()], inColor, inArrowSize); }
+	void								DrawWirePolygon(RMat44Arg inTransform, const VERTEX_ARRAY &inVertices, ColorArg inColor, decimal inArrowSize = decimal(0.0f)) { for (typename VERTEX_ARRAY::size_type i = 0; i < inVertices.size(); ++i) DrawArrow(inTransform * inVertices[i], inTransform * inVertices[(i + 1) % inVertices.size()], inColor, inArrowSize); }
 
 	/// Draw wireframe sphere
 	void								DrawWireSphere(RVec3Arg inCenter, decimal inRadius, ColorArg inColor, int inLevel = 3);

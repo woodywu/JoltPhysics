@@ -42,7 +42,7 @@ public:
 	/// @param inShapeScale Scale in local space of shape
 	/// @param inCenterOfMassTransform Center of mass transform for the shape
 	/// @param inCollideShapeSettings Settings
-	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. inCenterOfMassTransform.GetTranslation() since floats are most accurate near the origin
+	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. inCenterOfMassTransform.GetTranslation() since decimals are most accurate near the origin
 	/// @param ioCollector Collector that receives the hits
 	/// @param inBroadPhaseLayerFilter Filter that filters at broadphase level
 	/// @param inObjectLayerFilter Filter that filters at layer level
@@ -54,7 +54,7 @@ public:
 	/// Cast a shape and report any hits to ioCollector
 	/// @param inShapeCast The shape cast and its position and direction
 	/// @param inShapeCastSettings Settings for the shape cast
-	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. inShapeCast.mCenterOfMassStart.GetTranslation() since floats are most accurate near the origin
+	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. inShapeCast.mCenterOfMassStart.GetTranslation() since decimals are most accurate near the origin
 	/// @param ioCollector Collector that receives the hits
 	/// @param inBroadPhaseLayerFilter Filter that filters at broadphase level
 	/// @param inObjectLayerFilter Filter that filters at layer level

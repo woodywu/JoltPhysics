@@ -1599,7 +1599,7 @@ void PhysicsSystem::JobFindCCDContacts(const PhysicsUpdateContext *ioContext, Ph
 		{
 			RMat44 com = body.GetCenterOfMassTransform();
 			body.GetShape()->Draw(DebugRenderer::sInstance, com, Vec3::sReplicate(C1), Color::sGreen, false, true);
-			DebugRenderer::sInstance->DrawArrow(com.GetTranslation(), com.GetTranslation() + ccd_body.mDeltaPosition, Color::sGreen, 0.1f);
+			DebugRenderer::sInstance->DrawArrow(com.GetTranslation(), com.GetTranslation() + ccd_body.mDeltaPosition, Color::sGreen, decimal(0.1f));
 			body.GetShape()->Draw(DebugRenderer::sInstance, com.PostTranslated(ccd_body.mDeltaPosition), Vec3::sReplicate(C1), Color::sRed, false, true);
 		}
 	#endif // JPH_DEBUG_RENDERER
@@ -1940,7 +1940,7 @@ void PhysicsSystem::JobResolveCCDContacts(PhysicsUpdateContext *ioContext, Physi
 					// Solve contact constraint
 					AxisConstraintPart contact_constraint;
 					contact_constraint.CalculateConstraintProperties(ioContext->mSubStepDeltaTime, body1, r1_plus_u, body2, r2, ccd_body->mContactNormal, normal_velocity_bias);
-					contact_constraint.SolveVelocityConstraint(body1, body2, ccd_body->mContactNormal, -FLT_MAX, FLT_MAX);
+					contact_constraint.SolveVelocityConstraint(body1, body2, ccd_body->mContactNormal, FIX_MIN, FIX_MAX);
 
 					// Apply friction
 					if (ccd_body->mContactSettings.mCombinedFriction > C0)
@@ -1994,11 +1994,11 @@ void PhysicsSystem::JobResolveCCDContacts(PhysicsUpdateContext *ioContext, Physi
 						body1.GetShape()->Draw(DebugRenderer::sInstance, collision_transform_plus_slop, Vec3::sReplicate(C1), Color::sOrange, false, true);
 
 						// Draw contact normal
-						DebugRenderer::sInstance->DrawArrow(ccd_body->mContactPointOn2, ccd_body->mContactPointOn2 - ccd_body->mContactNormal, Color::sYellow, 0.1f);
+						DebugRenderer::sInstance->DrawArrow(ccd_body->mContactPointOn2, ccd_body->mContactPointOn2 - ccd_body->mContactNormal, Color::sYellow, decimal(0.1f));
 
 						// Draw post contact velocity
-						DebugRenderer::sInstance->DrawArrow(collision_transform.GetTranslation(), collision_transform.GetTranslation() + body1.GetLinearVelocity(), Color::sOrange, 0.1f);
-						DebugRenderer::sInstance->DrawArrow(collision_transform.GetTranslation(), collision_transform.GetTranslation() + body1.GetAngularVelocity(), Color::sPurple, 0.1f);
+						DebugRenderer::sInstance->DrawArrow(collision_transform.GetTranslation(), collision_transform.GetTranslation() + body1.GetLinearVelocity(), Color::sOrange, decimal(0.1f));
+						DebugRenderer::sInstance->DrawArrow(collision_transform.GetTranslation(), collision_transform.GetTranslation() + body1.GetAngularVelocity(), Color::sPurple, decimal(0.1f));
 					}
 				#endif // JPH_DEBUG_RENDERER
 				}

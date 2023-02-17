@@ -55,7 +55,7 @@ UVec4 UVec4::sLoadInt4Aligned(const uint32 *inV)
 template <const int Scale>
 UVec4 UVec4::sGatherInt4(const uint32 *inBase, UVec4Arg inOffsets)
 {
-	return Vec4::sGatherFloat4<Scale>(reinterpret_cast<const float *>(inBase), inOffsets).ReinterpretAsInt();
+	return Vec4::sGatherFloat4<Scale>(reinterpret_cast<const decimal *>(inBase), inOffsets).ReinterpretAsInt();
 }
 
 UVec4 UVec4::sMin(UVec4Arg inV1, UVec4Arg inV2)

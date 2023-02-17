@@ -40,7 +40,7 @@ void TwoBodyConstraint::DrawConstraintReferenceFrame(DebugRenderer *inRenderer) 
 {
 	RMat44 transform1 = mBody1->GetCenterOfMassTransform() * GetConstraintToBody1Matrix();
 	RMat44 transform2 = mBody2->GetCenterOfMassTransform() * GetConstraintToBody2Matrix();
-	inRenderer->DrawCoordinateSystem(transform1, 1.1f * mDrawConstraintSize);
+	inRenderer->DrawCoordinateSystem(transform1, decimal(1.1f) * mDrawConstraintSize);
 	inRenderer->DrawCoordinateSystem(transform2, mDrawConstraintSize);
 }
 

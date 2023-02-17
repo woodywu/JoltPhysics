@@ -261,7 +261,7 @@ private:
 	StepListeners				mStepListeners;
 
 	/// This is the global gravity vector
-	Vec3						mGravity = Vec3(C0, decimal(-9.81f), C0);
+	Vec3						mGravity = Vec3(C0, decimal(-decimal(9.81f)), C0);
 
 	/// Previous frame's delta time of one sub step to allow scaling previous frame's constraint impulses
 	decimal						mPreviousSubStepDeltaTime = C0;

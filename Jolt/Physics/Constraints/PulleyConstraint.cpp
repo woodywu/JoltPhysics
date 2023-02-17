@@ -89,17 +89,17 @@ PulleyConstraint::PulleyConstraint(Body &inBody1, Body &inBody2, const PulleyCon
 	}
 
 	// Calculate min/max length if it was not provided
-	float current_length = GetCurrentLength();
-	if (mMinLength < 0.0f)
+	decimal current_length = GetCurrentLength();
+	if (mMinLength < decimal(0.0f))
 		mMinLength = current_length;
-	if (mMaxLength < 0.0f)
+	if (mMaxLength < decimal(0.0f))
 		mMaxLength = current_length;
 
 	// Initialize the normals to a likely valid axis in case the fixed points overlap with the attachment points (most likely the fixed points are above both bodies)
 	mWorldSpaceNormal1 = mWorldSpaceNormal2 = -Vec3::sAxisY(); 
 }
 
-float PulleyConstraint::CalculatePositionsNormalsAndLength()
+decimal PulleyConstraint::CalculatePositionsNormalsAndLength()
 {
 	// Update world space positions (the bodies may have moved)
 	mWorldSpacePosition1 = mBody1->GetCenterOfMassTransform() * mLocalSpacePosition1;
@@ -107,13 +107,13 @@ float PulleyConstraint::CalculatePositionsNormalsAndLength()
 
 	// Calculate world space normals
 	Vec3 delta1 = Vec3(mWorldSpacePosition1 - mFixedPosition1);
-	float delta1_len = delta1.Length();
-	if (delta1_len > 0.0f)
+	decimal delta1_len = delta1.Length();
+	if (delta1_len > decimal(0.0f))
 		mWorldSpaceNormal1 = delta1 / delta1_len;
 
 	Vec3 delta2 = Vec3(mWorldSpacePosition2 - mFixedPosition2);
-	float delta2_len = delta2.Length();
-	if (delta2_len > 0.0f)
+	decimal delta2_len = delta2.Length();
+	if (delta2_len > decimal(0.0f))
 		mWorldSpaceNormal2 = delta2 / delta2_len;
 
 	// Calculate length
@@ -129,17 +129,17 @@ void PulleyConstraint::CalculateConstraintProperties()
 	mIndependentAxisConstraintPart.CalculateConstraintProperties(*mBody1, *mBody2, r1, mWorldSpaceNormal1, r2, mWorldSpaceNormal2, mRatio);
 }
 
-void PulleyConstraint::SetupVelocityConstraint(float inDeltaTime)
+void PulleyConstraint::SetupVelocityConstraint(decimal inDeltaTime)
 {
 	// Determine if the constraint is active
-	float current_length = CalculatePositionsNormalsAndLength();
+	decimal current_length = CalculatePositionsNormalsAndLength();
 	bool min_length_violation = current_length <= mMinLength;
 	bool max_length_violation = current_length >= mMaxLength;
 	if (min_length_violation || max_length_violation)
 	{
 		// Determine max lambda based on if the length is too big or small
-		mMinLambda = max_length_violation? -FLT_MAX : 0.0f;
-		mMaxLambda = min_length_violation? FLT_MAX : 0.0f;
+		mMinLambda = max_length_violation? FIX_MIN : decimal(0.0f);
+		mMaxLambda = min_length_violation? FIX_MAX : decimal(0.0f);
 
 		CalculateConstraintProperties();
 	}
@@ -147,12 +147,12 @@ void PulleyConstraint::SetupVelocityConstraint(float inDeltaTime)
 		mIndependentAxisConstraintPart.Deactivate();
 }
 
-void PulleyConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio)
+void PulleyConstraint::WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio)
 {
 	mIndependentAxisConstraintPart.WarmStart(*mBody1, *mBody2, mWorldSpaceNormal1, mWorldSpaceNormal2, mRatio, inWarmStartImpulseRatio);
 }
 
-bool PulleyConstraint::SolveVelocityConstraint(float inDeltaTime)
+bool PulleyConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 {
 	if (mIndependentAxisConstraintPart.IsActive())
 		return mIndependentAxisConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceNormal1, mWorldSpaceNormal2, mRatio, mMinLambda, mMaxLambda);
@@ -160,18 +160,18 @@ bool PulleyConstraint::SolveVelocityConstraint(float inDeltaTime)
 		return false;
 }
 
-bool PulleyConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgarte)
+bool PulleyConstraint::SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte)
 {
 	// Calculate new length (bodies may have changed)
-	float current_length = CalculatePositionsNormalsAndLength();
+	decimal current_length = CalculatePositionsNormalsAndLength();
 
-	float position_error = 0.0f;
+	decimal position_error = decimal(0.0f);
 	if (current_length < mMinLength)
 		position_error = current_length - mMinLength;
 	else if (current_length > mMaxLength)
 		position_error = current_length - mMaxLength;
 
-	if (position_error != 0.0f)
+	if (position_error != decimal(0.0f))
 	{
 		// Update constraint properties (bodies may have moved)
 		CalculateConstraintProperties();
@@ -186,7 +186,7 @@ bool PulleyConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumga
 void PulleyConstraint::DrawConstraint(DebugRenderer *inRenderer) const
 {
 	// Color according to length vs min/max length
-	float current_length = GetCurrentLength();
+	decimal current_length = GetCurrentLength();
 	Color color = Color::sGreen;
 	if (current_length < mMinLength)
 		color = Color::sYellow;

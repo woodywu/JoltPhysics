@@ -23,19 +23,19 @@ bool TriangleSplitterBinning::Split(const Range &inTriangles, Range &outLeft, Ra
 	for (uint t = inTriangles.mBegin; t < inTriangles.mEnd; ++t)
 		centroid_bounds.Encapsulate(Vec3(mCentroids[mSortedTriangleIdx[t]]));
 
-	float best_cp = FLT_MAX;
+	decimal best_cp = FIX_MAX;
 	uint best_dim = 0xffffffff;
-	float best_split = 0;
+	decimal best_split = 0;
 
 	// Bin in all dimensions
 	uint num_bins = Clamp(inTriangles.Count() / mNumTrianglesPerBin, mMinNumBins, mMaxNumBins);	
 	for (uint dim = 0; dim < 3; ++dim)
 	{
-		float bounds_min = centroid_bounds.mMin[dim];
-		float bounds_size = centroid_bounds.mMax[dim] - bounds_min;
+		decimal bounds_min = centroid_bounds.mMin[dim];
+		decimal bounds_size = centroid_bounds.mMax[dim] - bounds_min;
 
 		// Skip axis if too small
-		if (bounds_size < 1.0e-5f)
+		if (bounds_size < decimal(1.0e-5f))
 			continue;
 
 		// Initialize bins
@@ -50,7 +50,7 @@ bool TriangleSplitterBinning::Split(const Range &inTriangles, Range &outLeft, Ra
 		// Bin all triangles
 		for (uint t = inTriangles.mBegin; t < inTriangles.mEnd; ++t)
 		{
-			float centroid_pos = mCentroids[mSortedTriangleIdx[t]][dim];
+			decimal centroid_pos = mCentroids[mSortedTriangleIdx[t]][dim];
 
 			// Select bin 
 			uint bin_no = min(uint((centroid_pos - bounds_min) / bounds_size * num_bins), num_bins - 1);
@@ -91,7 +91,7 @@ bool TriangleSplitterBinning::Split(const Range &inTriangles, Range &outLeft, Ra
 		{
 			// Calculate surface area heuristic and see if it is better than the current best
 			const Bin &bin = mBins[b];
-			float cp = bin.mBoundsAccumulatedLeft.GetSurfaceArea() * bin.mNumTrianglesAccumulatedLeft + bin.mBoundsAccumulatedRight.GetSurfaceArea() * bin.mNumTrianglesAccumulatedRight;
+			decimal cp = bin.mBoundsAccumulatedLeft.GetSurfaceArea() * bin.mNumTrianglesAccumulatedLeft + bin.mBoundsAccumulatedRight.GetSurfaceArea() * bin.mNumTrianglesAccumulatedRight;
 			if (cp < best_cp)
 			{
 				best_cp = cp;

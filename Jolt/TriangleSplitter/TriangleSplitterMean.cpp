@@ -18,7 +18,7 @@ bool TriangleSplitterMean::Split(const Range &inTriangles, Range &outLeft, Range
 	Vec3 mean = Vec3::sZero();
 	for (uint t = inTriangles.mBegin; t < inTriangles.mEnd; ++t)
 		mean += Vec3(mCentroids[mSortedTriangleIdx[t]]);
-	mean *= 1.0f / inTriangles.Count();
+	mean *= decimal(1.0f) / inTriangles.Count();
 
 	// Calculate deviation
 	Vec3 deviation = Vec3::sZero();
@@ -27,11 +27,11 @@ bool TriangleSplitterMean::Split(const Range &inTriangles, Range &outLeft, Range
 		Vec3 delta = Vec3(mCentroids[mSortedTriangleIdx[t]]) - mean;
 		deviation += delta * delta;
 	}
-	deviation *= 1.0f / inTriangles.Count();
+	deviation *= decimal(1.0f) / inTriangles.Count();
 
 	// Calculate split plane
 	uint dimension = deviation.GetHighestComponentIndex();
-	float split = mean[dimension];
+	decimal split = mean[dimension];
 
 	return SplitInternal(inTriangles, dimension, split, outLeft, outRight);
 }

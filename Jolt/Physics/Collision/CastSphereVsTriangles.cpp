@@ -33,10 +33,10 @@ CastSphereVsTriangles::CastSphereVsTriangles(const ShapeCast &inShapeCast, const
 	mRadius = sphere->GetRadius() * abs(inShapeCast.mScale.GetX());
 
 	// Determine if shape is inside out or not
-	mScaleSign = ScaleHelpers::IsInsideOut(inScale)? -1.0f : 1.0f;
+	mScaleSign = ScaleHelpers::IsInsideOut(inScale)? -decimal(1.0f) : decimal(1.0f);
 }
 
-void CastSphereVsTriangles::AddHit(bool inBackFacing, const SubShapeID &inSubShapeID2, float inFraction, Vec3Arg inContactPointA, Vec3Arg inContactPointB, Vec3Arg inContactNormal)
+void CastSphereVsTriangles::AddHit(bool inBackFacing, const SubShapeID &inSubShapeID2, decimal inFraction, Vec3Arg inContactPointA, Vec3Arg inContactPointB, Vec3Arg inContactNormal)
 {
 	// Convert to world space
 	Vec3 contact_point_a = mCenterOfMassTransform2 * (mStart + inContactPointA);
@@ -52,7 +52,7 @@ void CastSphereVsTriangles::AddHit(bool inBackFacing, const SubShapeID &inSubSha
 	mCollector.AddHit(result);
 }
 
-void CastSphereVsTriangles::AddHitWithActiveEdgeDetection(Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2, bool inBackFacing, Vec3Arg inTriangleNormal, uint8 inActiveEdges, const SubShapeID &inSubShapeID2, float inFraction, Vec3Arg inContactPointA, Vec3Arg inContactPointB, Vec3Arg inContactNormal)
+void CastSphereVsTriangles::AddHitWithActiveEdgeDetection(Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2, bool inBackFacing, Vec3Arg inTriangleNormal, uint8 inActiveEdges, const SubShapeID &inSubShapeID2, decimal inFraction, Vec3Arg inContactPointA, Vec3Arg inContactPointB, Vec3Arg inContactNormal)
 {
 	// Check if we have enabled active edge detection
 	Vec3 contact_normal = inContactNormal;
@@ -72,7 +72,7 @@ void CastSphereVsTriangles::AddHitWithActiveEdgeDetection(Vec3Arg inV0, Vec3Arg 
 // This is a simplified version of the ray cylinder test from: Real Time Collision Detection - Christer Ericson
 // Chapter 5.3.7, page 194-197. Some conditions have been removed as we're not interested in hitting the caps of the cylinder.
 // Note that the ray origin is assumed to be the origin here.
-float CastSphereVsTriangles::RayCylinder(Vec3Arg inRayDirection, Vec3Arg inCylinderA, Vec3Arg inCylinderB, float inRadius) const
+decimal CastSphereVsTriangles::RayCylinder(Vec3Arg inRayDirection, Vec3Arg inCylinderA, Vec3Arg inCylinderB, decimal inRadius) const
 {
 	// Calculate cylinder axis
 	Vec3 axis = inCylinderB - inCylinderA;
@@ -81,37 +81,37 @@ float CastSphereVsTriangles::RayCylinder(Vec3Arg inRayDirection, Vec3Arg inCylin
 	Vec3 start = -inCylinderA;
 
 	// Test if segment is fully on the A side of the cylinder
-	float start_dot_axis = start.Dot(axis);
-	float direction_dot_axis = inRayDirection.Dot(axis);
-	float end_dot_axis = start_dot_axis + direction_dot_axis;
-	if (start_dot_axis < 0.0f && end_dot_axis < 0.0f) 
-		return FLT_MAX;
+	decimal start_dot_axis = start.Dot(axis);
+	decimal direction_dot_axis = inRayDirection.Dot(axis);
+	decimal end_dot_axis = start_dot_axis + direction_dot_axis;
+	if (start_dot_axis < decimal(0.0f) && end_dot_axis < decimal(0.0f)) 
+		return FIX_MAX;
 
 	// Test if segment is fully on the B side of the cylinder
-	float axis_len_sq = axis.LengthSq();
+	decimal axis_len_sq = axis.LengthSq();
 	if (start_dot_axis > axis_len_sq && end_dot_axis > axis_len_sq) 
-		return FLT_MAX;
+		return FIX_MAX;
 
 	// Calculate a, b and c, the factors for quadratic equation
 	// We're basically solving the ray: x = start + direction * t
 	// The closest point to x on the segment A B is: w = (x . axis) * axis / (axis . axis)
 	// The distance between x and w should be radius: (x - w) . (x - w) = radius^2
 	// Solving this gives the following:
-	float a = axis_len_sq * inRayDirection.LengthSq() - Square(direction_dot_axis);
-	if (abs(a) < 1.0e-6f)
-		return FLT_MAX; // Segment runs parallel to cylinder axis, stop processing, we will either hit at fraction = 0 or we'll hit a vertex
-	float b = axis_len_sq * start.Dot(inRayDirection) - direction_dot_axis * start_dot_axis; // should be multiplied by 2, instead we'll divide a and c by 2 when we solve the quadratic equation
-	float c = axis_len_sq * (start.LengthSq() - Square(inRadius)) - Square(start_dot_axis);
-	float det = Square(b) - a * c; // normally 4 * a * c but since both a and c need to be divided by 2 we lose the 4
-	if (det < 0.0f) 
-		return FLT_MAX; // No solution to quadractic equation
+	decimal a = axis_len_sq * inRayDirection.LengthSq() - Square(direction_dot_axis);
+	if (abs(a) < decimal(1.0e-6f))
+		return FIX_MAX; // Segment runs parallel to cylinder axis, stop processing, we will either hit at fraction = 0 or we'll hit a vertex
+	decimal b = axis_len_sq * start.Dot(inRayDirection) - direction_dot_axis * start_dot_axis; // should be multiplied by 2, instead we'll divide a and c by 2 when we solve the quadratic equation
+	decimal c = axis_len_sq * (start.LengthSq() - Square(inRadius)) - Square(start_dot_axis);
+	decimal det = Square(b) - a * c; // normally 4 * a * c but since both a and c need to be divided by 2 we lose the 4
+	if (det < decimal(0.0f)) 
+		return FIX_MAX; // No solution to quadractic equation
 	
 	// Solve fraction t where the ray hits the cylinder
-	float t = -(b + sqrt(det)) / a; // normally divided by 2 * a but since a should be divided by 2 we lose the 2
-	if (t < 0.0f || t > 1.0f) 
-		return FLT_MAX; // Intersection lies outside segment
-	if (start_dot_axis + t * direction_dot_axis < 0.0f || start_dot_axis + t * direction_dot_axis > axis_len_sq) 
-		return FLT_MAX; // Intersection outside the end point of the cyclinder, stop processing, we will possibly hit a vertex
+	decimal t = -(b + sqrt(det)) / a; // normally divided by 2 * a but since a should be divided by 2 we lose the 2
+	if (t < decimal(0.0f) || t > decimal(1.0f)) 
+		return FIX_MAX; // Intersection lies outside segment
+	if (start_dot_axis + t * direction_dot_axis < decimal(0.0f) || start_dot_axis + t * direction_dot_axis > axis_len_sq) 
+		return FIX_MAX; // Intersection outside the end point of the cyclinder, stop processing, we will possibly hit a vertex
 	return t;
 }
 
@@ -128,8 +128,8 @@ void CastSphereVsTriangles::Cast(Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2, uint8
 	Vec3 triangle_normal = mScaleSign * (v1 - v0).Cross(v2 - v0).Normalized();
 
 	// Backface check
-	float normal_dot_direction = triangle_normal.Dot(mDirection);
-	bool back_facing = normal_dot_direction > 0.0f;
+	decimal normal_dot_direction = triangle_normal.Dot(mDirection);
+	bool back_facing = normal_dot_direction > decimal(0.0f);
 	if (mShapeCastSettings.mBackFaceModeTriangles == EBackFaceMode::IgnoreBackFaces && back_facing)
 		return;
 
@@ -143,27 +143,27 @@ void CastSphereVsTriangles::Cast(Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2, uint8
 		// Check if the sphere intersects at the start of the cast
 		uint32 closest_feature;
 		Vec3 q = ClosestPoint::GetClosestPointOnTriangle(v0, v1, v2, closest_feature);
-		float q_len_sq = q.LengthSq();
+		decimal q_len_sq = q.LengthSq();
 		if (q_len_sq <= Square(mRadius))
 		{
 			// Yes it does, generate contacts now
-			float q_len = sqrt(q_len_sq);
-			Vec3 contact_normal = q_len > 0.0f? q / q_len : Vec3::sAxisY();
+			decimal q_len = sqrt(q_len_sq);
+			Vec3 contact_normal = q_len > decimal(0.0f)? q / q_len : Vec3::sAxisY();
 			Vec3 contact_point_a = q + contact_normal * (mRadius - q_len);
 			Vec3 contact_point_b = q;
-			AddHitWithActiveEdgeDetection(v0, v1, v2, back_facing, triangle_normal, inActiveEdges, inSubShapeID2, 0.0f, contact_point_a, contact_point_b, contact_normal);
+			AddHitWithActiveEdgeDetection(v0, v1, v2, back_facing, triangle_normal, inActiveEdges, inSubShapeID2, decimal(0.0f), contact_point_a, contact_point_b, contact_normal);
 			return;
 		}
 	}
 	else
 	{
 		// Check if cast is not parallel to the plane of the triangle
-		float abs_normal_dot_direction = abs(normal_dot_direction);
-		if (abs_normal_dot_direction > 1.0e-6f)
+		decimal abs_normal_dot_direction = abs(normal_dot_direction);
+		if (abs_normal_dot_direction > decimal(1.0e-6f))
 		{
 			// Calculate the point on the sphere that will hit the triangle's plane first and calculate a fraction where it will do so
 			Vec3 d = Sign(normal_dot_direction) * mRadius * triangle_normal;
-			float plane_intersection = (v0 - d).Dot(triangle_normal) / normal_dot_direction;
+			decimal plane_intersection = (v0 - d).Dot(triangle_normal) / normal_dot_direction;
 
 			// Check if sphere will hit in the interval that we're interested in
 			if (plane_intersection * abs_normal_dot_direction < -mRadius	// Sphere hits the plane before the sweep, cannot intersect
@@ -171,15 +171,15 @@ void CastSphereVsTriangles::Cast(Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2, uint8
 				return;
 
 			// We can only report an interior hit if we're hitting the plane during our sweep and not before
-			if (plane_intersection >= 0.0f)
+			if (plane_intersection >= decimal(0.0f))
 			{
 				// Calculate the point of contact on the plane
 				Vec3 p = d + plane_intersection * mDirection;
 
 				// Check if this is an interior point
-				float u, v, w;
+				decimal u, v, w;
 				ClosestPoint::GetBaryCentricCoordinates(v0 - p, v1 - p, v2 - p, u, v, w);
-				if (u >= 0.0f && v >= 0.0f && w >= 0.0f)
+				if (u >= decimal(0.0f) && v >= decimal(0.0f) && w >= decimal(0.0f))
 				{
 					// Interior point, we found the collision point. We don't need to check active edges.
 					AddHit(back_facing, inSubShapeID2, plane_intersection, p, p, back_facing? triangle_normal : -triangle_normal);
@@ -190,7 +190,7 @@ void CastSphereVsTriangles::Cast(Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2, uint8
 	}
 
 	// Test 3 edges
-	float fraction = RayCylinder(mDirection, v0, v1, mRadius);
+	decimal fraction = RayCylinder(mDirection, v0, v1, mRadius);
 	fraction = min(fraction, RayCylinder(mDirection, v1, v2, mRadius));
 	fraction = min(fraction, RayCylinder(mDirection, v2, v0, mRadius));
 
@@ -200,7 +200,7 @@ void CastSphereVsTriangles::Cast(Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2, uint8
 	fraction = min(fraction, RaySphere(Vec3::sZero(), mDirection, v2, mRadius));
 
 	// Check if we have a collision
-	JPH_ASSERT(fraction >= 0.0f);
+	JPH_ASSERT(fraction >= decimal(0.0f));
 	if (fraction < mCollector.GetEarlyOutFraction())
 	{
 		// Calculate the center of the sphere at the point of contact

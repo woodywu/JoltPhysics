@@ -38,26 +38,26 @@ void VehicleDifferentialSettings::RestoreBinaryState(StreamIn &inStream)
 	inStream.Read(mEngineTorqueRatio);
 }
 
-void VehicleDifferentialSettings::CalculateTorqueRatio(float inLeftAngularVelocity, float inRightAngularVelocity, float &outLeftTorqueFraction, float &outRightTorqueFraction) const
+void VehicleDifferentialSettings::CalculateTorqueRatio(decimal inLeftAngularVelocity, decimal inRightAngularVelocity, decimal &outLeftTorqueFraction, decimal &outRightTorqueFraction) const
 {
 	// Start with the default torque ratio
-	outLeftTorqueFraction = 1.0f - mLeftRightSplit;
+	outLeftTorqueFraction = decimal(1.0f) - mLeftRightSplit;
 	outRightTorqueFraction = mLeftRightSplit;
 
-	if (mLimitedSlipRatio < FLT_MAX)
+	if (mLimitedSlipRatio < FIX_MAX)
 	{
-		JPH_ASSERT(mLimitedSlipRatio > 1.0f);
+		JPH_ASSERT(mLimitedSlipRatio > decimal(1.0f));
 
 		// This is a limited slip differential, adjust torque ratios according to wheel speeds
-		float omega_l = max(1.0e-3f, abs(inLeftAngularVelocity)); // prevent div by zero by setting a minimum velocity and ignoring that the wheels may be rotating in different directions
-		float omega_r = max(1.0e-3f, abs(inRightAngularVelocity));
-		float omega_min = min(omega_l, omega_r);
-		float omega_max = max(omega_l, omega_r);
+		decimal omega_l = max(decimal(1.0e-3f), abs(inLeftAngularVelocity)); // prevent div by zero by setting a minimum velocity and ignoring that the wheels may be rotating in different directions
+		decimal omega_r = max(decimal(1.0e-3f), abs(inRightAngularVelocity));
+		decimal omega_min = min(omega_l, omega_r);
+		decimal omega_max = max(omega_l, omega_r);
 
 		// Map into a value that is 0 when the wheels are turning at an equal rate and 1 when the wheels are turning at mLimitedSlipRotationRatio
-		float alpha = min((omega_max / omega_min - 1.0f) / (mLimitedSlipRatio - 1.0f), 1.0f);
-		JPH_ASSERT(alpha >= 0.0f);
-		float one_min_alpha = 1.0f - alpha;
+		decimal alpha = min((omega_max / omega_min - decimal(1.0f)) / (mLimitedSlipRatio - decimal(1.0f)), decimal(1.0f));
+		JPH_ASSERT(alpha >= decimal(0.0f));
+		decimal one_min_alpha = decimal(1.0f) - alpha;
 
 		if (omega_l < omega_r)
 		{
@@ -74,7 +74,7 @@ void VehicleDifferentialSettings::CalculateTorqueRatio(float inLeftAngularVeloci
 	}
 
 	// Assert the values add up to 1
-	JPH_ASSERT(abs(outLeftTorqueFraction + outRightTorqueFraction - 1.0f) < 1.0e-6f);
+	JPH_ASSERT(abs(outLeftTorqueFraction + outRightTorqueFraction - decimal(1.0f)) < decimal(1.0e-6f));
 }
 
 JPH_NAMESPACE_END

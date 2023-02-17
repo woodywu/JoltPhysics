@@ -78,7 +78,7 @@ void SixDOFConstraint::UpdateRotationLimits()
 	// Make values sensible
 	for (int i = 3; i < 6; ++i)
 		if (IsFixedAxis((EAxis)i))
-			mLimitMin[i] = mLimitMax[i] = 0.0f;
+			mLimitMin[i] = mLimitMax[i] = decimal(0.0f);
 		else
 		{
 			mLimitMin[i] = max(-JPH_PI, mLimitMin[i]);
@@ -176,7 +176,7 @@ void SixDOFConstraint::SetRotationLimits(Vec3Arg inLimitMin, Vec3Arg inLimitMax)
 	UpdateRotationLimits();
 }
 
-void SixDOFConstraint::SetMaxFriction(EAxis inAxis, float inFriction)
+void SixDOFConstraint::SetMaxFriction(EAxis inAxis, decimal inFriction)
 { 
 	mMaxFriction[inAxis] = inFriction; 
 	
@@ -276,7 +276,7 @@ void SixDOFConstraint::SetTargetOrientationCS(QuatArg inOrientation)
 		mTargetOrientation = inOrientation; 
 }
 
-void SixDOFConstraint::SetupVelocityConstraint(float inDeltaTime)
+void SixDOFConstraint::SetupVelocityConstraint(decimal inDeltaTime)
 {
 	// Get body rotations
 	Quat rotation1 = mBody1->GetRotation();
@@ -318,7 +318,7 @@ void SixDOFConstraint::SetupVelocityConstraint(float inDeltaTime)
 			else if (!IsFreeAxis(axis))
 			{
 				// When constraint is limited, it is only active when outside of the allowed range
-				float d = translation_axis.Dot(u);
+				decimal d = translation_axis.Dot(u);
 				constraint_active = d <= mLimitMin[i] || d >= mLimitMax[i];
 				mDisplacement[i] = d; // Store for SolveVelocityConstraint
 			}
@@ -343,7 +343,7 @@ void SixDOFConstraint::SetupVelocityConstraint(float inDeltaTime)
 				break;
 
 			case EMotorState::Position:
-				mMotorTranslationConstraintPart[i].CalculateConstraintProperties(inDeltaTime, *mBody1, r1_plus_u, *mBody2, r2, translation_axis, 0.0f, translation_axis.Dot(u) - mTargetPosition[i], mMotorSettings[i].mFrequency, mMotorSettings[i].mDamping);
+				mMotorTranslationConstraintPart[i].CalculateConstraintProperties(inDeltaTime, *mBody1, r1_plus_u, *mBody2, r2, translation_axis, decimal(0.0f), translation_axis.Dot(u) - mTargetPosition[i], mMotorSettings[i].mFrequency, mMotorSettings[i].mDamping);
 				break;
 			}
 		}
@@ -375,7 +375,7 @@ void SixDOFConstraint::SetupVelocityConstraint(float inDeltaTime)
 				mRotationAxis[i] = ws_axis.GetColumn3(i);
 
 			// Get target orientation along the shortest path from q
-			Quat target_orientation = q.Dot(mTargetOrientation) > 0.0f? mTargetOrientation : -mTargetOrientation;
+			Quat target_orientation = q.Dot(mTargetOrientation) > decimal(0.0f)? mTargetOrientation : -mTargetOrientation;
 
 			// The definition of the constraint rotation q:
 			// R2 * ConstraintToBody2 = R1 * ConstraintToBody1 * q (1)
@@ -443,9 +443,9 @@ void SixDOFConstraint::SetupVelocityConstraint(float inDeltaTime)
 			
 			// Approximate error angles
 			// The imaginary part of a quaternion is rotation_axis * sin(angle / 2)
-			// If angle is small, sin(x) = x so angle[i] ~ 2.0f * rotation_axis[i]
+			// If angle is small, sin(x) = x so angle[i] ~ decimal(2.0f) * rotation_axis[i]
 			// We'll be making small time steps, so if the angle is not small at least the sign will be correct and we'll move in the right direction
-			Vec3 rotation_error = -2.0f * projected_diff.GetXYZ();
+			Vec3 rotation_error = -decimal(2.0f) * projected_diff.GetXYZ();
 						
 			// Setup motors
 			for (int i = 0; i < 3; ++i)
@@ -468,7 +468,7 @@ void SixDOFConstraint::SetupVelocityConstraint(float inDeltaTime)
 					break;
 
 				case EMotorState::Position:
-					mMotorRotationConstraintPart[i].CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, rotation_axis, 0.0f, rotation_error[i], mMotorSettings[axis].mFrequency, mMotorSettings[axis].mDamping);
+					mMotorRotationConstraintPart[i].CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, rotation_axis, decimal(0.0f), rotation_error[i], mMotorSettings[axis].mFrequency, mMotorSettings[axis].mDamping);
 					break;
 				}	
 			}
@@ -476,7 +476,7 @@ void SixDOFConstraint::SetupVelocityConstraint(float inDeltaTime)
 	}
 }
 
-void SixDOFConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio)
+void SixDOFConstraint::WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio)
 {
 	// Warm start translation motors
 	if (mTranslationMotorActive)
@@ -505,7 +505,7 @@ void SixDOFConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio
 				mTranslationConstraintPart[i].WarmStart(*mBody1, *mBody2, mTranslationAxis[i], inWarmStartImpulseRatio);
 }
 
-bool SixDOFConstraint::SolveVelocityConstraint(float inDeltaTime)
+bool SixDOFConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 {
 	bool impulse = false;
 	
@@ -518,7 +518,7 @@ bool SixDOFConstraint::SolveVelocityConstraint(float inDeltaTime)
 				case EMotorState::Off:
 				{
 					// Apply friction only
-					float max_lambda = mMaxFriction[i] * inDeltaTime;
+					decimal max_lambda = mMaxFriction[i] * inDeltaTime;
 					impulse |= mMotorTranslationConstraintPart[i].SolveVelocityConstraint(*mBody1, *mBody2, mTranslationAxis[i], -max_lambda, max_lambda);
 					break;
 				}
@@ -541,7 +541,7 @@ bool SixDOFConstraint::SolveVelocityConstraint(float inDeltaTime)
 				case EMotorState::Off:
 				{
 					// Apply friction only
-					float max_lambda = mMaxFriction[axis] * inDeltaTime;
+					decimal max_lambda = mMaxFriction[axis] * inDeltaTime;
 					impulse |= mMotorRotationConstraintPart[i].SolveVelocityConstraint(*mBody1, *mBody2, mRotationAxis[i], -max_lambda, max_lambda);
 					break;
 				}
@@ -569,7 +569,7 @@ bool SixDOFConstraint::SolveVelocityConstraint(float inDeltaTime)
 			{
 				// If the axis is not fixed it must be limited (or else the constraint would not be active)
 				// Calculate the min and max constraint force based on on which side we're limited
-				float limit_min = -FLT_MAX, limit_max = FLT_MAX;
+				decimal limit_min = FIX_MIN, limit_max = FIX_MAX;
 				if (!IsFixedAxis(EAxis(EAxis::TranslationX + i)))
 				{
 					JPH_ASSERT(!IsFreeAxis(EAxis(EAxis::TranslationX + i)));
@@ -585,7 +585,7 @@ bool SixDOFConstraint::SolveVelocityConstraint(float inDeltaTime)
 	return impulse;
 }
 
-bool SixDOFConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgarte)
+bool SixDOFConstraint::SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte)
 {
 	bool impulse = false;
 
@@ -641,20 +641,20 @@ bool SixDOFConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumga
 			}
 
 			// Determine position error
-			float error = 0.0f;
+			decimal error = decimal(0.0f);
 			EAxis axis(EAxis(EAxis::TranslationX + i));
 			if (IsFixedAxis(axis))
 				error = u.Dot(translation_axis);
 			else if (!IsFreeAxis(axis))
 			{
-				float displacement = u.Dot(translation_axis);
+				decimal displacement = u.Dot(translation_axis);
 				if (displacement <= mLimitMin[axis])
 					error = displacement - mLimitMin[axis];
 				else if (displacement >= mLimitMax[axis])
 					error = displacement - mLimitMax[axis];
 			}
 
-			if (error != 0.0f)
+			if (error != decimal(0.0f))
 			{
 				// Setup axis constraint part and solve it
 				mTranslationConstraintPart[i].CalculateConstraintProperties(inDeltaTime, *mBody1, r1_plus_u, *mBody2, r2, translation_axis);
@@ -701,7 +701,7 @@ void SixDOFConstraint::DrawConstraint(DebugRenderer *inRenderer) const
 		if (mMotorState[EAxis::RotationX + i] == EMotorState::Velocity)
 			target_angular_velocity.SetComponent(i, mTargetAngularVelocity[i]);
 	if (target_angular_velocity != Vec3::sZero())
-		inRenderer->DrawArrow(position1, position1 + rotation2 * target_angular_velocity, Color::sRed, 0.1f);
+		inRenderer->DrawArrow(position1, position1 + rotation2 * target_angular_velocity, Color::sRed, decimal(0.1f));
 }
 
 void SixDOFConstraint::DrawConstraintLimits(DebugRenderer *inRenderer) const

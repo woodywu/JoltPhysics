@@ -18,7 +18,7 @@ TriangleSplitterMorton::TriangleSplitterMorton(const VertexList &inVertices, con
 		bounds.Encapsulate(Vec3(mCentroids[t]));
 
 	// Make sure box is not degenerate
-	bounds.EnsureMinimalEdgeLength(1.0e-5f);
+	bounds.EnsureMinimalEdgeLength(decimal(1.0e-5f));
 
 	// Calculate morton codes
 	mMortonCodes.resize(inTriangles.size());

@@ -88,7 +88,7 @@ ConeConstraint::ConeConstraint(Body &inBody1, Body &inBody2, const ConeConstrain
 	}
 }
 
-void ConeConstraint::CalculateRotationConstraintProperties(float inDeltaTime, Mat44Arg inRotation1, Mat44Arg inRotation2)
+void ConeConstraint::CalculateRotationConstraintProperties(decimal inDeltaTime, Mat44Arg inRotation1, Mat44Arg inRotation2)
 {
 	// Rotation is along the cross product of both twist axis
 	Vec3 twist1 = inRotation1.Multiply3x3(mLocalSpaceTwistAxis1);
@@ -102,8 +102,8 @@ void ConeConstraint::CalculateRotationConstraintProperties(float inDeltaTime, Ma
 		Vec3 rot_axis = twist2.Cross(twist1);
 
 		// If we can't find a rotation axis because the twist is too small, we'll use last frame's rotation axis
-		float len = rot_axis.Length();
-		if (len > 0.0f)
+		decimal len = rot_axis.Length();
+		if (len > decimal(0.0f))
 			mWorldSpaceRotationAxis = rot_axis / len;
 
 		mAngleConstraintPart.CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, mWorldSpaceRotationAxis);		
@@ -112,7 +112,7 @@ void ConeConstraint::CalculateRotationConstraintProperties(float inDeltaTime, Ma
 		mAngleConstraintPart.Deactivate();
 }
 
-void ConeConstraint::SetupVelocityConstraint(float inDeltaTime)
+void ConeConstraint::SetupVelocityConstraint(decimal inDeltaTime)
 {
 	Mat44 rotation1 = Mat44::sRotation(mBody1->GetRotation());
 	Mat44 rotation2 = Mat44::sRotation(mBody2->GetRotation());
@@ -120,25 +120,25 @@ void ConeConstraint::SetupVelocityConstraint(float inDeltaTime)
 	CalculateRotationConstraintProperties(inDeltaTime, rotation1, rotation2);
 }
 
-void ConeConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio)
+void ConeConstraint::WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio)
 {
 	// Warm starting: Apply previous frame impulse
 	mPointConstraintPart.WarmStart(*mBody1, *mBody2, inWarmStartImpulseRatio);
 	mAngleConstraintPart.WarmStart(*mBody1, *mBody2, inWarmStartImpulseRatio);
 }
 
-bool ConeConstraint::SolveVelocityConstraint(float inDeltaTime)
+bool ConeConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 {
 	bool pos = mPointConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2);
 
 	bool rot = false;
 	if (mAngleConstraintPart.IsActive())
-		rot = mAngleConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceRotationAxis, 0, FLT_MAX);
+		rot = mAngleConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2, mWorldSpaceRotationAxis, 0, FIX_MAX);
 
 	return pos || rot;
 }
 
-bool ConeConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgarte)
+bool ConeConstraint::SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte)
 {
 	mPointConstraintPart.CalculateConstraintProperties(*mBody1, Mat44::sRotation(mBody1->GetRotation()), mLocalSpacePosition1, *mBody2, Mat44::sRotation(mBody2->GetRotation()), mLocalSpacePosition2);
 	bool pos = mPointConstraintPart.SolvePositionConstraint(*mBody1, *mBody2, inBaumgarte);
@@ -161,8 +161,8 @@ void ConeConstraint::DrawConstraint(DebugRenderer *inRenderer) const
 	RVec3 p2 = transform2 * mLocalSpacePosition2;
 
 	// Draw constraint
-	inRenderer->DrawMarker(p1, Color::sRed, 0.1f);
-	inRenderer->DrawMarker(p2, Color::sGreen, 0.1f);
+	inRenderer->DrawMarker(p1, Color::sRed, decimal(0.1f));
+	inRenderer->DrawMarker(p2, Color::sGreen, decimal(0.1f));
 
 	// Draw twist axis
 	inRenderer->DrawLine(p1, p1 + mDrawConstraintSize * transform1.Multiply3x3(mLocalSpaceTwistAxis1), Color::sRed);

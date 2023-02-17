@@ -64,7 +64,7 @@ public:
 	// See: CollectorType::AddHit
 	virtual void		AddHit(const ResultType &inResult) override
 	{
-		float early_out = inResult.GetEarlyOutFraction();
+		decimal early_out = inResult.GetEarlyOutFraction();
 		if (!mHadHit || early_out < mHit.GetEarlyOutFraction())
 		{
 			// Update early out fraction

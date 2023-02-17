@@ -27,12 +27,12 @@ public:
 	virtual				~PathConstraintPath() override = default;
 
 	/// Gets the max fraction along the path. I.e. sort of the length of the path.
-	virtual float		GetPathMaxFraction() const = 0;
+	virtual decimal		GetPathMaxFraction() const = 0;
 
 	/// Get the globally closest point on the curve (Could be slow!)
 	/// @param inPosition Position to find closest point for
 	/// @return Fraction of closest point along the path
-	virtual float		GetClosestPoint(Vec3Arg inPosition) const = 0;
+	virtual decimal		GetClosestPoint(Vec3Arg inPosition) const = 0;
 
 	/// Given the fraction along the path, get the point, tangent and normal.
 	/// @param inFraction Fraction along the path [0, GetPathMaxFraction()].
@@ -40,7 +40,7 @@ public:
 	/// @param outPathTangent Returns the tangent to the path at outPathPosition (the vector that follows the direction of the path)
 	/// @param outPathNormal Return the normal to the path at outPathPosition (a vector that's perpendicular to outPathTangent)
 	/// @param outPathBinormal Returns the binormal to the path at outPathPosition (a vector so that normal cross tangent = binormal)
-	virtual void		GetPointOnPath(float inFraction, Vec3 &outPathPosition, Vec3 &outPathTangent, Vec3 &outPathNormal, Vec3 &outPathBinormal) const = 0;
+	virtual void		GetPointOnPath(decimal inFraction, Vec3 &outPathPosition, Vec3 &outPathTangent, Vec3 &outPathNormal, Vec3 &outPathBinormal) const = 0;
 
 	/// If the path is looping or not. If a path is looping, the first and last point are automatically connected to eachother. They should not be the same points.
 	void				SetIsLooping(bool inIsLooping)						{ mIsLooping = inIsLooping; }

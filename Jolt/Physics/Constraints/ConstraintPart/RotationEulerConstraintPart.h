@@ -148,18 +148,18 @@ public:
 	/// Deactivate this constraint
 	inline void					Deactivate()
 	{
-		mEffectiveMass(3, 3) = 0.0f;
+		mEffectiveMass(3, 3) = decimal(0.0f);
 		mTotalLambda = Vec3::sZero();
 	}
 
 	/// Check if constraint is active
 	inline bool					IsActive() const
 	{
-		return mEffectiveMass(3, 3) != 0.0f;
+		return mEffectiveMass(3, 3) != decimal(0.0f);
 	}
 
 	/// Must be called from the WarmStartVelocityConstraint call to apply the previous frame's impulses
-	inline void					WarmStart(Body &ioBody1, Body &ioBody2, float inWarmStartImpulseRatio)
+	inline void					WarmStart(Body &ioBody1, Body &ioBody2, decimal inWarmStartImpulseRatio)
 	{
 		mTotalLambda *= inWarmStartImpulseRatio;
 		ApplyVelocityStep(ioBody1, ioBody2, mTotalLambda);
@@ -177,7 +177,7 @@ public:
 	}
 	
 	/// Iteratively update the position constraint. Makes sure C(...) = 0.
-	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, QuatArg inInvInitialOrientation, float inBaumgarte) const
+	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, QuatArg inInvInitialOrientation, decimal inBaumgarte) const
 	{
 		// Calculate difference in rotation
 		//
@@ -205,7 +205,7 @@ public:
 		// theta = rotation angle
 		// 
 		// If we assume theta is small (error is small) then sin(x) = x so an approximation of the error angles is:
-		Vec3 error = 2.0f * diff.EnsureWPositive().GetXYZ();
+		Vec3 error = decimal(2.0f) * diff.EnsureWPositive().GetXYZ();
 		if (error != Vec3::sZero())
 		{
 			// Calculate lagrange multiplier (lambda) for Baumgarte stabilization:

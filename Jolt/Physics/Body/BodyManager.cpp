@@ -840,18 +840,18 @@ void BodyManager::Draw(const DrawSettings &inDrawSettings, const PhysicsSettings
 
 			// Draw center of mass transform
 			if (inDrawSettings.mDrawCenterOfMassTransform)
-				inRenderer->DrawCoordinateSystem(body->GetCenterOfMassTransform(), 0.2f);
+				inRenderer->DrawCoordinateSystem(body->GetCenterOfMassTransform(), decimal(0.2f));
 
 			// Draw world transform
 			if (inDrawSettings.mDrawWorldTransform)
-				inRenderer->DrawCoordinateSystem(body->GetWorldTransform(), 0.2f);
+				inRenderer->DrawCoordinateSystem(body->GetWorldTransform(), decimal(0.2f));
 
 			// Draw world space linear and angular velocity
 			if (inDrawSettings.mDrawVelocity)
 			{
 				RVec3 pos = body->GetCenterOfMassPosition();
-				inRenderer->DrawArrow(pos, pos + body->GetLinearVelocity(), Color::sGreen, 0.1f);
-				inRenderer->DrawArrow(pos, pos + body->GetAngularVelocity(), Color::sRed, 0.1f);
+				inRenderer->DrawArrow(pos, pos + body->GetLinearVelocity(), Color::sGreen, decimal(0.1f));
+				inRenderer->DrawArrow(pos, pos + body->GetAngularVelocity(), Color::sRed, decimal(0.1f));
 			}
 
 			if (inDrawSettings.mDrawMassAndInertia && body->IsDynamic())
@@ -871,7 +871,7 @@ void BodyManager::Draw(const DrawSettings &inDrawSettings, const PhysicsSettings
 				inRenderer->DrawWireBox(body->GetCenterOfMassTransform() * Mat44::sRotation(mp->GetInertiaRotation()), AABox(-C0P5 * box_size, C0P5 * box_size), Color::sOrange);
 
 				// Draw mass
-				inRenderer->DrawText3D(body->GetCenterOfMassPosition(), StringFormat("%.2f", (double)mass), Color::sOrange, 0.2f);
+				inRenderer->DrawText3D(body->GetCenterOfMassPosition(), StringFormat("%.2f", (double)mass), Color::sOrange, decimal(0.2f));
 			}
 
 			if (inDrawSettings.mDrawSleepStats && body->IsDynamic() && body->IsActive())
@@ -880,7 +880,7 @@ void BodyManager::Draw(const DrawSettings &inDrawSettings, const PhysicsSettings
 				String text = StringFormat("t: %.1f", (double)body->mMotionProperties->mSleepTestTimer);
 				uint8 g = uint8(Clamp(decimal(255.0f) * body->mMotionProperties->mSleepTestTimer / inPhysicsSettings.mTimeBeforeSleep, C0, decimal(255.0f)));
 				Color sleep_color = Color(0, 255 - g, g);
-				inRenderer->DrawText3D(body->GetCenterOfMassPosition(), text, sleep_color, 0.2f);
+				inRenderer->DrawText3D(body->GetCenterOfMassPosition(), text, sleep_color, decimal(0.2f));
 				for (int i = 0; i < 3; ++i)
 					inRenderer->DrawWireSphere(JPH_IF_DOUBLE_PRECISION(body->mMotionProperties->GetSleepTestOffset() +) body->mMotionProperties->mSleepTestSpheres[i].GetCenter(), body->mMotionProperties->mSleepTestSpheres[i].GetRadius(), sleep_color);
 			}

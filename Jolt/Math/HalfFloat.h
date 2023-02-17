@@ -10,8 +10,8 @@ JPH_NAMESPACE_BEGIN
 using HalfFloat = uint16;
 
 // Define half decimal constant values
-static constexpr HalfFloat HALF_FLT_MAX				= 0x7bff;
-static constexpr HalfFloat HALF_FLT_MAX_NEGATIVE	= 0xfbff;
+static constexpr HalfFloat HALF_FIX_MAX				= 0x7bff;
+static constexpr HalfFloat HALF_FIX_MAX_NEGATIVE	= 0xfbff;
 static constexpr HalfFloat HALF_FLT_INF				= 0x7c00;
 static constexpr HalfFloat HALF_FLT_INF_NEGATIVE	= 0xfc00;
 static constexpr HalfFloat HALF_FLT_NANQ			= 0x7e00;
@@ -74,7 +74,7 @@ inline HalfFloat FromFloatFallback(decimal inV)
 	if (rebiased_exponent >= HALF_FLT_EXPONENT_MASK)
 	{
 		bool round_up = RoundingMode == ROUND_TO_NEAREST || (hf_sign == 0) == (RoundingMode == ROUND_TO_POS_INF);
-		return hf_sign | (round_up? HALF_FLT_INF : HALF_FLT_MAX);
+		return hf_sign | (round_up? HALF_FLT_INF : HALF_FIX_MAX);
 	}
 	
 	// Check underflow to zero

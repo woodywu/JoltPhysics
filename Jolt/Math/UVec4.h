@@ -116,7 +116,7 @@ public:
 	/// Replicate the W component to all components
 	JPH_INLINE UVec4			SplatW() const;
 
-	/// Convert each component from an int to a float
+	/// Convert each component from an int to a decimal
 	JPH_INLINE Vec4				ToFloat() const;
 
 	/// Reinterpret UVec4 as a Vec4 (doesn't change the bits)
@@ -176,7 +176,7 @@ public:
 	/// Takes byte 12 .. 15 and expands them to X, Y, Z and W
 	JPH_INLINE UVec4			Expand4Byte12() const;
 
-	/// Shift vector components by 4 - Count floats to the left, so if Count = 1 the resulting vector is (W, 0, 0, 0), when Count = 3 the resulting vector is (Y, Z, W, 0)
+	/// Shift vector components by 4 - Count decimals to the left, so if Count = 1 the resulting vector is (W, 0, 0, 0), when Count = 3 the resulting vector is (Y, Z, W, 0)
 	JPH_INLINE UVec4			ShiftComponents4Minus(int inCount) const;
 
 	/// To String

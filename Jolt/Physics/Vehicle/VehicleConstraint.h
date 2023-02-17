@@ -151,7 +151,7 @@ private:
 	// Prevent vehicle from toppling over
 	decimal						mCosMaxPitchRollAngle;						///< Cos of the max pitch/roll angle
 	decimal						mCosPitchRollAngle;							///< Cos of the current pitch/roll angle
-	Vec3						mPitchRollRotationAxis { 0, 1, 0 };			///< Current axis along which to apply torque to prevent the car from toppling over
+	Vec3						mPitchRollRotationAxis { C0, C1, C0 };			///< Current axis along which to apply torque to prevent the car from toppling over
 	AngleConstraintPart			mPitchRollPart;								///< Constraint part that prevents the car from toppling over
 
 	// Interfaces

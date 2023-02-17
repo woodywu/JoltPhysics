@@ -18,7 +18,7 @@ public:
 	/// Returns true if there was an IO failure
 	virtual bool		IsFailed() const = 0;
 
-	/// Write a primitive (e.g. float, int, etc.) to the binary stream
+	/// Write a primitive (e.g. decimal, int, etc.) to the binary stream
 	template <class T>
 	void				Write(const T &inT)
 	{
@@ -49,7 +49,7 @@ public:
 	/// Write a Vec3 (don't write W)
 	void				Write(const Vec3 &inVec)
 	{
-		WriteBytes(&inVec, 3 * sizeof(float));
+		WriteBytes(&inVec, 3 * sizeof(decimal));
 	}
 };
 

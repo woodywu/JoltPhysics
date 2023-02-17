@@ -41,10 +41,10 @@ void TriangleGrouperClosestCentroid::Group(const VertexList &inVertices, const I
 
 		// Find triangle with centroid with lowest X coordinate
 		Array<uint>::iterator lowest_iter = batch_begin;
-		float lowest_val = centroids[*lowest_iter].GetX();
+		decimal lowest_val = centroids[*lowest_iter].GetX();
 		for (Array<uint>::iterator other = batch_begin; other != triangles_end; ++other)
 		{
-			float val = centroids[*other].GetX();
+			decimal val = centroids[*other].GetX();
 			if (val < lowest_val)
 			{
 				lowest_iter = other;
@@ -64,11 +64,11 @@ void TriangleGrouperClosestCentroid::Group(const VertexList &inVertices, const I
 			});
 			
 		// Loop over remaining triangles
-		float furthest_dist = (centroids[*batch_end_minus_1] - first_centroid).LengthSq();
+		decimal furthest_dist = (centroids[*batch_end_minus_1] - first_centroid).LengthSq();
 		for (Array<uint>::iterator other = batch_end; other != triangles_end; ++other)
 		{
 			// Check if this triangle is closer than the furthest triangle in the batch
-			float dist = (centroids[*other] - first_centroid).LengthSq();
+			decimal dist = (centroids[*other] - first_centroid).LengthSq();
 			if (dist < furthest_dist)
 			{
 				// Replace furthest triangle
@@ -77,7 +77,7 @@ void TriangleGrouperClosestCentroid::Group(const VertexList &inVertices, const I
 
 				// Find first element that is bigger than this one and insert the current item before it
 				Array<uint>::iterator upper = std::upper_bound(batch_begin_plus_1, batch_end, dist, 
-					[&first_centroid, &centroids](float inLHS, uint inRHS)
+					[&first_centroid, &centroids](decimal inLHS, uint inRHS)
 					{
 						return inLHS < (centroids[inRHS] - first_centroid).LengthSq(); 
 					});

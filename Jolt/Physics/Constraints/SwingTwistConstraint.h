@@ -41,15 +41,15 @@ public:
 	Vec3						mPlaneAxis2 = Vec3::sAxisY();
 	
 	///@name Swing rotation limits
-	float						mNormalHalfConeAngle = 0.0f;								///< See image. Angle in radians.
-	float						mPlaneHalfConeAngle = 0.0f;									///< See image. Angle in radians.
+	decimal						mNormalHalfConeAngle = decimal(0.0f);								///< See image. Angle in radians.
+	decimal						mPlaneHalfConeAngle = decimal(0.0f);									///< See image. Angle in radians.
 
 	///@name Twist rotation limits
-	float						mTwistMinAngle = 0.0f;										///< See image. Angle in radians. Rotation will be limited between [mLimitsMin, mLimitsMax] where mLimitsMin \f$\in [-\pi, 0]\f$ and mLimitsMax \f$\in [0, \pi]\f$
-	float						mTwistMaxAngle = 0.0f;										///< See image. Angle in radians.
+	decimal						mTwistMinAngle = decimal(0.0f);										///< See image. Angle in radians. Rotation will be limited between [mLimitsMin, mLimitsMax] where mLimitsMin \f$\in [-\pi, 0]\f$ and mLimitsMax \f$\in [0, \pi]\f$
+	decimal						mTwistMaxAngle = decimal(0.0f);										///< See image. Angle in radians.
 
 	///@name Friction
-	float						mMaxFrictionTorque = 0.0f;									///< Maximum amount of torque (N m) to apply as friction when the constraint is not powered by a motor
+	decimal						mMaxFrictionTorque = decimal(0.0f);									///< Maximum amount of torque (N m) to apply as friction when the constraint is not powered by a motor
 
 	///@name In case the constraint is powered, this determines the motor settings around the swing and twist axis
 	MotorSettings				mSwingMotorSettings;
@@ -73,10 +73,10 @@ public:
 
 	///@name Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override									{ return EConstraintSubType::SwingTwist; }
-	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
-	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
-	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;
-	virtual bool				SolvePositionConstraint(float inDeltaTime, float inBaumgarte) override;
+	virtual void				SetupVelocityConstraint(decimal inDeltaTime) override;
+	virtual void				WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio) override;
+	virtual bool				SolveVelocityConstraint(decimal inDeltaTime) override;
+	virtual bool				SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte) override;
 #ifdef JPH_DEBUG_RENDERER
 	virtual void				DrawConstraint(DebugRenderer *inRenderer) const override;
 	virtual void				DrawConstraintLimits(DebugRenderer *inRenderer) const override;
@@ -96,14 +96,14 @@ public:
 	inline Quat		 			GetConstraintToBody2() const								{ return mConstraintToBody2; }
 
 	///@name Constraint limits
-	inline float				GetNormalHalfConeAngle() const								{ return mNormalHalfConeAngle; }
-	inline void					SetNormalHalfConeAngle(float inAngle)						{ mNormalHalfConeAngle = inAngle; UpdateLimits(); }
-	inline float				GetPlaneHalfConeAngle() const								{ return mPlaneHalfConeAngle; }
-	inline void					SetPlaneHalfConeAngle(float inAngle)						{ mPlaneHalfConeAngle = inAngle; UpdateLimits(); }
-	inline float				GetTwistMinAngle() const									{ return mTwistMinAngle; }
-	inline void					SetTwistMinAngle(float inAngle)								{ mTwistMinAngle = inAngle; UpdateLimits(); }
-	inline float				GetTwistMaxAngle() const									{ return mTwistMaxAngle; }
-	inline void					SetTwistMaxAngle(float inAngle)								{ mTwistMaxAngle = inAngle; UpdateLimits(); }
+	inline decimal				GetNormalHalfConeAngle() const								{ return mNormalHalfConeAngle; }
+	inline void					SetNormalHalfConeAngle(decimal inAngle)						{ mNormalHalfConeAngle = inAngle; UpdateLimits(); }
+	inline decimal				GetPlaneHalfConeAngle() const								{ return mPlaneHalfConeAngle; }
+	inline void					SetPlaneHalfConeAngle(decimal inAngle)						{ mPlaneHalfConeAngle = inAngle; UpdateLimits(); }
+	inline decimal				GetTwistMinAngle() const									{ return mTwistMinAngle; }
+	inline void					SetTwistMinAngle(decimal inAngle)								{ mTwistMinAngle = inAngle; UpdateLimits(); }
+	inline decimal				GetTwistMaxAngle() const									{ return mTwistMaxAngle; }
+	inline void					SetTwistMaxAngle(decimal inAngle)								{ mTwistMaxAngle = inAngle; UpdateLimits(); }
 
 	///@name Motor settings
 	const MotorSettings &		GetSwingMotorSettings() const								{ return mSwingMotorSettings; }
@@ -112,8 +112,8 @@ public:
 	MotorSettings &				GetTwistMotorSettings()										{ return mTwistMotorSettings; }
 
 	///@name Friction control
-	void						SetMaxFrictionTorque(float inFrictionTorque)				{ mMaxFrictionTorque = inFrictionTorque; }
-	float						GetMaxFrictionTorque() const								{ return mMaxFrictionTorque; }
+	void						SetMaxFrictionTorque(decimal inFrictionTorque)				{ mMaxFrictionTorque = inFrictionTorque; }
+	decimal						GetMaxFrictionTorque() const								{ return mMaxFrictionTorque; }
 
 	///@name Motor controls
 
@@ -141,9 +141,9 @@ public:
 
 	///@name Get Lagrange multiplier from last physics update (relates to how much force/torque was applied to satisfy the constraint)
 	inline Vec3		 			GetTotalLambdaPosition() const								{ return mPointConstraintPart.GetTotalLambda(); }
-	inline float				GetTotalLambdaTwist() const									{ return mSwingTwistConstraintPart.GetTotalTwistLambda(); }
-	inline float				GetTotalLambdaSwingY() const								{ return mSwingTwistConstraintPart.GetTotalSwingYLambda(); }
-	inline float				GetTotalLambdaSwingZ() const								{ return mSwingTwistConstraintPart.GetTotalSwingZLambda(); }
+	inline decimal				GetTotalLambdaTwist() const									{ return mSwingTwistConstraintPart.GetTotalTwistLambda(); }
+	inline decimal				GetTotalLambdaSwingY() const								{ return mSwingTwistConstraintPart.GetTotalSwingYLambda(); }
+	inline decimal				GetTotalLambdaSwingZ() const								{ return mSwingTwistConstraintPart.GetTotalSwingZLambda(); }
 	inline Vec3					GetTotalLambdaMotor() const									{ return Vec3(mMotorConstraintPart[0].GetTotalLambda(), mMotorConstraintPart[1].GetTotalLambda(), mMotorConstraintPart[2].GetTotalLambda()); }
 
 private:
@@ -161,13 +161,13 @@ private:
 	Quat						mConstraintToBody2;
 
 	// Limits
-	float						mNormalHalfConeAngle;
-	float						mPlaneHalfConeAngle;
-	float						mTwistMinAngle;
-	float						mTwistMaxAngle;
+	decimal						mNormalHalfConeAngle;
+	decimal						mPlaneHalfConeAngle;
+	decimal						mTwistMinAngle;
+	decimal						mTwistMaxAngle;
 
 	// Friction
-	float						mMaxFrictionTorque;
+	decimal						mMaxFrictionTorque;
 
 	// Motor controls
 	MotorSettings				mSwingMotorSettings;

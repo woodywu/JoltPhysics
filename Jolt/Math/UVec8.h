@@ -50,7 +50,7 @@ public:
 	/// Logical and
 	static JPH_INLINE UVec8		sAnd(UVec8Arg inV1, UVec8Arg inV2);
 
-	/// Get float component by index
+	/// Get decimal component by index
 	JPH_INLINE uint32			operator [] (uint inCoordinate) const				{ JPH_ASSERT(inCoordinate < 8); return mU32[inCoordinate]; }
 	JPH_INLINE uint32 &			operator [] (uint inCoordinate)						{ JPH_ASSERT(inCoordinate < 8); return mU32[inCoordinate]; }
 	
@@ -70,7 +70,7 @@ public:
 	/// Fetch the higher 128 bit from a 256 bit variable
 	JPH_INLINE UVec4			UpperVec4() const;
 
-	/// Converts int to float
+	/// Converts int to decimal
 	JPH_INLINE Vec8				ToFloat() const;
 	
 	/// Shift all components by Count bits to the left (filling with zeros from the left)

@@ -25,38 +25,38 @@ class SwingTwistConstraintPart
 {
 public:
 	/// Set limits for this constraint (see description above for parameters)
-	void						SetLimits(float inTwistMinAngle, float inTwistMaxAngle, float inSwingYHalfAngle, float inSwingZHalfAngle)
+	void						SetLimits(decimal inTwistMinAngle, decimal inTwistMaxAngle, decimal inSwingYHalfAngle, decimal inSwingZHalfAngle)
 	{
-		constexpr float cLockedAngle = DegreesToRadians(0.5f);
-		constexpr float cFreeAngle = DegreesToRadians(179.5f);
+		constexpr decimal cLockedAngle = DegreesToRadians(decimal(0.5f));
+		constexpr decimal cFreeAngle = DegreesToRadians(decimal(179.5f));
 
 		// Assume sane input
-		JPH_ASSERT(inTwistMinAngle <= 0.0f && inTwistMinAngle >= -JPH_PI);
-		JPH_ASSERT(inTwistMaxAngle >= 0.0f && inTwistMaxAngle <= JPH_PI);
-		JPH_ASSERT(inSwingYHalfAngle >= 0.0f && inSwingYHalfAngle <= JPH_PI);
-		JPH_ASSERT(inSwingZHalfAngle >= 0.0f && inSwingZHalfAngle <= JPH_PI);
+		JPH_ASSERT(inTwistMinAngle <= decimal(0.0f) && inTwistMinAngle >= -JPH_PI);
+		JPH_ASSERT(inTwistMaxAngle >= decimal(0.0f) && inTwistMaxAngle <= JPH_PI);
+		JPH_ASSERT(inSwingYHalfAngle >= decimal(0.0f) && inSwingYHalfAngle <= JPH_PI);
+		JPH_ASSERT(inSwingZHalfAngle >= decimal(0.0f) && inSwingZHalfAngle <= JPH_PI);
 
 		// Calculate the sine and cosine of the half angles
 		Vec4 s, c;
-		(0.5f * Vec4(inTwistMinAngle, inTwistMaxAngle, inSwingYHalfAngle, inSwingZHalfAngle)).SinCos(s, c);
+		(decimal(0.5f) * Vec4(inTwistMinAngle, inTwistMaxAngle, inSwingYHalfAngle, inSwingZHalfAngle)).SinCos(s, c);
 
 		// Store axis flags which are used at runtime to quickly decided which contraints to apply
 		mRotationFlags = 0;
 		if (inTwistMinAngle > -cLockedAngle && inTwistMaxAngle < cLockedAngle)
 		{
 			mRotationFlags |= TwistXLocked;
-			mSinTwistHalfMinAngle = 0.0f;
-			mSinTwistHalfMaxAngle = 0.0f;
-			mCosTwistHalfMinAngle = 1.0f;
-			mCosTwistHalfMaxAngle = 1.0f;
+			mSinTwistHalfMinAngle = decimal(0.0f);
+			mSinTwistHalfMaxAngle = decimal(0.0f);
+			mCosTwistHalfMinAngle = decimal(1.0f);
+			mCosTwistHalfMaxAngle = decimal(1.0f);
 		}
 		else if (inTwistMinAngle < -cFreeAngle && inTwistMaxAngle > cFreeAngle)
 		{
 			mRotationFlags |= TwistXFree;
-			mSinTwistHalfMinAngle = -1.0f;
-			mSinTwistHalfMaxAngle = 1.0f;
-			mCosTwistHalfMinAngle = 0.0f;
-			mCosTwistHalfMaxAngle = 0.0f;
+			mSinTwistHalfMinAngle = -decimal(1.0f);
+			mSinTwistHalfMaxAngle = decimal(1.0f);
+			mCosTwistHalfMinAngle = decimal(0.0f);
+			mCosTwistHalfMaxAngle = decimal(0.0f);
 		}
 		else
 		{
@@ -69,12 +69,12 @@ public:
 		if (inSwingYHalfAngle < cLockedAngle)
 		{
 			mRotationFlags |= SwingYLocked;
-			mSinSwingYQuarterAngle = 0.0f;
+			mSinSwingYQuarterAngle = decimal(0.0f);
 		}
 		else if (inSwingYHalfAngle > cFreeAngle)
 		{
 			mRotationFlags |= SwingYFree;
-			mSinSwingYQuarterAngle = 1.0f;
+			mSinSwingYQuarterAngle = decimal(1.0f);
 		}
 		else
 		{
@@ -84,12 +84,12 @@ public:
 		if (inSwingZHalfAngle < cLockedAngle)
 		{
 			mRotationFlags |= SwingZLocked;
-			mSinSwingZQuarterAngle = 0.0f;
+			mSinSwingZQuarterAngle = decimal(0.0f);
 		}
 		else if (inSwingZHalfAngle > cFreeAngle)
 		{
 			mRotationFlags |= SwingZFree;
-			mSinSwingZQuarterAngle = 1.0f;
+			mSinSwingZQuarterAngle = decimal(1.0f);
 		}
 		else
 		{
@@ -106,22 +106,22 @@ public:
 		outSwingZClamped = false;
 
 		// Check that swing and twist quaternions don't contain rotations around the wrong axis
-		JPH_ASSERT(ioSwing.GetX() == 0.0f);
-		JPH_ASSERT(ioTwist.GetY() == 0.0f);
-		JPH_ASSERT(ioTwist.GetZ() == 0.0f);
+		JPH_ASSERT(ioSwing.GetX() == decimal(0.0f));
+		JPH_ASSERT(ioTwist.GetY() == decimal(0.0f));
+		JPH_ASSERT(ioTwist.GetZ() == decimal(0.0f));
 
 		// Ensure quaternions have w > 0
-		bool negate_swing = ioSwing.GetW() < 0.0f;
+		bool negate_swing = ioSwing.GetW() < decimal(0.0f);
 		if (negate_swing)
 			ioSwing = -ioSwing;
-		bool negate_twist = ioTwist.GetW() < 0.0f;
+		bool negate_twist = ioTwist.GetW() < decimal(0.0f);
 		if (negate_twist)
 			ioTwist = -ioTwist;
 
 		if (mRotationFlags & TwistXLocked)
 		{
 			// Twist axis is locked, clamp whenever twist is not identity
-			if (ioTwist.GetX() != 0.0f)
+			if (ioTwist.GetX() != decimal(0.0f))
 			{
 				ioTwist = Quat::sIdentity();
 				outTwistClamped = true;
@@ -130,9 +130,9 @@ public:
 		else if ((mRotationFlags & TwistXFree) == 0)
 		{
 			// Twist axis has limit, clamp whenever out of range
-			float delta_min = mSinTwistHalfMinAngle - ioTwist.GetX();
-			float delta_max = ioTwist.GetX() - mSinTwistHalfMaxAngle;
-			if (delta_min > 0.0f || delta_max > 0.0f)
+			decimal delta_min = mSinTwistHalfMinAngle - ioTwist.GetX();
+			decimal delta_max = ioTwist.GetX() - mSinTwistHalfMaxAngle;
+			if (delta_min > decimal(0.0f) || delta_max > decimal(0.0f))
 			{
 				// We're outside of the limits, get actual delta to min/max range
 				// Note that a twist of -1 and 1 represent the same angle, so if the difference is bigger than 1, the shortest angle is the other way around (2 - difference)
@@ -140,9 +140,9 @@ public:
 				// when working with extreme values the calculation is off and e.g. when the limit is between 0 and 180 a value of approx -60 will clamp
 				// to 180 rather than 0 (you'd expect anything > -90 to go to 0).
 				delta_min = abs(delta_min);
-				if (delta_min > 1.0f) delta_min = 2.0f - delta_min;
+				if (delta_min > decimal(1.0f)) delta_min = decimal(2.0f) - delta_min;
 				delta_max = abs(delta_max);
-				if (delta_max > 1.0f) delta_max = 2.0f - delta_max;
+				if (delta_max > decimal(1.0f)) delta_max = decimal(2.0f) - delta_max;
 
 				// Pick the twist that corresponds to the smallest delta
 				if (delta_min < delta_max)
@@ -159,29 +159,29 @@ public:
 			if (mRotationFlags & SwingZLocked)
 			{
 				// Both swing Y and Z are disabled, no degrees of freedom in swing
-				outSwingYClamped = ioSwing.GetY() != 0.0f;
-				outSwingZClamped = ioSwing.GetZ() != 0.0f;
+				outSwingYClamped = ioSwing.GetY() != decimal(0.0f);
+				outSwingZClamped = ioSwing.GetZ() != decimal(0.0f);
 				if (outSwingYClamped || outSwingZClamped)
 					ioSwing = Quat::sIdentity();
 			}
 			else
 			{
 				// Swing Y angle disabled, only 1 degree of freedom in swing
-				float z = Clamp(ioSwing.GetZ(), -mSinSwingZQuarterAngle, mSinSwingZQuarterAngle);
-				outSwingYClamped = ioSwing.GetY() != 0.0f;
+				decimal z = Clamp(ioSwing.GetZ(), -mSinSwingZQuarterAngle, mSinSwingZQuarterAngle);
+				outSwingYClamped = ioSwing.GetY() != decimal(0.0f);
 				outSwingZClamped = z != ioSwing.GetZ();
 				if (outSwingYClamped || outSwingZClamped)
-					ioSwing = Quat(0, 0, z, sqrt(1.0f - Square(z)));
+					ioSwing = Quat(0, 0, z, sqrt(decimal(1.0f) - Square(z)));
 			}
 		}
 		else if (mRotationFlags & SwingZLocked)
 		{
 			// Swing Z angle disabled, only 1 degree of freedom in swing
-			float y = Clamp(ioSwing.GetY(), -mSinSwingYQuarterAngle, mSinSwingYQuarterAngle);
+			decimal y = Clamp(ioSwing.GetY(), -mSinSwingYQuarterAngle, mSinSwingYQuarterAngle);
 			outSwingYClamped = y != ioSwing.GetY();
-			outSwingZClamped = ioSwing.GetZ() != 0.0f;
+			outSwingZClamped = ioSwing.GetZ() != decimal(0.0f);
 			if (outSwingYClamped || outSwingZClamped)
-				ioSwing = Quat(0, y, 0, sqrt(1.0f - Square(y)));
+				ioSwing = Quat(0, y, 0, sqrt(decimal(1.0f) - Square(y)));
 		}
 		else
 		{
@@ -191,7 +191,7 @@ public:
 			if (!ellipse.IsInside(point))
 			{
 				Float2 closest = ellipse.GetClosestPoint(point);
-				ioSwing = Quat(0, closest.x, closest.y, sqrt(max(0.0f, 1.0f - Square(closest.x) - Square(closest.y))));
+				ioSwing = Quat(0, closest.x, closest.y, sqrt(max(decimal(0.0f), decimal(1.0f) - Square(closest.x) - Square(closest.y))));
 				outSwingYClamped = true;
 				outSwingZClamped = true;
 			}
@@ -213,7 +213,7 @@ public:
 	/// @param inBody2 The second body that this constraint is attached to
 	/// @param inConstraintRotation The current rotation of the constraint in constraint space
 	/// @param inConstraintToWorld Rotates from constraint space into world space
-	inline void					CalculateConstraintProperties(float inDeltaTime, const Body &inBody1, const Body &inBody2, QuatArg inConstraintRotation, QuatArg inConstraintToWorld)
+	inline void					CalculateConstraintProperties(decimal inDeltaTime, const Body &inBody1, const Body &inBody2, QuatArg inConstraintRotation, QuatArg inConstraintToWorld)
 	{
 		// Decompose into swing and twist
 		Quat q_swing, q_twist;
@@ -242,8 +242,8 @@ public:
 				mSwingLimitYConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceSwingLimitYRotationAxis);
 				if (swing_z_clamped)
 				{
-					if (Sign(q_swing.GetW()) * q_swing.GetZ() < 0.0f)
-						mWorldSpaceSwingLimitZRotationAxis = -mWorldSpaceSwingLimitZRotationAxis; // Flip axis if angle is negative because the impulse limit is going to be between [-FLT_MAX, 0]
+					if (Sign(q_swing.GetW()) * q_swing.GetZ() < decimal(0.0f))
+						mWorldSpaceSwingLimitZRotationAxis = -mWorldSpaceSwingLimitZRotationAxis; // Flip axis if angle is negative because the impulse limit is going to be between [FIX_MIN, 0]
 					mSwingLimitZConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceSwingLimitZRotationAxis);
 				}
 				else
@@ -259,8 +259,8 @@ public:
 
 			if (swing_y_clamped)
 			{
-				if (Sign(q_swing.GetW()) * q_swing.GetY() < 0.0f)
-					mWorldSpaceSwingLimitYRotationAxis = -mWorldSpaceSwingLimitYRotationAxis; // Flip axis if angle is negative because the impulse limit is going to be between [-FLT_MAX, 0]
+				if (Sign(q_swing.GetW()) * q_swing.GetY() < decimal(0.0f))
+					mWorldSpaceSwingLimitYRotationAxis = -mWorldSpaceSwingLimitYRotationAxis; // Flip axis if angle is negative because the impulse limit is going to be between [FIX_MIN, 0]
 				mSwingLimitYConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceSwingLimitYRotationAxis);
 			}
 			else
@@ -276,8 +276,8 @@ public:
 				Vec3 current = (inConstraintToWorld * q_swing).RotateAxisX();
 				Vec3 desired = (inConstraintToWorld * q_clamped_swing).RotateAxisX();
 				mWorldSpaceSwingLimitYRotationAxis = desired.Cross(current);
-				float len = mWorldSpaceSwingLimitYRotationAxis.Length();
-				if (len != 0.0f)
+				decimal len = mWorldSpaceSwingLimitYRotationAxis.Length();
+				if (len != decimal(0.0f))
 				{
 					mWorldSpaceSwingLimitYRotationAxis /= len;
 					mSwingLimitYConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceSwingLimitYRotationAxis);
@@ -308,8 +308,8 @@ public:
 			if (twist_clamped)
 			{
 				mWorldSpaceTwistLimitRotationAxis = (inConstraintToWorld * q_swing).RotateAxisX();				
-				if (Sign(q_twist.GetW()) * q_twist.GetX() < 0.0f)
-					mWorldSpaceTwistLimitRotationAxis = -mWorldSpaceTwistLimitRotationAxis; // Flip axis if angle is negative because the impulse limit is going to be between [-FLT_MAX, 0]
+				if (Sign(q_twist.GetW()) * q_twist.GetX() < decimal(0.0f))
+					mWorldSpaceTwistLimitRotationAxis = -mWorldSpaceTwistLimitRotationAxis; // Flip axis if angle is negative because the impulse limit is going to be between [FIX_MIN, 0]
 				mTwistLimitConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceTwistLimitRotationAxis);
 			}
 			else
@@ -337,7 +337,7 @@ public:
 	}
 
 	/// Must be called from the WarmStartVelocityConstraint call to apply the previous frame's impulses
-	inline void					WarmStart(Body &ioBody1, Body &ioBody2, float inWarmStartImpulseRatio)
+	inline void					WarmStart(Body &ioBody1, Body &ioBody2, decimal inWarmStartImpulseRatio)
 	{
 		mSwingLimitYConstraintPart.WarmStart(ioBody1, ioBody2, inWarmStartImpulseRatio);
 		mSwingLimitZConstraintPart.WarmStart(ioBody1, ioBody2, inWarmStartImpulseRatio);
@@ -351,14 +351,14 @@ public:
 
 		// Solve swing constraint
 		if (mSwingLimitYConstraintPart.IsActive())
-			impulse |= mSwingLimitYConstraintPart.SolveVelocityConstraint(ioBody1, ioBody2, mWorldSpaceSwingLimitYRotationAxis, -FLT_MAX, (mRotationFlags & SwingYLocked)? FLT_MAX : 0.0f);
+			impulse |= mSwingLimitYConstraintPart.SolveVelocityConstraint(ioBody1, ioBody2, mWorldSpaceSwingLimitYRotationAxis, FIX_MIN, (mRotationFlags & SwingYLocked)? FIX_MAX : decimal(0.0f));
 
 		if (mSwingLimitZConstraintPart.IsActive())
-			impulse |= mSwingLimitZConstraintPart.SolveVelocityConstraint(ioBody1, ioBody2, mWorldSpaceSwingLimitZRotationAxis, -FLT_MAX, (mRotationFlags & SwingZLocked)? FLT_MAX : 0.0f);
+			impulse |= mSwingLimitZConstraintPart.SolveVelocityConstraint(ioBody1, ioBody2, mWorldSpaceSwingLimitZRotationAxis, FIX_MIN, (mRotationFlags & SwingZLocked)? FIX_MAX : decimal(0.0f));
 
 		// Solve twist constraint
 		if (mTwistLimitConstraintPart.IsActive())
-			impulse |= mTwistLimitConstraintPart.SolveVelocityConstraint(ioBody1, ioBody2, mWorldSpaceTwistLimitRotationAxis, -FLT_MAX, (mRotationFlags & TwistXLocked)? FLT_MAX : 0.0f);
+			impulse |= mTwistLimitConstraintPart.SolveVelocityConstraint(ioBody1, ioBody2, mWorldSpaceTwistLimitRotationAxis, FIX_MIN, (mRotationFlags & TwistXLocked)? FIX_MAX : decimal(0.0f));
 
 		return impulse;
 	}
@@ -369,7 +369,7 @@ public:
 	/// @param inConstraintRotation The current rotation of the constraint in constraint space
 	/// @param inConstraintToBody1 , inConstraintToBody2 Rotates from constraint space to body 1/2 space
 	/// @param inBaumgarte Baumgarte constant (fraction of the error to correct)
-	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, QuatArg inConstraintRotation, QuatArg inConstraintToBody1, QuatArg inConstraintToBody2, float inBaumgarte) const
+	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, QuatArg inConstraintRotation, QuatArg inConstraintToBody1, QuatArg inConstraintToBody2, decimal inBaumgarte) const
 	{
 		Quat q_swing, q_twist;
 		inConstraintRotation.GetSwingTwist(q_swing, q_twist);
@@ -390,18 +390,18 @@ public:
 	}
 
 	/// Return lagrange multiplier for swing
-	inline float				GetTotalSwingYLambda() const
+	inline decimal				GetTotalSwingYLambda() const
 	{
 		return mSwingLimitYConstraintPart.GetTotalLambda();
 	}
 
-	inline float				GetTotalSwingZLambda() const
+	inline decimal				GetTotalSwingZLambda() const
 	{
 		return mSwingLimitZConstraintPart.GetTotalLambda();
 	}
 
 	/// Return lagrange multiplier for twist
-	inline float				GetTotalTwistLambda() const
+	inline decimal				GetTotalTwistLambda() const
 	{
 		return mTwistLimitConstraintPart.GetTotalLambda();
 	}
@@ -442,12 +442,12 @@ private:
 	uint8						mRotationFlags;
 
 	// Constants
-	float						mSinTwistHalfMinAngle;
-	float						mSinTwistHalfMaxAngle;
-	float						mCosTwistHalfMinAngle;
-	float						mCosTwistHalfMaxAngle;
-	float						mSinSwingYQuarterAngle;
-	float						mSinSwingZQuarterAngle;
+	decimal						mSinTwistHalfMinAngle;
+	decimal						mSinTwistHalfMaxAngle;
+	decimal						mCosTwistHalfMinAngle;
+	decimal						mCosTwistHalfMaxAngle;
+	decimal						mSinSwingYQuarterAngle;
+	decimal						mSinSwingZQuarterAngle;
 
 	// RUN TIME PROPERTIES FOLLOW
 

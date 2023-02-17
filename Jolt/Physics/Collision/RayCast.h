@@ -27,7 +27,7 @@ struct RayCastT
 	}
 
 	/// Get point with fraction inFraction on ray (0 = start of ray, 1 = end of ray)
-	inline Vec					GetPointOnRay(float inFraction) const
+	inline Vec					GetPointOnRay(decimal inFraction) const
 	{
 		return mOrigin + inFraction * mDirection;
 	}

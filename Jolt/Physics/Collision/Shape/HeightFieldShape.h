@@ -54,8 +54,8 @@ public:
 	virtual ShapeResult				Create() const override;
 
 	/// Determine the minimal and maximal value of mHeightSamples (will ignore cNoCollisionValue)
-	/// @param outMinValue The minimal value fo mHeightSamples or FLT_MAX if no samples have collision
-	/// @param outMaxValue The maximal value fo mHeightSamples or -FLT_MAX if no samples have collision
+	/// @param outMinValue The minimal value fo mHeightSamples or FIX_MAX if no samples have collision
+	/// @param outMaxValue The maximal value fo mHeightSamples or FIX_MIN if no samples have collision
 	/// @param outQuantizationScale (value - outMinValue) * outQuantizationScale quantizes a height sample to 16 bits
 	void							DetermineMinAndMaxSample(decimal &outMinValue, decimal &outMaxValue, decimal &outQuantizationScale) const;
 

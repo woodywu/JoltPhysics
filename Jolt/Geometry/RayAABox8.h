@@ -8,13 +8,13 @@
 
 JPH_NAMESPACE_BEGIN
 
-/// Intersect 8 AABBs with ray, returns minimal distance along ray or FLT_MAX if no hit
+/// Intersect 8 AABBs with ray, returns minimal distance along ray or FIX_MAX if no hit
 /// Note: Can return negative value if ray starts in box
 JPH_INLINE Vec8 RayAABox8(Vec3Arg inOrigin, const RayInvDirection &inInvDirection, Vec8Arg inBoundsMinX, Vec8Arg inBoundsMinY, Vec8Arg inBoundsMinZ, Vec8Arg inBoundsMaxX, Vec8Arg inBoundsMaxY, Vec8Arg inBoundsMaxZ)
 {
 	// Constants
-	Vec8 flt_min = Vec8::sReplicate(-FLT_MAX);
-	Vec8 flt_max = Vec8::sReplicate(FLT_MAX);
+	Vec8 flt_min = Vec8::sReplicate(FIX_MIN);
+	Vec8 flt_max = Vec8::sReplicate(FIX_MAX);
 
 	// Origin
 	Vec8 originx = Vec8::sSplatX(Vec4(inOrigin));
@@ -54,17 +54,17 @@ JPH_INLINE Vec8 RayAABox8(Vec3Arg inOrigin, const RayInvDirection &inInvDirectio
 	// t_max.xyz = minimum(t_max.x, t_max.y, t_max.z);
 	Vec8 t_max = Vec8::sMin(Vec8::sMin(t_maxx, t_maxy), t_maxz);
 
-	// if (t_min > t_max) return FLT_MAX;
+	// if (t_min > t_max) return FIX_MAX;
 	UVec8 no_intersection = Vec8::sGreater(t_min, t_max);
 
-	// if (t_max < 0.0f) return FLT_MAX;
+	// if (t_max < 0.0f) return FIX_MAX;
 	no_intersection = UVec8::sOr(no_intersection, Vec8::sLess(t_max, Vec8::sZero()));
 
 	// if bounds are invalid return FLOAT_MAX;
 	UVec8 bounds_invalid = UVec8::sOr(UVec8::sOr(Vec8::sGreater(inBoundsMinX, inBoundsMaxX), Vec8::sGreater(inBoundsMinY, inBoundsMaxY)), Vec8::sGreater(inBoundsMinZ, inBoundsMaxZ));
 	no_intersection = UVec8::sOr(no_intersection, bounds_invalid);
 
-	// if (inInvDirection.mIsParallel && !(Min <= inOrigin && inOrigin <= Max)) return FLT_MAX; else return t_min;
+	// if (inInvDirection.mIsParallel && !(Min <= inOrigin && inOrigin <= Max)) return FIX_MAX; else return t_min;
 	UVec8 no_parallel_overlapx = UVec8::sAnd(parallelx, UVec8::sOr(Vec8::sLess(originx, inBoundsMinX), Vec8::sGreater(originx, inBoundsMaxX)));
 	UVec8 no_parallel_overlapy = UVec8::sAnd(parallely, UVec8::sOr(Vec8::sLess(originy, inBoundsMinY), Vec8::sGreater(originy, inBoundsMaxY)));
 	UVec8 no_parallel_overlapz = UVec8::sAnd(parallelz, UVec8::sOr(Vec8::sLess(originz, inBoundsMinZ), Vec8::sGreater(originz, inBoundsMaxZ)));

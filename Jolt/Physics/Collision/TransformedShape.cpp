@@ -101,10 +101,10 @@ void TransformedShape::CastShape(const RShapeCast &inShapeCast, const ShapeCastS
 		ioCollector.SetContext(this);
 		inShapeFilter.mBodyID2 = mBodyID;
 
-		// Get the shape cast relative to the base offset and convert it to floats
+		// Get the shape cast relative to the base offset and convert it to decimals
 		ShapeCast shape_cast(inShapeCast.PostTranslated(-inBaseOffset));
 
-		// Get center of mass of object we're casting against relative to the base offset and convert it to floats
+		// Get center of mass of object we're casting against relative to the base offset and convert it to decimals
 		Mat44 center_of_mass_transform2 = GetCenterOfMassTransform().PostTranslated(-inBaseOffset).ToMat44();
 
 		SubShapeIDCreator sub_shape_id1, sub_shape_id2(mSubShapeIDCreator);
@@ -145,7 +145,7 @@ void TransformedShape::CollectTransformedShapes(const AABox &inBox, TransformedS
 		// Set the context on the collector
 		ioCollector.SetContext(this);
 
-		// Wrap the collector so we can add the center of mass precision, we do this to avoid losing precision because CollectTransformedShapes uses single precision floats
+		// Wrap the collector so we can add the center of mass precision, we do this to avoid losing precision because CollectTransformedShapes uses single precision decimals
 		MyCollector collector(ioCollector, mShapePositionCOM);
 
 		// Take box to local space for the shape

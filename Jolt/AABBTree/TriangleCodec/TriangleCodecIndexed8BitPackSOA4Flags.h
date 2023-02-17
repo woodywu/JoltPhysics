@@ -192,7 +192,7 @@ public:
 
 			// Compress vertices
 			VertexData *vertices = ioBuffer.Allocate<VertexData>(mVertices.size());
-			Vec3 compress_scale = Vec3::sReplicate(decimal((float)COMPONENT_MASK)) / Vec3::sMax(bounds.GetSize(), Vec3::sReplicate(decimal(1.0e-20f)));
+			Vec3 compress_scale = Vec3::sReplicate(decimal((decimal)COMPONENT_MASK)) / Vec3::sMax(bounds.GetSize(), Vec3::sReplicate(decimal(1.0e-20f)));
 			for (uint32 v : mVertices)
 			{
 				UVec4 c = ((Vec3(inVertices[v]) - bounds.mMin) * compress_scale + Vec3::sReplicate(C0P5)).ToInt();
@@ -206,7 +206,7 @@ public:
 
 			// Store decompression information
 			bounds.mMin.StoreFloat3(&ioHeader->mOffset);
-			(bounds.GetSize() / Vec3::sReplicate(decimal((float)COMPONENT_MASK))).StoreFloat3(&ioHeader->mScale);
+			(bounds.GetSize() / Vec3::sReplicate(decimal((decimal)COMPONENT_MASK))).StoreFloat3(&ioHeader->mScale);
 		}
 
 	private:

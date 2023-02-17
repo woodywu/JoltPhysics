@@ -24,7 +24,7 @@ public:
 	/// Create box from 2 points
 	static AABox	sFromTwoPoints(Vec3Arg inP1, Vec3Arg inP2)			{ return AABox(Vec3::sMin(inP1, inP2), Vec3::sMax(inP1, inP2)); }
 
-	/// Get bounding box of size 2 * FLT_MAX
+	/// Get bounding box of size 2 * FIX_MAX
 	static AABox	sBiggest()
 	{
 		return AABox(Vec3::sReplicate(numeric_limits<decimal>::min()), Vec3::sReplicate(numeric_limits<decimal>::max()));

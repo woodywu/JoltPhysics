@@ -5,7 +5,7 @@
 
 JPH_NAMESPACE_BEGIN
 #ifndef JPH_PLATFORM_DOXYGEN // Somehow Doxygen gets confused and thinks the parameters to CalculateSpringProperties belong to this macro
-JPH_MSVC_SUPPRESS_WARNING(4723) // potential divide by 0 - caused by line: outEffectiveMass = 1.0f / inInvEffectiveMass, note that JPH_NAMESPACE_BEGIN already pushes the warning state
+JPH_MSVC_SUPPRESS_WARNING(4723) // potential divide by 0 - caused by line: outEffectiveMass = decimal(1.0f) / inInvEffectiveMass, note that JPH_NAMESPACE_BEGIN already pushes the warning state
 #endif // !JPH_PLATFORM_DOXYGEN
 
 /// Class used in other constraint parts to calculate the required bias factor in the lagrange multiplier for creating springs
@@ -21,19 +21,19 @@ public:
 	///	@param inFrequency Oscillation frequency (Hz). Set to zero if you don't want to drive the constraint to zero with a spring.
 	///	@param inDamping Damping factor (0 = no damping, 1 = critical damping). Set to zero if you don't want to drive the constraint to zero with a spring.
 	/// @param outEffectiveMass On return, this contains the new effective mass K^-1
-	inline void					CalculateSpringProperties(float inDeltaTime, float inInvEffectiveMass, float inBias, float inC, float inFrequency, float inDamping, float &outEffectiveMass)
+	inline void					CalculateSpringProperties(decimal inDeltaTime, decimal inInvEffectiveMass, decimal inBias, decimal inC, decimal inFrequency, decimal inDamping, decimal &outEffectiveMass)
 	{
-		outEffectiveMass = 1.0f / inInvEffectiveMass;
+		outEffectiveMass = decimal(1.0f) / inInvEffectiveMass;
 
 		// Soft constraints as per: Soft Contraints: Reinventing The Spring - Erin Catto - GDC 2011
-		if (inFrequency > 0.0f)
+		if (inFrequency > decimal(0.0f))
 		{
 			// Calculate angular frequency
-			float omega = 2.0f * JPH_PI * inFrequency;
+			decimal omega = decimal(2.0f) * JPH_PI * inFrequency;
 
 			// Calculate spring constant k and drag constant c (page 45)
-			float k = outEffectiveMass * Square(omega);
-			float c = 2.0f * outEffectiveMass * inDamping * omega;
+			decimal k = outEffectiveMass * Square(omega);
+			decimal c = decimal(2.0f) * outEffectiveMass * inDamping * omega;
 
 			// Note that the calculation of beta and gamma below are based on the solution of an implicit Euler integration scheme
 			// This scheme is unconditionally stable but has built in damping, so even when you set the damping ratio to 0 there will still
@@ -42,7 +42,7 @@ public:
 			// Calculate softness (gamma in the slides)
 			// See page 34 and note that the gamma needs to be divided by delta time since we're working with impulses rather than forces:
 			// softness = 1 / (dt * (c + dt * k))
-			mSoftness = 1.0f / (inDeltaTime * (c + inDeltaTime * k));
+			mSoftness = decimal(1.0f) / (inDeltaTime * (c + inDeltaTime * k));
 
 			// Calculate bias factor (baumgarte stabilization):
 			// beta = dt * k / (c + dt * k) = dt * k^2 * softness
@@ -78,11 +78,11 @@ public:
 			// K = J * M^-1 * J^T + softness 
 			// 
 			// So our new effective mass is K^-1 
-			outEffectiveMass = 1.0f / (inInvEffectiveMass + mSoftness);
+			outEffectiveMass = decimal(1.0f) / (inInvEffectiveMass + mSoftness);
 		}
 		else
 		{
-			mSoftness = 0.0f;
+			mSoftness = decimal(0.0f);
 			mBias = inBias;
 		}
 	}
@@ -90,11 +90,11 @@ public:
 	/// Returns if this spring is active
 	inline bool					IsActive() const
 	{
-		return mSoftness != 0.0f;
+		return mSoftness != decimal(0.0f);
 	}
 
 	/// Get total bias b, including supplied bias and bias for spring: lambda = J v + b
-	inline float				GetBias(float inTotalLambda) const
+	inline decimal				GetBias(decimal inTotalLambda) const
 	{
 		// Remainder of post by Erin Catto: http://www.bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=4&t=1354
 		//
@@ -122,8 +122,8 @@ public:
 	}
 	
 private:
-	float						mBias  = 0.0f;
-	float						mSoftness  = 0.0f;
+	decimal						mBias  = decimal(0.0f);
+	decimal						mSoftness  = decimal(0.0f);
 };
 
 JPH_NAMESPACE_END

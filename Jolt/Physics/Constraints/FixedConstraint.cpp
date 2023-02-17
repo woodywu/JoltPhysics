@@ -106,7 +106,7 @@ FixedConstraint::FixedConstraint(Body &inBody1, Body &inBody2, const FixedConstr
 	}
 }
 
-void FixedConstraint::SetupVelocityConstraint(float inDeltaTime)
+void FixedConstraint::SetupVelocityConstraint(decimal inDeltaTime)
 {
 	// Calculate constraint values that don't change when the bodies don't change position
 	Mat44 rotation1 = Mat44::sRotation(mBody1->GetRotation());
@@ -115,14 +115,14 @@ void FixedConstraint::SetupVelocityConstraint(float inDeltaTime)
 	mPointConstraintPart.CalculateConstraintProperties(*mBody1, rotation1, mLocalSpacePosition1, *mBody2, rotation2, mLocalSpacePosition2);
 }
 
-void FixedConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio)
+void FixedConstraint::WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio)
 {
 	// Warm starting: Apply previous frame impulse
 	mRotationConstraintPart.WarmStart(*mBody1, *mBody2, inWarmStartImpulseRatio);
 	mPointConstraintPart.WarmStart(*mBody1, *mBody2, inWarmStartImpulseRatio);
 }
 
-bool FixedConstraint::SolveVelocityConstraint(float inDeltaTime)
+bool FixedConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 {
 	// Solve rotation constraint
 	bool rot = mRotationConstraintPart.SolveVelocityConstraint(*mBody1, *mBody2);
@@ -133,7 +133,7 @@ bool FixedConstraint::SolveVelocityConstraint(float inDeltaTime)
 	return rot || pos;
 }
 
-bool FixedConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgarte)
+bool FixedConstraint::SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte)
 {
 	// Solve rotation constraint
 	mRotationConstraintPart.CalculateConstraintProperties(*mBody1, Mat44::sRotation(mBody1->GetRotation()), *mBody2, Mat44::sRotation(mBody2->GetRotation()));

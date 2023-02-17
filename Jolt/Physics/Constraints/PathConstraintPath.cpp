@@ -31,23 +31,23 @@ static inline void sTransformPathPoint(RMat44Arg inTransform, Vec3Arg inPosition
 static inline void sDrawPathSegment(DebugRenderer *inRenderer, RVec3Arg inPrevPosition, RVec3Arg inPosition, Vec3Arg inNormal, Vec3Arg inBinormal)
 {
 	inRenderer->DrawLine(inPrevPosition, inPosition, Color::sWhite);
-	inRenderer->DrawArrow(inPosition, inPosition + 0.1f * inNormal, Color::sRed, 0.02f);
-	inRenderer->DrawArrow(inPosition, inPosition + 0.1f * inBinormal, Color::sGreen, 0.02f);
+	inRenderer->DrawArrow(inPosition, inPosition + decimal(0.1f) * inNormal, Color::sRed, decimal(0.02f));
+	inRenderer->DrawArrow(inPosition, inPosition + decimal(0.1f) * inBinormal, Color::sGreen, decimal(0.02f));
 }
 
 void PathConstraintPath::DrawPath(DebugRenderer *inRenderer, RMat44Arg inBaseTransform) const
 {
 	// Calculate first point
 	Vec3 lfirst_pos, first_tangent, first_normal, first_binormal;
-	GetPointOnPath(0.0f, lfirst_pos, first_tangent, first_normal, first_binormal);
+	GetPointOnPath(decimal(0.0f), lfirst_pos, first_tangent, first_normal, first_binormal);
 	RVec3 first_pos;
 	sTransformPathPoint(inBaseTransform, lfirst_pos, first_pos, first_normal, first_binormal);
 
-	float t_max = GetPathMaxFraction();
+	decimal t_max = GetPathMaxFraction();
 
 	// Draw the segments
 	RVec3 prev_pos = first_pos;
-	for (float t = 0.1f; t < t_max; t += 0.1f)
+	for (decimal t = decimal(0.1f); t < t_max; t += decimal(0.1f))
 	{
 		Vec3 lpos, tangent, normal, binormal;
 		GetPointOnPath(t, lpos, tangent, normal, binormal);

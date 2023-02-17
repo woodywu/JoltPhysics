@@ -13,7 +13,7 @@
 
 JPH_NAMESPACE_BEGIN
 
-bool VehicleCollisionTesterRay::Collide(PhysicsSystem &inPhysicsSystem, uint inWheelIndex, RVec3Arg inOrigin, Vec3Arg inDirection, float inSuspensionMaxLength, const BodyID &inVehicleBodyID, Body *&outBody, SubShapeID &outSubShapeID, RVec3 &outContactPosition, Vec3 &outContactNormal, float &outSuspensionLength) const
+bool VehicleCollisionTesterRay::Collide(PhysicsSystem &inPhysicsSystem, uint inWheelIndex, RVec3Arg inOrigin, Vec3Arg inDirection, decimal inSuspensionMaxLength, const BodyID &inVehicleBodyID, Body *&outBody, SubShapeID &outSubShapeID, RVec3 &outContactPosition, Vec3 &outContactNormal, decimal &outSuspensionLength) const
 {
 	DefaultBroadPhaseLayerFilter broadphase_layer_filter = inPhysicsSystem.GetDefaultBroadPhaseLayerFilter(mObjectLayer);
 	DefaultObjectLayerFilter object_layer_filter = inPhysicsSystem.GetDefaultLayerFilter(mObjectLayer);
@@ -24,7 +24,7 @@ bool VehicleCollisionTesterRay::Collide(PhysicsSystem &inPhysicsSystem, uint inW
 	class MyCollector : public CastRayCollector
 	{
 	public:
-							MyCollector(PhysicsSystem &inPhysicsSystem, const RRayCast &inRay, Vec3Arg inUpDirection, float inCosMaxSlopeAngle) : 
+							MyCollector(PhysicsSystem &inPhysicsSystem, const RRayCast &inRay, Vec3Arg inUpDirection, decimal inCosMaxSlopeAngle) : 
 			mPhysicsSystem(inPhysicsSystem),
 			mRay(inRay),
 			mUpDirection(inUpDirection),
@@ -66,7 +66,7 @@ bool VehicleCollisionTesterRay::Collide(PhysicsSystem &inPhysicsSystem, uint inW
 		PhysicsSystem &		mPhysicsSystem;
 		RRayCast			mRay;
 		Vec3				mUpDirection;
-		float				mCosMaxSlopeAngle;
+		decimal				mCosMaxSlopeAngle;
 
 		// Resulting closest collision
 		const Body *		mBody = nullptr;
@@ -91,7 +91,7 @@ bool VehicleCollisionTesterRay::Collide(PhysicsSystem &inPhysicsSystem, uint inW
 	return true;
 }
 
-bool VehicleCollisionTesterCastSphere::Collide(PhysicsSystem &inPhysicsSystem, uint inWheelIndex, RVec3Arg inOrigin, Vec3Arg inDirection, float inSuspensionMaxLength, const BodyID &inVehicleBodyID, Body *&outBody, SubShapeID &outSubShapeID, RVec3 &outContactPosition, Vec3 &outContactNormal, float &outSuspensionLength) const
+bool VehicleCollisionTesterCastSphere::Collide(PhysicsSystem &inPhysicsSystem, uint inWheelIndex, RVec3Arg inOrigin, Vec3Arg inDirection, decimal inSuspensionMaxLength, const BodyID &inVehicleBodyID, Body *&outBody, SubShapeID &outSubShapeID, RVec3 &outContactPosition, Vec3 &outContactNormal, decimal &outSuspensionLength) const
 {
 	DefaultBroadPhaseLayerFilter broadphase_layer_filter = inPhysicsSystem.GetDefaultBroadPhaseLayerFilter(mObjectLayer);
 	DefaultObjectLayerFilter object_layer_filter = inPhysicsSystem.GetDefaultLayerFilter(mObjectLayer);
@@ -100,8 +100,8 @@ bool VehicleCollisionTesterCastSphere::Collide(PhysicsSystem &inPhysicsSystem, u
 	SphereShape sphere(mRadius);
 	sphere.SetEmbedded();
 
-	float cast_length = max(0.0f, inSuspensionMaxLength - mRadius);
-	RShapeCast shape_cast(&sphere, Vec3::sReplicate(1.0f), RMat44::sTranslation(inOrigin), inDirection * cast_length);
+	decimal cast_length = max(decimal(0.0f), inSuspensionMaxLength - mRadius);
+	RShapeCast shape_cast(&sphere, Vec3::sReplicate(decimal(1.0f)), RMat44::sTranslation(inOrigin), inDirection * cast_length);
 
 	ShapeCastSettings settings;
 	settings.mUseShrunkenShapeAndConvexRadius = true;
@@ -110,7 +110,7 @@ bool VehicleCollisionTesterCastSphere::Collide(PhysicsSystem &inPhysicsSystem, u
 	class MyCollector : public CastShapeCollector
 	{
 	public:
-							MyCollector(PhysicsSystem &inPhysicsSystem, const RShapeCast &inShapeCast, Vec3Arg inUpDirection, float inCosMaxSlopeAngle) : 
+							MyCollector(PhysicsSystem &inPhysicsSystem, const RShapeCast &inShapeCast, Vec3Arg inUpDirection, decimal inCosMaxSlopeAngle) : 
 			mPhysicsSystem(inPhysicsSystem),
 			mShapeCast(inShapeCast),
 			mUpDirection(inUpDirection),
@@ -151,7 +151,7 @@ bool VehicleCollisionTesterCastSphere::Collide(PhysicsSystem &inPhysicsSystem, u
 		PhysicsSystem &		mPhysicsSystem;
 		const RShapeCast &	mShapeCast;
 		Vec3				mUpDirection;
-		float				mCosMaxSlopeAngle;
+		decimal				mCosMaxSlopeAngle;
 
 		// Resulting closest collision
 		const Body *		mBody = nullptr;

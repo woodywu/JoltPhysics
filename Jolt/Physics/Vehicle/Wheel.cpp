@@ -53,21 +53,21 @@ Wheel::Wheel(const WheelSettings &inSettings) :
 	mContactLength(inSettings.mSuspensionMaxLength + inSettings.mRadius)
 {
 	JPH_ASSERT(inSettings.mDirection.IsNormalized());
-	JPH_ASSERT(inSettings.mSuspensionMinLength >= 0.0f);
+	JPH_ASSERT(inSettings.mSuspensionMinLength >= decimal(0.0f));
 	JPH_ASSERT(inSettings.mSuspensionMaxLength >= inSettings.mSuspensionMinLength);
-	JPH_ASSERT(inSettings.mSuspensionPreloadLength >= 0.0f);
-	JPH_ASSERT(inSettings.mSuspensionFrequency > 0.0f);
-	JPH_ASSERT(inSettings.mSuspensionDamping >= 0.0f);
-	JPH_ASSERT(inSettings.mRadius > 0.0f);
-	JPH_ASSERT(inSettings.mWidth >= 0.0f);
+	JPH_ASSERT(inSettings.mSuspensionPreloadLength >= decimal(0.0f));
+	JPH_ASSERT(inSettings.mSuspensionFrequency > decimal(0.0f));
+	JPH_ASSERT(inSettings.mSuspensionDamping >= decimal(0.0f));
+	JPH_ASSERT(inSettings.mRadius > decimal(0.0f));
+	JPH_ASSERT(inSettings.mWidth >= decimal(0.0f));
 }
 
-bool Wheel::SolveLongitudinalConstraintPart(const VehicleConstraint &inConstraint, float inMinImpulse, float inMaxImpulse) 
+bool Wheel::SolveLongitudinalConstraintPart(const VehicleConstraint &inConstraint, decimal inMinImpulse, decimal inMaxImpulse) 
 { 
 	return mLongitudinalPart.SolveVelocityConstraint(*inConstraint.GetVehicleBody(), *mContactBody, -mContactLongitudinal, inMinImpulse, inMaxImpulse); 
 }
 
-bool Wheel::SolveLateralConstraintPart(const VehicleConstraint &inConstraint, float inMinImpulse, float inMaxImpulse) 
+bool Wheel::SolveLateralConstraintPart(const VehicleConstraint &inConstraint, decimal inMinImpulse, decimal inMaxImpulse) 
 { 
 	return mLateralPart.SolveVelocityConstraint(*inConstraint.GetVehicleBody(), *mContactBody, -mContactLateral, inMinImpulse, inMaxImpulse); 
 }

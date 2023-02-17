@@ -73,7 +73,7 @@ void GearConstraint::CalculateConstraintProperties(Mat44Arg inRotation1, Mat44Ar
 	mGearConstraintPart.CalculateConstraintProperties(*mBody1, mWorldSpaceHingeAxis1, *mBody2, mWorldSpaceHingeAxis2, mRatio);
 }
 
-void GearConstraint::SetupVelocityConstraint(float inDeltaTime)
+void GearConstraint::SetupVelocityConstraint(decimal inDeltaTime)
 {
 	// Calculate constraint properties that are constant while bodies don't move
 	Mat44 rotation1 = Mat44::sRotation(mBody1->GetRotation());
@@ -81,23 +81,23 @@ void GearConstraint::SetupVelocityConstraint(float inDeltaTime)
 	CalculateConstraintProperties(rotation1, rotation2);
 }
 
-void GearConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio)
+void GearConstraint::WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio)
 {
 	// Warm starting: Apply previous frame impulse
 	mGearConstraintPart.WarmStart(*mBody1, *mBody2, inWarmStartImpulseRatio);
 }
 
-bool GearConstraint::SolveVelocityConstraint(float inDeltaTime)
+bool GearConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 {
 	return mGearConstraintPart.SolveVelocityConstraint(*mBody1, mWorldSpaceHingeAxis1, *mBody2, mWorldSpaceHingeAxis2, mRatio);
 }
 
-bool GearConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgarte)
+bool GearConstraint::SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte)
 {
 	if (mGear1Constraint == nullptr || mGear2Constraint == nullptr)
 		return false;
 
-	float gear1rot;
+	decimal gear1rot;
 	if (mGear1Constraint->GetSubType() == EConstraintSubType::Hinge)
 	{
 		gear1rot = static_cast<const HingeConstraint *>(mGear1Constraint.GetPtr())->GetCurrentAngle();
@@ -108,7 +108,7 @@ bool GearConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgart
 		return false;
 	}
 
-	float gear2rot;
+	decimal gear2rot;
 	if (mGear2Constraint->GetSubType() == EConstraintSubType::Hinge)
 	{
 		gear2rot = static_cast<const HingeConstraint *>(mGear2Constraint.GetPtr())->GetCurrentAngle();
@@ -119,8 +119,8 @@ bool GearConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgart
 		return false;
 	}
 
-	float error = CenterAngleAroundZero(fmod(gear1rot + mRatio * gear2rot, 2.0f * JPH_PI));
-	if (error == 0.0f)
+	decimal error = CenterAngleAroundZero(fmod(gear1rot + mRatio * gear2rot, decimal(2.0f) * JPH_PI));
+	if (error == decimal(0.0f))
 		return false;
 
 	Mat44 rotation1 = Mat44::sRotation(mBody1->GetRotation());
@@ -136,8 +136,8 @@ void GearConstraint::DrawConstraint(DebugRenderer *inRenderer) const
 	RMat44 transform2 = mBody2->GetCenterOfMassTransform();
 
 	// Draw constraint axis
-	inRenderer->DrawArrow(transform1.GetTranslation(), transform1 * mLocalSpaceHingeAxis1, Color::sGreen, 0.01f);
-	inRenderer->DrawArrow(transform2.GetTranslation(), transform2 * mLocalSpaceHingeAxis2, Color::sBlue, 0.01f);
+	inRenderer->DrawArrow(transform1.GetTranslation(), transform1 * mLocalSpaceHingeAxis1, Color::sGreen, decimal(0.01f));
+	inRenderer->DrawArrow(transform2.GetTranslation(), transform2 * mLocalSpaceHingeAxis2, Color::sBlue, decimal(0.01f));
 }
 
 #endif // JPH_DEBUG_RENDERER

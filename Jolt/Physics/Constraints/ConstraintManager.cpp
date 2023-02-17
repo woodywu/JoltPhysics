@@ -105,7 +105,7 @@ void ConstraintManager::sSortConstraints(Constraint **inActiveConstraints, uint3
 	QuickSort(inConstraintIdxBegin, inConstraintIdxEnd, [inActiveConstraints](uint32 inLHS, uint32 inRHS) { return inActiveConstraints[inLHS]->mConstraintIndex < inActiveConstraints[inRHS]->mConstraintIndex; });
 }
 
-void ConstraintManager::sSetupVelocityConstraints(Constraint **inActiveConstraints, uint32 inNumActiveConstraints, float inDeltaTime)
+void ConstraintManager::sSetupVelocityConstraints(Constraint **inActiveConstraints, uint32 inNumActiveConstraints, decimal inDeltaTime)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -113,7 +113,7 @@ void ConstraintManager::sSetupVelocityConstraints(Constraint **inActiveConstrain
 		(*c)->SetupVelocityConstraint(inDeltaTime);
 }
 
-void ConstraintManager::sSetupVelocityConstraints(Constraint **inActiveConstraints, const uint32 *inConstraintIdxBegin, const uint32 *inConstraintIdxEnd, float inDeltaTime)
+void ConstraintManager::sSetupVelocityConstraints(Constraint **inActiveConstraints, const uint32 *inConstraintIdxBegin, const uint32 *inConstraintIdxEnd, decimal inDeltaTime)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -124,7 +124,7 @@ void ConstraintManager::sSetupVelocityConstraints(Constraint **inActiveConstrain
 	}
 }
 
-void ConstraintManager::sWarmStartVelocityConstraints(Constraint **inActiveConstraints, const uint32 *inConstraintIdxBegin, const uint32 *inConstraintIdxEnd, float inWarmStartImpulseRatio, int &ioNumVelocitySteps)
+void ConstraintManager::sWarmStartVelocityConstraints(Constraint **inActiveConstraints, const uint32 *inConstraintIdxBegin, const uint32 *inConstraintIdxEnd, decimal inWarmStartImpulseRatio, int &ioNumVelocitySteps)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -136,7 +136,7 @@ void ConstraintManager::sWarmStartVelocityConstraints(Constraint **inActiveConst
 	}
 }
 
-bool ConstraintManager::sSolveVelocityConstraints(Constraint **inActiveConstraints, const uint32 *inConstraintIdxBegin, const uint32 *inConstraintIdxEnd, float inDeltaTime)
+bool ConstraintManager::sSolveVelocityConstraints(Constraint **inActiveConstraints, const uint32 *inConstraintIdxBegin, const uint32 *inConstraintIdxEnd, decimal inDeltaTime)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -151,7 +151,7 @@ bool ConstraintManager::sSolveVelocityConstraints(Constraint **inActiveConstrain
 	return any_impulse_applied;
 }
 
-bool ConstraintManager::sSolvePositionConstraints(Constraint **inActiveConstraints, const uint32 *inConstraintIdxBegin, const uint32 *inConstraintIdxEnd, float inDeltaTime, float inBaumgarte)
+bool ConstraintManager::sSolvePositionConstraints(Constraint **inActiveConstraints, const uint32 *inConstraintIdxBegin, const uint32 *inConstraintIdxEnd, decimal inDeltaTime, decimal inBaumgarte)
 {
 	JPH_PROFILE_FUNCTION();
 
@@ -166,7 +166,7 @@ bool ConstraintManager::sSolvePositionConstraints(Constraint **inActiveConstrain
 	return any_impulse_applied;
 }
 
-bool ConstraintManager::sSolvePositionConstraints(Constraint **inActiveConstraints, const uint32 *inConstraintIdxBegin, const uint32 *inConstraintIdxEnd, float inDeltaTime, float inBaumgarte, int &ioNumPositionSteps)
+bool ConstraintManager::sSolvePositionConstraints(Constraint **inActiveConstraints, const uint32 *inConstraintIdxBegin, const uint32 *inConstraintIdxEnd, decimal inDeltaTime, decimal inBaumgarte, int &ioNumPositionSteps)
 {
 	JPH_PROFILE_FUNCTION();
 

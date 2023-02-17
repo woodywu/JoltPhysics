@@ -5,7 +5,7 @@
 
 JPH_NAMESPACE_BEGIN
 
-// Define real to float
+// Define real to decimal
 using Real = decimal;
 using Real3 = Float3;
 using RVec3  = Vec3;

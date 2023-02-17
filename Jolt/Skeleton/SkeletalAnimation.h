@@ -38,7 +38,7 @@ public:
 	public:
 		JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(Keyframe)
 
-		float							mTime = 0.0f;										///< Time of keyframe in seconds
+		decimal							mTime = decimal(0.0f);										///< Time of keyframe in seconds
 	};
 
 	using KeyframeVector = Array<Keyframe>;
@@ -56,13 +56,13 @@ public:
 	using AnimatedJointVector = Array<AnimatedJoint>;
 
 	/// Get the length (in seconds) of this animation
-	float								GetDuration() const;
+	decimal								GetDuration() const;
 
 	/// Scale the size of all joints by inScale
-	void								ScaleJoints(float inScale);
+	void								ScaleJoints(decimal inScale);
 
 	/// Get the (interpolated) joint transforms at time inTime
-	void								Sample(float inTime, SkeletonPose &ioPose) const;
+	void								Sample(decimal inTime, SkeletonPose &ioPose) const;
 
 	/// Get joint samples			
 	const AnimatedJointVector &			GetAnimatedJoints() const							{ return mAnimatedJoints; }

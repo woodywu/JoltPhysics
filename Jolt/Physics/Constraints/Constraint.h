@@ -81,7 +81,7 @@ public:
 	int							mNumPositionStepsOverride = 0;
 
 	/// Size of constraint when drawing it through the debug renderer
-	decimal						mDrawConstraintSize = 1.0f;
+	decimal						mDrawConstraintSize = decimal(1.0f);
 
 protected:
 	/// This function should not be called directly, it is used by sRestoreFromBinaryState.

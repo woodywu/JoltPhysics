@@ -41,7 +41,7 @@ ConvexHullBuilder2D::ConvexHullBuilder2D(const Positions &inPositions) :
 	}
 	else
 	{
-		Vec3 maxv = Vec3::sReplicate(-FLT_MAX), minv = Vec3::sReplicate(FLT_MAX);
+		Vec3 maxv = Vec3::sReplicate(FIX_MIN), minv = Vec3::sReplicate(FIX_MAX);
 		for (Vec3 v : mPositions)
 		{
 			minv = Vec3::sMin(minv, v);

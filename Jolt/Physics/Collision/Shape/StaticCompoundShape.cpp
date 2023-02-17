@@ -60,12 +60,12 @@ void StaticCompoundShape::Node::SetChildInvalid(uint inIndex)
 	mNodeProperties[inIndex] = INVALID_NODE;
 
 	// Make bounding box invalid
-	mBoundsMinX[inIndex] = HALF_FLT_MAX;
-	mBoundsMinY[inIndex] = HALF_FLT_MAX;
-	mBoundsMinZ[inIndex] = HALF_FLT_MAX;
-	mBoundsMaxX[inIndex] = HALF_FLT_MAX;
-	mBoundsMaxY[inIndex] = HALF_FLT_MAX;
-	mBoundsMaxZ[inIndex] = HALF_FLT_MAX;
+	mBoundsMinX[inIndex] = HALF_FIX_MAX;
+	mBoundsMinY[inIndex] = HALF_FIX_MAX;
+	mBoundsMinZ[inIndex] = HALF_FIX_MAX;
+	mBoundsMaxX[inIndex] = HALF_FIX_MAX;
+	mBoundsMaxY[inIndex] = HALF_FIX_MAX;
+	mBoundsMaxZ[inIndex] = HALF_FIX_MAX;
 }
 
 void StaticCompoundShape::Node::SetChildBounds(uint inIndex, const AABox &inBounds)

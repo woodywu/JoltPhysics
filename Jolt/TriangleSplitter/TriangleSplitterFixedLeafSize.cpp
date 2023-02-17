@@ -47,20 +47,20 @@ bool TriangleSplitterFixedLeafSize::Split(const Range &inTriangles, Range &outLe
 	for (uint t = inTriangles.mBegin; t < inTriangles.mEnd; t += mLeafSize)
 		centroid_bounds.Encapsulate(GetCentroidForGroup(t));
 
-	float best_cp = FLT_MAX;
+	decimal best_cp = FIX_MAX;
 	uint best_dim = 0xffffffff;
-	float best_split = 0;
+	decimal best_split = 0;
 
 	// Bin in all dimensions
 	uint num_bins = Clamp(inTriangles.Count() / mNumTrianglesPerBin, mMinNumBins, mMaxNumBins);	
 	Array<Bin> bins(num_bins);
 	for (uint dim = 0; dim < 3; ++dim)
 	{
-		float bounds_min = centroid_bounds.mMin[dim];
-		float bounds_size = centroid_bounds.mMax[dim] - bounds_min;
+		decimal bounds_min = centroid_bounds.mMin[dim];
+		decimal bounds_size = centroid_bounds.mMax[dim] - bounds_min;
 
 		// Skip axis if too small
-		if (bounds_size < 1.0e-5f)
+		if (bounds_size < decimal(1.0e-5f))
 			continue;
 
 		// Initialize bins
@@ -76,7 +76,7 @@ bool TriangleSplitterFixedLeafSize::Split(const Range &inTriangles, Range &outLe
 		for (uint t = inTriangles.mBegin; t < inTriangles.mEnd; t += mLeafSize)
 		{
 			// Calculate average centroid for group
-			float centroid_pos = GetCentroidForGroup(t)[dim];
+			decimal centroid_pos = GetCentroidForGroup(t)[dim];
 
 			// Select bin 
 			uint bin_no = min(uint((centroid_pos - bounds_min) / bounds_size * num_bins), num_bins - 1);
@@ -118,7 +118,7 @@ bool TriangleSplitterFixedLeafSize::Split(const Range &inTriangles, Range &outLe
 		{
 			// Calculate surface area heuristic and see if it is better than the current best
 			const Bin &bin = bins[b];
-			float cp = bin.mBoundsAccumulatedLeft.GetSurfaceArea() * bin.mNumTrianglesAccumulatedLeft + bin.mBoundsAccumulatedRight.GetSurfaceArea() * bin.mNumTrianglesAccumulatedRight;
+			decimal cp = bin.mBoundsAccumulatedLeft.GetSurfaceArea() * bin.mNumTrianglesAccumulatedLeft + bin.mBoundsAccumulatedRight.GetSurfaceArea() * bin.mNumTrianglesAccumulatedRight;
 			if (cp < best_cp)
 			{
 				best_cp = cp;

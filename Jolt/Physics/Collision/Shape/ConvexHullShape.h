@@ -167,7 +167,7 @@ private:
 	Array<uint8>			mVertexIdx;					///< A list of vertex indices (indexing in mPoints) for each of the faces
 	decimal					mConvexRadius = C0;		///< Convex radius
 	decimal					mVolume;					///< Total volume of the convex hull
-	decimal					mInnerRadius = FLT_MAX;		///< Radius of the biggest sphere that fits entirely in the convex hull
+	decimal					mInnerRadius = FIX_MAX;		///< Radius of the biggest sphere that fits entirely in the convex hull
 
 #ifdef JPH_DEBUG_RENDERER
 	mutable DebugRenderer::GeometryRef mGeometry;

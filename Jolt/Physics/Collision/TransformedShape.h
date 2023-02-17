@@ -49,7 +49,7 @@ public:
 	/// @param inShapeScale Scale in local space of shape
 	/// @param inCenterOfMassTransform Center of mass transform for the shape
 	/// @param inCollideShapeSettings Settings
-	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. mShapePositionCOM since floats are most accurate near the origin
+	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. mShapePositionCOM since decimals are most accurate near the origin
 	/// @param ioCollector Collector that receives the hits
 	/// @param inShapeFilter Filter that allows you to reject collisions
 	void						CollideShape(const Shape *inShape, Vec3Arg inShapeScale, RMat44Arg inCenterOfMassTransform, const CollideShapeSettings &inCollideShapeSettings, RVec3Arg inBaseOffset, CollideShapeCollector &ioCollector, const ShapeFilter &inShapeFilter = { }) const;
@@ -57,7 +57,7 @@ public:
 	/// Cast a shape and report any hits to ioCollector
 	/// @param inShapeCast The shape cast and its position and direction
 	/// @param inShapeCastSettings Settings for the shape cast
-	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. mShapePositionCOM or inShapeCast.mCenterOfMassStart.GetTranslation() since floats are most accurate near the origin
+	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. mShapePositionCOM or inShapeCast.mCenterOfMassStart.GetTranslation() since decimals are most accurate near the origin
 	/// @param ioCollector Collector that receives the hits
 	/// @param inShapeFilter Filter that allows you to reject collisions
 	void						CastShape(const RShapeCast &inShapeCast, const ShapeCastSettings &inShapeCastSettings, RVec3Arg inBaseOffset, CastShapeCollector &ioCollector, const ShapeFilter &inShapeFilter = { }) const;
@@ -73,7 +73,7 @@ public:
 	/// To get the actual triangles call GetTrianglesNext.
 	/// @param ioContext A temporary buffer and should remain untouched until the last call to GetTrianglesNext.
 	/// @param inBox The world space bounding in which you want to get the triangles.
-	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. inBox.GetCenter() since floats are most accurate near the origin
+	/// @param inBaseOffset All hit results will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. inBox.GetCenter() since decimals are most accurate near the origin
 	void						GetTrianglesStart(GetTrianglesContext &ioContext, const AABox &inBox, RVec3Arg inBaseOffset) const;
 
 	/// Call this repeatedly to get all triangles in the box.
@@ -145,7 +145,7 @@ public:
 	/// convex shapes or triangles, which is why a sub shape ID to get to that leaf must be provided. 
 	/// @param inSubShapeID Sub shape ID of target shape
 	/// @param inDirection Direction that the face should be facing (in world space)
-	/// @param inBaseOffset The vertices will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. mShapePositionCOM since floats are most accurate near the origin
+	/// @param inBaseOffset The vertices will be returned relative to this offset, can be zero to get results in world position, but when you're testing far from the origin you get better precision by picking a position that's closer e.g. mShapePositionCOM since decimals are most accurate near the origin
 	/// @param outVertices Resulting face. Note the returned face can have a single point if the shape doesn't have polygons to return (e.g. because it's a sphere). The face will be returned in world space.
 	void						GetSupportingFace(const SubShapeID &inSubShapeID, Vec3Arg inDirection, RVec3Arg inBaseOffset, Shape::SupportingFace &outVertices) const
 	{
@@ -182,7 +182,7 @@ public:
 	RVec3						mShapePositionCOM;							///< Center of mass world position of the shape
 	Quat						mShapeRotation;								///< Rotation of the shape
 	RefConst<Shape>				mShape;										///< The shape itself
-	Float3						mShapeScale { 1, 1, 1 };					///< Not stored as Vec3 to get a nicely packed structure
+	Float3						mShapeScale { C1, C1, C1 };					///< Not stored as Vec3 to get a nicely packed structure
 	BodyID						mBodyID;									///< Optional body ID from which this shape comes
 	SubShapeIDCreator			mSubShapeIDCreator;							///< Optional sub shape ID creator for the shape (can be used when expanding compound shapes into multiple transformed shapes)
 };

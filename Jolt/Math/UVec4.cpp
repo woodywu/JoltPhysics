@@ -5,7 +5,7 @@
 
 JPH_NAMESPACE_BEGIN
 
-// Table that shifts vector components by 4 - X floats to the left
+// Table that shifts vector components by 4 - X decimals to the left
 const UVec4 UVec4::sFourMinusXShuffle[5] = 
 {
 	UVec4(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff),

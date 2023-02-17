@@ -8,7 +8,7 @@
 JPH_NAMESPACE_BEGIN
 
 /// Tests a ray starting at inRayOrigin and extending infinitely in inRayDirection against a sphere, 
-/// @return FLT_MAX if there is no intersection, otherwise the fraction along the ray.
+/// @return FIX_MAX if there is no intersection, otherwise the fraction along the ray.
 /// @param inRayOrigin Ray origin. If the ray starts inside the sphere, the returned fraction will be 0.
 /// @param inRayDirection Ray direction. Does not need to be normalized.
 /// @param inSphereCenter Position of the center of the sphere

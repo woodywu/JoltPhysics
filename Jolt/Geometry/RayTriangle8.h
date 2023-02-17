@@ -7,11 +7,11 @@
 
 JPH_NAMESPACE_BEGIN
 
-/// Intersect ray with 8 triangles in SOA format, returns 8 vector of closest points or FLT_MAX if no hit
+/// Intersect ray with 8 triangles in SOA format, returns 8 vector of closest points or FIX_MAX if no hit
 JPH_INLINE Vec8 RayTriangle8(Vec3Arg inOrigin, Vec3Arg inDirection, Vec8Arg inV0X, Vec8Arg inV0Y, Vec8Arg inV0Z, Vec8Arg inV1X, Vec8Arg inV1Y, Vec8Arg inV1Z, Vec8Arg inV2X, Vec8Arg inV2Y, Vec8Arg inV2Z)
 {
 	// Epsilon
-	Vec8 epsilon = Vec8::sReplicate(1.0e-12f);
+	Vec8 epsilon = Vec8::sReplicate(decimal(1.0e-12f));
 
 	// Zero & one
 	Vec8 zero = Vec8::sZero();
@@ -83,8 +83,8 @@ JPH_INLINE Vec8 RayTriangle8(Vec3Arg inOrigin, Vec3Arg inDirection, Vec8Arg inV0
 			Vec8::sLess(t, zero)
 		);
 
-	// Select intersection point or FLT_MAX based on if there is an intersection or not
-	return Vec8::sSelect(t, Vec8::sReplicate(FLT_MAX), no_intersection);
+	// Select intersection point or FIX_MAX based on if there is an intersection or not
+	return Vec8::sSelect(t, Vec8::sReplicate(FIX_MAX), no_intersection);
 }
 
 JPH_NAMESPACE_END

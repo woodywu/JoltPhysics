@@ -75,10 +75,10 @@ void SkeletonPose::Draw(const DrawSettings &inDrawSettings, DebugRenderer *inRen
 		}
 
 		if (inDrawSettings.mDrawJointOrientations)
-			inRenderer->DrawCoordinateSystem(joint_transform, 0.05f);
+			inRenderer->DrawCoordinateSystem(joint_transform, decimal(0.05f));
 
 		if (inDrawSettings.mDrawJointNames)
-			inRenderer->DrawText3D(joint_transform.GetTranslation(), joints[b].mName, Color::sWhite, 0.05f);
+			inRenderer->DrawText3D(joint_transform.GetTranslation(), joints[b].mName, Color::sWhite, decimal(0.05f));
 	}
 }
 #endif // JPH_DEBUG_RENDERER

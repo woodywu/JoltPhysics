@@ -275,7 +275,7 @@ public:
 	}
 
 	/// Find the triangle on which inPosition is the furthest to the front
-	/// Note this function works as long as all points added have been added with AddPoint(..., FLT_MAX).
+	/// Note this function works as long as all points added have been added with AddPoint(..., FIX_MAX).
 	Triangle *			FindFacingTriangle(Vec3Arg inPosition, decimal &outBestDistSq)
 	{
 		Triangle *best = nullptr;
@@ -636,8 +636,8 @@ public:
 			}
 
 		// Determine max position
-		decimal min_x = FLT_MAX;
-		decimal max_x = -FLT_MAX;
+		decimal min_x = FIX_MAX;
+		decimal max_x = FIX_MIN;
 		for (Vec3 p : mPositions)
 		{
 			min_x = min(min_x, p.GetX());

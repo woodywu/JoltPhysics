@@ -245,7 +245,7 @@ public:
 
 	/// Switch the shape of the character (e.g. for stance).
 	/// @param inShape The shape to switch to.
-	/// @param inMaxPenetrationDepth When inMaxPenetrationDepth is not FLT_MAX, it checks if the new shape collides before switching shape. This is the max penetration we're willing to accept after the switch.
+	/// @param inMaxPenetrationDepth When inMaxPenetrationDepth is not FIX_MAX, it checks if the new shape collides before switching shape. This is the max penetration we're willing to accept after the switch.
 	/// @param inBroadPhaseLayerFilter Filter that is used to check if the character collides with something in the broadphase.
 	/// @param inObjectLayerFilter Filter that is used to check if a character collides with a layer.
 	/// @param inBodyFilter Filter that is used to check if a character collides with a body.

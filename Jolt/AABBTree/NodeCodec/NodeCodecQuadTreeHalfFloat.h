@@ -112,12 +112,12 @@ public:
 					node->mNodeProperties[i] = uint32(TRIANGLE_COUNT_MASK) << TRIANGLE_COUNT_SHIFT; 
 
 					// Make bounding box invalid
-					node->mBoundsMinX[i] = HALF_FLT_MAX;
-					node->mBoundsMinY[i] = HALF_FLT_MAX;
-					node->mBoundsMinZ[i] = HALF_FLT_MAX;
-					node->mBoundsMaxX[i] = HALF_FLT_MAX;
-					node->mBoundsMaxY[i] = HALF_FLT_MAX;
-					node->mBoundsMaxZ[i] = HALF_FLT_MAX;
+					node->mBoundsMinX[i] = HALF_FIX_MAX;
+					node->mBoundsMinY[i] = HALF_FIX_MAX;
+					node->mBoundsMinZ[i] = HALF_FIX_MAX;
+					node->mBoundsMaxX[i] = HALF_FIX_MAX;
+					node->mBoundsMaxY[i] = HALF_FIX_MAX;
+					node->mBoundsMaxZ[i] = HALF_FIX_MAX;
 				}
 			}
 
@@ -250,7 +250,7 @@ public:
 					properties.StoreInt4(&mNodeStack[mTop]);
 					mTop += num_results;
 				}
-				else if (tri_count != TRIANGLE_COUNT_MASK) // TRIANGLE_COUNT_MASK indicates a padding node, normally we shouldn't visit these nodes but when querying with a big enough box you could touch HALF_FLT_MAX (about 65K)
+				else if (tri_count != TRIANGLE_COUNT_MASK) // TRIANGLE_COUNT_MASK indicates a padding node, normally we shouldn't visit these nodes but when querying with a big enough box you could touch HALF_FIX_MAX (about 65K)
 				{	
 					// Node contains triangles, do individual tests
 					uint32 triangle_block_id = node_properties & OFFSET_MASK;

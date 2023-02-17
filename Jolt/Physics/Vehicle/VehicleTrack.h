@@ -33,10 +33,10 @@ public:
 
 	uint					mDrivenWheel;								///< Which wheel on the track is connected to the engine
 	Array<uint>				mWheels;									///< Indices of wheels that are inside this track, should include the driven wheel too
-	float					mInertia = 10.0f;							///< Moment of inertia (kg m^2) of the track and its wheels as seen on the driven wheel
-	float					mAngularDamping = 0.5f;						///< Damping factor of track and its wheels: dw/dt = -c * w as seen on the driven wheel
-	float					mMaxBrakeTorque = 15000.0f;					///< How much torque (Nm) the brakes can apply on the driven wheel
-	float					mDifferentialRatio = 6.0f;					///< Ratio between rotation speed of gear box and driven wheel of track
+	decimal					mInertia = decimal(10.0f);							///< Moment of inertia (kg m^2) of the track and its wheels as seen on the driven wheel
+	decimal					mAngularDamping = decimal(0.5f);						///< Damping factor of track and its wheels: dw/dt = -c * w as seen on the driven wheel
+	decimal					mMaxBrakeTorque = decimal(15000.0f);					///< How much torque (Nm) the brakes can apply on the driven wheel
+	decimal					mDifferentialRatio = decimal(6.0f);					///< Ratio between rotation speed of gear box and driven wheel of track
 };
 
 /// Runtime data for tank tracks
@@ -47,7 +47,7 @@ public:
 	void					SaveState(StateRecorder &inStream) const;
 	void					RestoreState(StateRecorder &inStream);
 
-	float					mAngularVelocity = 0.0f;					///< Angular velocity of the driven wheel, will determine the speed of the entire track
+	decimal					mAngularVelocity = decimal(0.0f);					///< Angular velocity of the driven wheel, will determine the speed of the entire track
 };
 
 using VehicleTracks = VehicleTrack[(int)ETrackSide::Num];

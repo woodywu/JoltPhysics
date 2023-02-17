@@ -27,7 +27,7 @@ JPH_NAMESPACE_BEGIN
 template <class Vector, class Matrix>
 bool EigenValueSymmetric(const Matrix &inMatrix, Matrix &outEigVec, Vector &outEigVal)
 {
-	// This algorithm works with very small numbers and can trigger invalid float exceptions when not flushing denormals
+	// This algorithm works with very small numbers and can trigger invalid decimal exceptions when not flushing denormals
 	FPFlushDenormals flush_denormals;
 	(void)flush_denormals;
 
@@ -65,7 +65,7 @@ bool EigenValueSymmetric(const Matrix &inMatrix, Matrix &outEigVec, Vector &outE
 	for (int sweep = 0; sweep < cMaxSweeps; ++sweep)
 	{
 		// Get the sum of the off-diagonal elements of a
-		float sm = 0.0f;
+		decimal sm = 0.0f;
 		for (uint ip = 0; ip < n - 1; ++ip)
 			for (uint iq = ip + 1; iq < n; ++iq)
 				sm += abs(a(ip, iq));
@@ -83,7 +83,7 @@ bool EigenValueSymmetric(const Matrix &inMatrix, Matrix &outEigVec, Vector &outE
 					// Check if inMatrix * eigen_vector = eigen_value * eigen_vector
 					Vector mat_eigvec = inMatrix * outEigVec.GetColumn(c);
 					Vector eigval_eigvec = outEigVal[c] * outEigVec.GetColumn(c);
-					JPH_ASSERT(mat_eigvec.IsClose(eigval_eigvec, max(mat_eigvec.LengthSq(), eigval_eigvec.LengthSq()) * 1.0e-6f));
+					JPH_ASSERT(mat_eigvec.IsClose(eigval_eigvec, max(mat_eigvec.LengthSq(), eigval_eigvec.LengthSq()) * decimal(1.0e-6f)));
 				}
 			#endif
 
@@ -92,12 +92,12 @@ bool EigenValueSymmetric(const Matrix &inMatrix, Matrix &outEigVec, Vector &outE
 		}
 
 		// On the first three sweeps use a fraction of the sum of the off diagonal elements as treshold
-		float tresh = sweep < 4? 0.2f * sm / Square(n) : 0.0f;
+		decimal tresh = sweep < 4? 0.2f * sm / Square(n) : 0.0f;
 
 		for (uint ip = 0; ip < n - 1; ++ip)
 			for (uint iq = ip + 1; iq < n; ++iq)
 			{
-				float g = 100.0f * abs(a(ip, iq));
+				decimal g = 100.0f * abs(a(ip, iq));
 				
 				// After four sweeps, skip the rotation if the off-diagonal element is small
 				if (sweep > 4 
@@ -108,23 +108,23 @@ bool EigenValueSymmetric(const Matrix &inMatrix, Matrix &outEigVec, Vector &outE
 				}
 				else if (abs(a(ip, iq)) > tresh)
 				{
-					float h = outEigVal[iq] - outEigVal[ip];
+					decimal h = outEigVal[iq] - outEigVal[ip];
 
-					float t;
+					decimal t;
 					if (abs(h) + g == abs(h))
 					{
 						t = a(ip, iq) / h;
 					}
 					else
 					{
-						float theta = 0.5f * h / a(ip, iq); // Warning: Can become inf if a(ip, iq) too small
+						decimal theta = 0.5f * h / a(ip, iq); // Warning: Can become inf if a(ip, iq) too small
 						t = 1.0f / (abs(theta) + sqrt(1.0f + theta * theta)); // Warning: Squaring large value can make it inf
 						if (theta < 0.0f) t = -t;
 					}
 					
-					float c = 1.0f / sqrt(1.0f + t * t);
-					float s = t * c;
-					float tau = s / (1.0f + c);
+					decimal c = 1.0f / sqrt(1.0f + t * t);
+					decimal s = t * c;
+					decimal tau = s / (1.0f + c);
 					h = t * a(ip, iq);
 					
 					a(ip, iq) = 0.0f;

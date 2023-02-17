@@ -27,7 +27,7 @@ public:
 
 	RVec3					mBaseOffset;						///< Offset to which all the contact points are relative
 	Vec3					mWorldSpaceNormal;					///< Normal for this manifold, direction along which to move body 2 out of collision along the shortest path
-	float					mPenetrationDepth;					///< Penetration depth (move shape 2 by this distance to resolve the collision)
+	decimal					mPenetrationDepth;					///< Penetration depth (move shape 2 by this distance to resolve the collision)
 	SubShapeID				mSubShapeID1;						///< Sub shapes that formed this manifold (note that when multiple manifolds are combined because they're coplanar, we lose some information here because we only keep track of one sub shape pair that we encounter)
 	SubShapeID				mSubShapeID2;
 	ContactPoints			mRelativeContactPointsOn1;			///< Contact points on the surface of shape 1 relative to mBaseOffset.
@@ -39,8 +39,8 @@ public:
 class ContactSettings
 {
 public:
-	float					mCombinedFriction;					///< Combined friction for the body pair (usually calculated by sCombineFriction)
-	float					mCombinedRestitution;				///< Combined restitution for the body pair (usually calculated by sCombineRestitution)
+	decimal					mCombinedFriction;					///< Combined friction for the body pair (usually calculated by sCombineFriction)
+	decimal					mCombinedRestitution;				///< Combined restitution for the body pair (usually calculated by sCombineRestitution)
 	bool					mIsSensor;							///< If the contact should be treated as a sensor vs body contact (no collision response)
 };
 

@@ -74,7 +74,7 @@ public:
 	}
 
 	/// Test if two vectors are close to each other
-	inline bool					IsClose(const Vector &inV2, decimal inMaxDistSq = 1.0e-12f)
+	inline bool					IsClose(const Vector &inV2, decimal inMaxDistSq = decimal(1.0e-12f))
 	{
 		return (inV2 - *this).LengthSq() <= inMaxDistSq;
 	}

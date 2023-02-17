@@ -72,25 +72,25 @@ public:
 	/// Calculate properties used during the functions below
 	inline void					CalculateConstraintProperties(const Body &inBody1, Mat44Arg inRotation1, Vec3Arg inWorldSpaceHingeAxis1, const Body &inBody2, Mat44Arg inRotation2, Vec3Arg inWorldSpaceHingeAxis2)
 	{
-		JPH_ASSERT(inWorldSpaceHingeAxis1.IsNormalized(1.0e-5f));
-		JPH_ASSERT(inWorldSpaceHingeAxis2.IsNormalized(1.0e-5f));
+		JPH_ASSERT(inWorldSpaceHingeAxis1.IsNormalized(decimal(1.0e-5f)));
+		JPH_ASSERT(inWorldSpaceHingeAxis2.IsNormalized(decimal(1.0e-5f)));
 
 		// Calculate hinge axis in world space
 		mA1 = inWorldSpaceHingeAxis1;
 		Vec3 a2 = inWorldSpaceHingeAxis2;
-		float dot = mA1.Dot(a2);
-		if (dot <= 1.0e-3f)
+		decimal dot = mA1.Dot(a2);
+		if (dot <= decimal(1.0e-3f))
 		{
 			// World space axes are more than 90 degrees apart, get a perpendicular vector in the plane formed by mA1 and a2 as hinge axis until the rotation is less than 90 degrees
 			Vec3 perp = a2 - dot * mA1;
-			if (perp.LengthSq() < 1.0e-6f)
+			if (perp.LengthSq() < decimal(1.0e-6f))
 			{
 				// mA1 ~ -a2, take random perpendicular
 				perp = mA1.GetNormalizedPerpendicular();
 			}
 
 			// Blend in a little bit from mA1 so we're less than 90 degrees apart
-			a2 = (0.99f * perp.Normalized() + 0.01f * mA1).Normalized();
+			a2 = (decimal(0.99f) * perp.Normalized() + decimal(0.01f) * mA1).Normalized();
 		}
 		mB2 = a2.GetNormalizedPerpendicular();
 		mC2 = a2.Cross(mB2);
@@ -123,7 +123,7 @@ public:
 	}
 
 	/// Must be called from the WarmStartVelocityConstraint call to apply the previous frame's impulses
-	inline void					WarmStart(Body &ioBody1, Body &ioBody2, float inWarmStartImpulseRatio)
+	inline void					WarmStart(Body &ioBody1, Body &ioBody2, decimal inWarmStartImpulseRatio)
 	{
 		mTotalLambda *= inWarmStartImpulseRatio;
 		ApplyVelocityStep(ioBody1, ioBody2, mTotalLambda);
@@ -148,7 +148,7 @@ public:
 	}
 
 	/// Iteratively update the position constraint. Makes sure C(...) = 0.
-	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, float inBaumgarte) const
+	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, decimal inBaumgarte) const
 	{
 		// Constraint needs Axis of body 1 perpendicular to both B and C from body 2 (which are both perpendicular to the Axis of body 2)
 		Vec2 c;

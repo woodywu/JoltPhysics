@@ -24,7 +24,7 @@ TriangleSplitter::TriangleSplitter(const VertexList &inVertices, const IndexedTr
 	}
 }
 
-bool TriangleSplitter::SplitInternal(const Range &inTriangles, uint inDimension, float inSplit, Range &outLeft, Range &outRight)
+bool TriangleSplitter::SplitInternal(const Range &inTriangles, uint inDimension, decimal inSplit, Range &outLeft, Range &outRight)
 {
 	// Divide triangles
 	uint start = inTriangles.mBegin, end = inTriangles.mEnd;

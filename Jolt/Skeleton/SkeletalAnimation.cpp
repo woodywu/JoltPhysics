@@ -41,27 +41,27 @@ void SkeletalAnimation::JointState::FromMatrix(Mat44Arg inMatrix)
 	mTranslation = inMatrix.GetTranslation();
 }
 
-float SkeletalAnimation::GetDuration() const
+decimal SkeletalAnimation::GetDuration() const
 {
 	if (!mAnimatedJoints.empty() && !mAnimatedJoints[0].mKeyframes.empty())
 		return mAnimatedJoints[0].mKeyframes.back().mTime;
 	else
-		return 0.0f;
+		return decimal(0.0f);
 }
 
-void SkeletalAnimation::ScaleJoints(float inScale)
+void SkeletalAnimation::ScaleJoints(decimal inScale)
 {
 	for (SkeletalAnimation::AnimatedJoint &j : mAnimatedJoints)
 		for (SkeletalAnimation::Keyframe &k : j.mKeyframes)
 			k.mTranslation *= inScale;
 }
 
-void SkeletalAnimation::Sample(float inTime, SkeletonPose &ioPose) const
+void SkeletalAnimation::Sample(decimal inTime, SkeletonPose &ioPose) const
 {
 	// Correct time when animation is looping
-	JPH_ASSERT(inTime >= 0.0f);
-	float duration = GetDuration();
-	float time = duration > 0.0f && mIsLooping? fmod(inTime, duration) : inTime;
+	JPH_ASSERT(inTime >= decimal(0.0f));
+	decimal duration = GetDuration();
+	decimal time = duration > decimal(0.0f) && mIsLooping? fmod(inTime, duration) : inTime;
 
 	for (const AnimatedJoint &aj : mAnimatedJoints)
 	{
@@ -94,10 +94,10 @@ void SkeletalAnimation::Sample(float inTime, SkeletonPose &ioPose) const
 			const Keyframe &s1 = aj.mKeyframes[low];
 			const Keyframe &s2 = aj.mKeyframes[low + 1];
 
-			float fraction = (time - s1.mTime) / (s2.mTime - s1.mTime);
-			JPH_ASSERT(fraction >= 0.0f && fraction <= 1.0f);
+			decimal fraction = (time - s1.mTime) / (s2.mTime - s1.mTime);
+			JPH_ASSERT(fraction >= decimal(0.0f) && fraction <= decimal(1.0f));
 			
-			state.mTranslation = (1.0f - fraction) * s1.mTranslation + fraction * s2.mTranslation;
+			state.mTranslation = (decimal(1.0f) - fraction) * s1.mTranslation + fraction * s2.mTranslation;
 			JPH_ASSERT(s1.mRotation.IsNormalized());
 			JPH_ASSERT(s2.mRotation.IsNormalized());
 			state.mRotation = s1.mRotation.SLERP(s2.mRotation, fraction);

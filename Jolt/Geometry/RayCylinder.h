@@ -9,7 +9,7 @@ JPH_NAMESPACE_BEGIN
 
 /// Tests a ray starting at inRayOrigin and extending infinitely in inRayDirection
 /// against an infinite cylinder centered along the Y axis
-/// @return FLT_MAX if there is no intersection, otherwise the fraction along the ray.
+/// @return FIX_MAX if there is no intersection, otherwise the fraction along the ray.
 /// @param inRayDirection Direction of the ray. Does not need to be normalized.
 /// @param inRayOrigin Origin of the ray. If the ray starts inside the cylinder, the returned fraction will be 0.
 /// @param inCylinderRadius Radius of the infinite cylinder
@@ -48,7 +48,7 @@ JPH_INLINE decimal RayCylinder(Vec3Arg inRayOrigin, Vec3Arg inRayDirection, deci
 }
 
 /// Test a ray against a cylinder centered around the origin with its axis along the Y axis and half height specified.
-/// @return FLT_MAX if there is no intersection, otherwise the fraction along the ray.
+/// @return FIX_MAX if there is no intersection, otherwise the fraction along the ray.
 /// @param inRayDirection Ray direction. Does not need to be normalized.
 /// @param inRayOrigin Origin of the ray. If the ray starts inside the cylinder, the returned fraction will be 0.
 /// @param inCylinderRadius Radius of the cylinder

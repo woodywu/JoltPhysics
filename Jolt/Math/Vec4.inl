@@ -467,7 +467,7 @@ void Vec4::SinCos(Vec4 &outSin, Vec4 &outCos) const
 	// Cos(x) = 1 - x^2/2! + x^4/4! - x^6/6! + x^8/8! + ... = (((x2/8!- 1/6!) * x2 + 1/4!) * x2 - 1/2!) * x2 + 1
 	Vec4 taylor_cos = ((decimal(2.443315711809948e-5f) * x2 - Vec4::sReplicate(decimal(1.388731625493765e-3f))) * x2 + Vec4::sReplicate(decimal(4.166664568298827e-2f))) * x2 * x2 - C0P5 * x2 + Vec4::sReplicate(C1);
 	// Sin(x) = x - x^3/3! + x^5/5! - x^7/7! + ... = ((-x2/7! + 1/5!) * x2 - 1/3!) * x2 * x + x
-	Vec4 taylor_sin = ((decimal(- 1.9515295891e-4f) * x2 + Vec4::sReplicate(decimal(8.3321608736e-3f))) * x2 - Vec4::sReplicate(decimal(1.6666654611e-1f))) * x2 * x + x;
+	Vec4 taylor_sin = ((decimal(-1.9515295891e-4f) * x2 + Vec4::sReplicate(decimal(8.3321608736e-3f))) * x2 - Vec4::sReplicate(decimal(1.6666654611e-1f))) * x2 * x + x;
 
 	// The lowest 2 bits of quadrant indicate the quadrant that we are in.
 	// Let x be the original input value and x' our value that has been mapped to the range [-PI / 4, PI / 4].

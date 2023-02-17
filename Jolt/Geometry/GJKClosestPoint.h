@@ -223,7 +223,7 @@ public:
 #endif
 
 		// Previous length^2 of v
-		decimal prev_v_len_sq = FLT_MAX;
+		decimal prev_v_len_sq = FIX_MAX;
 
 		for (;;)
 		{
@@ -321,14 +321,14 @@ public:
 	///	@param inMaxDistSq The maximum squared distance between A and B before the objects are considered infinitely far away and processing is terminated.
 	///	@param ioV Initial guess for the separating axis. Start with any non-zero vector if you don't know.
 	///		If return value is 0, ioV = (0, 0, 0).
-	///		If the return value is bigger than 0 but smaller than FLT_MAX, ioV will be the separating axis in the direction from A to B and its length the squared distance between A and B.
-	///		If the return value is FLT_MAX, ioV will be the separating axis in the direction from A to B and the magnitude of the vector is meaningless.
+	///		If the return value is bigger than 0 but smaller than FIX_MAX, ioV will be the separating axis in the direction from A to B and its length the squared distance between A and B.
+	///		If the return value is FIX_MAX, ioV will be the separating axis in the direction from A to B and the magnitude of the vector is meaningless.
 	///	@param outPointA , outPointB
 	///		If the return value is 0 the points are invalid.
-	///		If the return value is bigger than 0 but smaller than FLT_MAX these will contain the closest point on A and B.
-	///		If the return value is FLT_MAX the points are invalid.
+	///		If the return value is bigger than 0 but smaller than FIX_MAX these will contain the closest point on A and B.
+	///		If the return value is FIX_MAX the points are invalid.
 	///
-	///	@return The squared distance between A and B or FLT_MAX when they are further away than inMaxDistSq.
+	///	@return The squared distance between A and B or FIX_MAX when they are further away than inMaxDistSq.
 	template <typename A, typename B>
 	decimal		GetClosestPoints(const A &inA, const B &inB, decimal inTolerance, decimal inMaxDistSq, Vec3 &ioV, Vec3 &outPointA, Vec3 &outPointB)
 	{
@@ -354,7 +354,7 @@ public:
 		decimal v_len_sq = ioV.LengthSq();
 
 		// Previous length^2 of v
-		decimal prev_v_len_sq = FLT_MAX;
+		decimal prev_v_len_sq = FIX_MAX;
 
 		for (;;)
 		{
@@ -396,7 +396,7 @@ public:
 				memset(&outPointA, 0xcd, sizeof(outPointA));
 				memset(&outPointB, 0xcd, sizeof(outPointB));
 #endif
-				return FLT_MAX;
+				return FIX_MAX;
 			}
 
 			// Store the point for later use
@@ -529,7 +529,7 @@ public:
 		decimal lambda = 0.0f;
 		Vec3 x = inRayOrigin;
 		Vec3 v = x - inA.GetSupport(Vec3::sZero());
-		decimal v_len_sq = FLT_MAX;
+		decimal v_len_sq = FIX_MAX;
 		bool allow_restart = false;
 				
 		for (;;)
@@ -580,7 +580,7 @@ public:
 				x = inRayOrigin + lambda * inRayDirection;
 				
 				// We've shifted x, so reset v_len_sq so that it is not used as early out for GetClosest
-				v_len_sq = FLT_MAX;
+				v_len_sq = FIX_MAX;
 
 				// We allow rebuilding the simplex once after x changes because the simplex was built
 				// for another x and numerical round off builds up as you keep adding points to an
@@ -638,7 +638,7 @@ public:
 				mP[0] = p;
 				mNumPoints = 1;
 				v = x - p;
-				v_len_sq = FLT_MAX;
+				v_len_sq = FIX_MAX;
 				continue;
 			}
 
@@ -719,7 +719,7 @@ public:
 		decimal lambda = 0.0f;
 		Vec3 x = Vec3::sZero(); // Since A is already transformed we can start the cast from zero
 		Vec3 v = -inB.GetSupport(Vec3::sZero()) + transformed_a.GetSupport(Vec3::sZero()); // See CastRay: v = x - inA.GetSupport(Vec3::sZero()) where inA is the Minkowski difference inB - transformed_a (see CastShape above) and x is zero
-		decimal v_len_sq = FLT_MAX;
+		decimal v_len_sq = FIX_MAX;
 		bool allow_restart = false;
 
 		// Keeps track of separating axis of the previous iteration.
@@ -784,7 +784,7 @@ public:
 				x = lambda * inDirection;
 				
 				// We've shifted x, so reset v_len_sq so that it is not used as early out when GetClosest returns false
-				v_len_sq = FLT_MAX;
+				v_len_sq = FIX_MAX;
 
 				// Now that we've moved, we know that A and B are not intersecting at lambda = 0, so we can update our tolerance to stop iterating
 				// as soon as A and B are inConvexRadiusA + inConvexRadiusB apart
@@ -848,7 +848,7 @@ public:
 				mQ[0] = q;
 				mNumPoints = 1;
 				v = x - q;
-				v_len_sq = FLT_MAX;
+				v_len_sq = FIX_MAX;
 				continue;
 			}
 

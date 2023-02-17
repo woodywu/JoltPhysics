@@ -33,7 +33,7 @@ public:
 	Vec3						mTwistAxis2 = Vec3::sAxisX();
 
 	/// Half of maximum angle between twist axis of body 1 and 2
-	float						mHalfConeAngle = 0.0f;
+	decimal						mHalfConeAngle = decimal(0.0f);
 
 protected:
 	// See: ConstraintSettings::RestoreBinaryState
@@ -75,10 +75,10 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override					{ return EConstraintSubType::Cone; }
-	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
-	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
-	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;
-	virtual bool				SolvePositionConstraint(float inDeltaTime, float inBaumgarte) override;
+	virtual void				SetupVelocityConstraint(decimal inDeltaTime) override;
+	virtual void				WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio) override;
+	virtual bool				SolveVelocityConstraint(decimal inDeltaTime) override;
+	virtual bool				SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte) override;
 #ifdef JPH_DEBUG_RENDERER
 	virtual void				DrawConstraint(DebugRenderer *inRenderer) const override;
 	virtual void				DrawConstraintLimits(DebugRenderer *inRenderer) const override;
@@ -92,16 +92,16 @@ public:
 	virtual Mat44				GetConstraintToBody2Matrix() const override;
 
 	/// Update maximum angle between body 1 and 2 (see ConeConstraintSettings)
-	void						SetHalfConeAngle(float inHalfConeAngle)		{ JPH_ASSERT(inHalfConeAngle >= 0.0f && inHalfConeAngle <= JPH_PI); mCosHalfConeAngle = Cos(inHalfConeAngle); }
-	float						GetCosHalfConeAngle() const					{ return mCosHalfConeAngle; }
+	void						SetHalfConeAngle(decimal inHalfConeAngle)		{ JPH_ASSERT(inHalfConeAngle >= decimal(0.0f) && inHalfConeAngle <= JPH_PI); mCosHalfConeAngle = Cos(inHalfConeAngle); }
+	decimal						GetCosHalfConeAngle() const					{ return mCosHalfConeAngle; }
 
 	///@name Get Lagrange multiplier from last physics update (relates to how much force/torque was applied to satisfy the constraint)
 	inline Vec3 				GetTotalLambdaPosition() const				{ return mPointConstraintPart.GetTotalLambda(); }
-	inline float				GetTotalLambdaRotation() const				{ return mAngleConstraintPart.GetTotalLambda(); }
+	inline decimal				GetTotalLambdaRotation() const				{ return mAngleConstraintPart.GetTotalLambda(); }
 
 private:
 	// Internal helper function to calculate the values below
-	void						CalculateRotationConstraintProperties(float inDeltaTime, Mat44Arg inRotation1, Mat44Arg inRotation2);
+	void						CalculateRotationConstraintProperties(decimal inDeltaTime, Mat44Arg inRotation1, Mat44Arg inRotation2);
 
 	// CONFIGURATION PROPERTIES FOLLOW
 
@@ -114,13 +114,13 @@ private:
 	Vec3						mLocalSpaceTwistAxis2;
 
 	// Angular limits
-	float						mCosHalfConeAngle;
+	decimal						mCosHalfConeAngle;
 
 	// RUN TIME PROPERTIES FOLLOW
 
 	// Axis and angle of rotation between the two bodies
 	Vec3						mWorldSpaceRotationAxis;
-	float						mCosTheta;
+	decimal						mCosTheta;
 
 	// The constraint parts
 	PointConstraintPart			mPointConstraintPart;

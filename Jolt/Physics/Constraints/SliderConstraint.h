@@ -45,16 +45,16 @@ public:
 	Vec3						mNormalAxis2 = Vec3::sAxisY();
 
 	/// When the bodies move so that mPoint1 coincides with mPoint2 the slider position is defined to be 0, movement will be limited between [mLimitsMin, mLimitsMax] where mLimitsMin e [-inf, 0] and mLimitsMax e [0, inf]
-	float						mLimitsMin = -FLT_MAX;
-	float						mLimitsMax = FLT_MAX;
+	decimal						mLimitsMin = FIX_MIN;
+	decimal						mLimitsMax = FIX_MAX;
 
 	/// If mFrequency > 0 the constraint limits will be soft and mFrequency specifies the oscillation frequency in Hz and mDamping the damping ratio (0 = no damping, 1 = critical damping).
 	/// If mFrequency <= 0, mDamping is ignored and the limits will be hard.
-	float						mFrequency = 0.0f;
-	float						mDamping = 0.0f;
+	decimal						mFrequency = decimal(0.0f);
+	decimal						mDamping = decimal(0.0f);
 
 	/// Maximum amount of friction force to apply (N) when not driven by a motor.
-	float						mMaxFrictionForce = 0.0f;
+	decimal						mMaxFrictionForce = decimal(0.0f);
 
 	/// In case the constraint is powered, this determines the motor settings around the sliding axis
 	MotorSettings				mMotorSettings;
@@ -75,10 +75,10 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override								{ return EConstraintSubType::Slider; }
-	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
-	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
-	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;
-	virtual bool				SolvePositionConstraint(float inDeltaTime, float inBaumgarte) override;
+	virtual void				SetupVelocityConstraint(decimal inDeltaTime) override;
+	virtual void				WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio) override;
+	virtual bool				SolveVelocityConstraint(decimal inDeltaTime) override;
+	virtual bool				SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte) override;
 #ifdef JPH_DEBUG_RENDERER
 	virtual void				DrawConstraint(DebugRenderer *inRenderer) const override;
 	virtual void				DrawConstraintLimits(DebugRenderer *inRenderer) const override;
@@ -92,11 +92,11 @@ public:
 	virtual Mat44				GetConstraintToBody2Matrix() const override;
 
 	/// Get the current distance from the rest position
-	float						GetCurrentPosition() const;
+	decimal						GetCurrentPosition() const;
 
 	/// Friction control
-	void						SetMaxFrictionForce(float inFrictionForce)				{ mMaxFrictionForce = inFrictionForce; }
-	float						GetMaxFrictionForce() const								{ return mMaxFrictionForce; }
+	void						SetMaxFrictionForce(decimal inFrictionForce)				{ mMaxFrictionForce = inFrictionForce; }
+	decimal						GetMaxFrictionForce() const								{ return mMaxFrictionForce; }
 
 	/// Motor settings
 	MotorSettings &				GetMotorSettings()										{ return mMotorSettings; }
@@ -105,38 +105,38 @@ public:
 	// Motor controls
 	void						SetMotorState(EMotorState inState)						{ JPH_ASSERT(inState == EMotorState::Off || mMotorSettings.IsValid()); mMotorState = inState; }
 	EMotorState					GetMotorState() const									{ return mMotorState; }
-	void						SetTargetVelocity(float inVelocity)						{ mTargetVelocity = inVelocity; }
-	float						GetTargetVelocity() const								{ return mTargetVelocity; }
-	void						SetTargetPosition(float inPosition)						{ mTargetPosition = mHasLimits? Clamp(inPosition, mLimitsMin, mLimitsMax) : inPosition; }
-	float						GetTargetPosition() const								{ return mTargetPosition; }
+	void						SetTargetVelocity(decimal inVelocity)						{ mTargetVelocity = inVelocity; }
+	decimal						GetTargetVelocity() const								{ return mTargetVelocity; }
+	void						SetTargetPosition(decimal inPosition)						{ mTargetPosition = mHasLimits? Clamp(inPosition, mLimitsMin, mLimitsMax) : inPosition; }
+	decimal						GetTargetPosition() const								{ return mTargetPosition; }
 
 	/// Update the limits of the slider constraint (see SliderConstraintSettings)
-	void						SetLimits(float inLimitsMin, float inLimitsMax);
-	float						GetLimitsMin() const									{ return mLimitsMin; }
-	float						GetLimitsMax() const									{ return mLimitsMax; }
+	void						SetLimits(decimal inLimitsMin, decimal inLimitsMax);
+	decimal						GetLimitsMin() const									{ return mLimitsMin; }
+	decimal						GetLimitsMax() const									{ return mLimitsMax; }
 	bool						HasLimits() const										{ return mHasLimits; }
 
 	/// Update the spring frequency for the limits constraint
-	void						SetFrequency(float inFrequency)							{ JPH_ASSERT(inFrequency >= 0.0f); mFrequency = inFrequency; }
-	float						GetFrequency() const									{ return mFrequency; }
+	void						SetFrequency(decimal inFrequency)							{ JPH_ASSERT(inFrequency >= decimal(0.0f)); mFrequency = inFrequency; }
+	decimal						GetFrequency() const									{ return mFrequency; }
 
 	/// Update the spring damping for the limits constraint
-	void						SetDamping(float inDamping)								{ JPH_ASSERT(inDamping >= 0.0f); mDamping = inDamping; }
-	float						GetDamping() const										{ return mDamping; }
+	void						SetDamping(decimal inDamping)								{ JPH_ASSERT(inDamping >= decimal(0.0f)); mDamping = inDamping; }
+	decimal						GetDamping() const										{ return mDamping; }
 
 	///@name Get Lagrange multiplier from last physics update (relates to how much force/torque was applied to satisfy the constraint)
 	inline Vector<2> 			GetTotalLambdaPosition() const							{ return mPositionConstraintPart.GetTotalLambda(); }
-	inline float				GetTotalLambdaPositionLimits() const					{ return mPositionLimitsConstraintPart.GetTotalLambda(); }
+	inline decimal				GetTotalLambdaPositionLimits() const					{ return mPositionLimitsConstraintPart.GetTotalLambda(); }
 	inline Vec3					GetTotalLambdaRotation() const							{ return mRotationConstraintPart.GetTotalLambda(); }
-	inline float				GetTotalLambdaMotor() const								{ return mMotorConstraintPart.GetTotalLambda(); }
+	inline decimal				GetTotalLambdaMotor() const								{ return mMotorConstraintPart.GetTotalLambda(); }
 
 private:
 	// Internal helper function to calculate the values below
 	void						CalculateR1R2U(Mat44Arg inRotation1, Mat44Arg inRotation2);
 	void						CalculateSlidingAxisAndPosition(Mat44Arg inRotation1);
 	void						CalculatePositionConstraintProperties(Mat44Arg inRotation1, Mat44Arg inRotation2);
-	void						CalculatePositionLimitsConstraintProperties(float inDeltaTime);
-	void						CalculateMotorConstraintProperties(float inDeltaTime);
+	void						CalculatePositionLimitsConstraintProperties(decimal inDeltaTime);
+	void						CalculateMotorConstraintProperties(decimal inDeltaTime);
 
 	// CONFIGURATION PROPERTIES FOLLOW
 
@@ -156,21 +156,21 @@ private:
 		
 	// Slider limits
 	bool						mHasLimits;
-	float						mLimitsMin;
-	float						mLimitsMax;
+	decimal						mLimitsMin;
+	decimal						mLimitsMax;
 
 	// Soft slider limits
-	float						mFrequency;
-	float						mDamping;
+	decimal						mFrequency;
+	decimal						mDamping;
 
 	// Friction
-	float						mMaxFrictionForce;
+	decimal						mMaxFrictionForce;
 
 	// Motor controls
 	MotorSettings				mMotorSettings;
 	EMotorState					mMotorState = EMotorState::Off;
-	float						mTargetVelocity = 0.0f;
-	float						mTargetPosition = 0.0f;
+	decimal						mTargetVelocity = decimal(0.0f);
+	decimal						mTargetPosition = decimal(0.0f);
 
 	// RUN TIME PROPERTIES FOLLOW
 
@@ -189,7 +189,7 @@ private:
 	Vec3						mN2;
 
 	// Distance along the slide axis
-	float						mD = 0.0f;
+	decimal						mD = decimal(0.0f);
 
 	// The constraint parts
 	DualAxisConstraintPart		mPositionConstraintPart;

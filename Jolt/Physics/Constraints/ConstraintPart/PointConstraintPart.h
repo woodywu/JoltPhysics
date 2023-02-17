@@ -84,7 +84,7 @@ public:
 
 		// Calculate effective mass: K^-1 = (J M^-1 J^T)^-1
 		// Using: I^-1 = R * Ibody^-1 * R^T
-		float summed_inv_mass;
+		decimal summed_inv_mass;
 		Mat44 inv_effective_mass;
 		if (inBody1.IsDynamic())
 		{
@@ -100,7 +100,7 @@ public:
 		{
 			JPH_IF_DEBUG(mInvI1_R1X = Mat44::sNaN();)
 
-			summed_inv_mass = 0.0f;
+			summed_inv_mass = decimal(0.0f);
 			inv_effective_mass = Mat44::sZero();
 		}
 
@@ -127,7 +127,7 @@ public:
 	/// @param ioBody1 The first body that this constraint is attached to
 	/// @param ioBody2 The second body that this constraint is attached to
 	/// @param inWarmStartImpulseRatio Ratio of new step to old time step (dt_new / dt_old) for scaling the lagrange multiplier of the previous frame
-	inline void					WarmStart(Body &ioBody1, Body &ioBody2, float inWarmStartImpulseRatio)
+	inline void					WarmStart(Body &ioBody1, Body &ioBody2, decimal inWarmStartImpulseRatio)
 	{
 		mTotalLambda *= inWarmStartImpulseRatio;
 		ApplyVelocityStep(ioBody1, ioBody2, mTotalLambda);
@@ -150,7 +150,7 @@ public:
 	/// @param ioBody1 The first body that this constraint is attached to
 	/// @param ioBody2 The second body that this constraint is attached to
 	/// @param inBaumgarte Baumgarte constant (fraction of the error to correct)
-	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, float inBaumgarte) const
+	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, decimal inBaumgarte) const
 	{
 		Vec3 separation = (Vec3(ioBody2.GetCenterOfMassPosition() - ioBody1.GetCenterOfMassPosition()) + mR2 - mR1);
 		if (separation != Vec3::sZero())

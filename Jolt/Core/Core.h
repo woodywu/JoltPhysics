@@ -152,7 +152,7 @@
 #define JPH_SUPPRESS_WARNINGS																	\
 	JPH_CLANG_SUPPRESS_WARNING("-Wc++98-compat")												\
 	JPH_CLANG_SUPPRESS_WARNING("-Wc++98-compat-pedantic")										\
-	JPH_CLANG_SUPPRESS_WARNING("-Wfloat-equal")													\
+	JPH_CLANG_SUPPRESS_WARNING("-Wdecimal-equal")													\
 	JPH_CLANG_SUPPRESS_WARNING("-Wsign-conversion")												\
 	JPH_CLANG_SUPPRESS_WARNING("-Wold-style-cast")												\
 	JPH_CLANG_SUPPRESS_WARNING("-Wgnu-anonymous-struct")										\
@@ -170,7 +170,7 @@
 	JPH_CLANG_SUPPRESS_WARNING("-Wdocumentation-unknown-command")								\
 	JPH_CLANG_SUPPRESS_WARNING("-Wctad-maybe-unsupported")										\
 	JPH_CLANG_SUPPRESS_WARNING("-Wdeprecated-copy")												\
-	JPH_IF_NOT_ANDROID(JPH_CLANG_SUPPRESS_WARNING("-Wimplicit-int-float-conversion"))			\
+	JPH_IF_NOT_ANDROID(JPH_CLANG_SUPPRESS_WARNING("-Wimplicit-int-decimal-conversion"))			\
 																								\
 	JPH_GCC_SUPPRESS_WARNING("-Wcomment")														\
 	JPH_GCC_SUPPRESS_WARNING("-Winvalid-offsetof")												\
@@ -257,7 +257,7 @@ JPH_SUPPRESS_WARNINGS_STD_BEGIN
 #include <algorithm>
 JPH_SUPPRESS_WARNINGS_STD_END
 #include <limits.h>
-#include <float.h>
+#include <decimal.h>
 #include <string.h>
 #if defined(JPH_USE_SSE)
 	#include <immintrin.h>
@@ -377,14 +377,14 @@ static_assert(sizeof(void *) == (JPH_CPU_ADDRESS_BITS == 64? 8 : 4), "Invalid si
 // Macro to indicate that a parameter / variable is unused
 #define JPH_UNUSED(x)			(void)x
 
-// Macro to enable floating point precise mode and to disable fused multiply add instructions
+// Macro to enable decimaling point precise mode and to disable fused multiply add instructions
 #if defined(JPH_COMPILER_GCC) || defined(JPH_CROSS_PLATFORM_DETERMINISTIC)
 	// We compile without -ffast-math and -ffp-contract=fast, so we don't need to disable anything
 	#define JPH_PRECISE_MATH_ON
 	#define JPH_PRECISE_MATH_OFF
 #elif defined(JPH_COMPILER_CLANG)
 	// We compile without -ffast-math because it cannot be turned off for a single compilation unit
-	// On clang 14 and later we can turn off float contraction through a pragma, so if FMA is on we can disable it through this macro
+	// On clang 14 and later we can turn off decimal contraction through a pragma, so if FMA is on we can disable it through this macro
 	#if __clang_major__ >= 14 && defined(JPH_USE_FMADD)
 		#define JPH_PRECISE_MATH_ON					\
 			_Pragma("clang fp contract(off)")
@@ -397,11 +397,11 @@ static_assert(sizeof(void *) == (JPH_CPU_ADDRESS_BITS == 64? 8 : 4), "Invalid si
 #elif defined(JPH_COMPILER_MSVC)
 	// Unfortunately there is no way to push the state of fp_contract, so we have to assume it was turned on before JPH_PRECISE_MATH_ON
 	#define JPH_PRECISE_MATH_ON						\
-		__pragma(float_control(precise, on, push))	\
+		__pragma(decimal_control(precise, on, push))	\
 		__pragma(fp_contract(off))
 	#define JPH_PRECISE_MATH_OFF					\
 		__pragma(fp_contract(on))					\
-		__pragma(float_control(pop))
+		__pragma(decimal_control(pop))
 #else
 	#error Undefined
 #endif

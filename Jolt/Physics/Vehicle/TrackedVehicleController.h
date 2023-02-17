@@ -23,8 +23,8 @@ public:
 	virtual void				SaveBinaryState(StreamOut &inStream) const override;
 	virtual void				RestoreBinaryState(StreamIn &inStream) override;
 
-	float						mLongitudinalFriction = 4.0f;				///< Friction in forward direction of tire
-	float						mLateralFriction = 2.0f;					///< Friction in sideway direction of tire
+	decimal						mLongitudinalFriction = decimal(4.0f);				///< Friction in forward direction of tire
+	decimal						mLateralFriction = decimal(2.0f);					///< Friction in sideway direction of tire
 };
 
 /// Wheel object specifically for TrackedVehicleController
@@ -43,12 +43,12 @@ public:
 	void						CalculateAngularVelocity(const VehicleConstraint &inConstraint);
 
 	/// Update the wheel rotation based on the current angular velocity
-	void						Update(float inDeltaTime, const VehicleConstraint &inConstraint);
+	void						Update(decimal inDeltaTime, const VehicleConstraint &inConstraint);
 
 	int							mTrackIndex = -1;							///< Index in mTracks to which this wheel is attached (calculated on initialization)
-	float						mCombinedLongitudinalFriction = 0.0f;		///< Combined friction coefficient in longitudinal direction (combines terrain and track)
-	float						mCombinedLateralFriction = 0.0f;			///< Combined friction coefficient in lateral direction (combines terrain and track)
-	float						mBrakeImpulse = 0.0f;						///< Amount of impulse that the brakes can apply to the floor (excluding friction), spread out from brake impulse applied on track
+	decimal						mCombinedLongitudinalFriction = decimal(0.0f);		///< Combined friction coefficient in longitudinal direction (combines terrain and track)
+	decimal						mCombinedLateralFriction = decimal(0.0f);			///< Combined friction coefficient in lateral direction (combines terrain and track)
+	decimal						mBrakeImpulse = decimal(0.0f);						///< Amount of impulse that the brakes can apply to the floor (excluding friction), spread out from brake impulse applied on track
 };
 
 /// Settings of a vehicle with tank tracks
@@ -87,7 +87,7 @@ public:
 	/// @param inLeftRatio Value between -1 and 1 indicating an extra multiplier to the rotation rate of the left track (used for steering)
 	/// @param inRightRatio Value between -1 and 1 indicating an extra multiplier to the rotation rate of the right track (used for steering)
 	/// @param inBrake Value between 0 and 1 indicating how strong the brake pedal is pressed
-	void						SetDriverInput(float inForward, float inLeftRatio, float inRightRatio, float inBrake) { JPH_ASSERT(inLeftRatio != 0.0f && inRightRatio != 0.0f); mForwardInput = inForward; mLeftRatio = inLeftRatio; mRightRatio = inRightRatio; mBrakeInput = inBrake; }
+	void						SetDriverInput(decimal inForward, decimal inLeftRatio, decimal inRightRatio, decimal inBrake) { JPH_ASSERT(inLeftRatio != decimal(0.0f) && inRightRatio != decimal(0.0f)); mForwardInput = inForward; mLeftRatio = inLeftRatio; mRightRatio = inRightRatio; mBrakeInput = inBrake; }
 
 	/// Get current engine state
 	const VehicleEngine &		GetEngine() const							{ return mEngine; }
@@ -109,7 +109,7 @@ public:
 
 #ifdef JPH_DEBUG_RENDERER
 	/// Debug drawing of RPM meter
-	void						SetRPMMeter(Vec3Arg inPosition, float inSize) { mRPMMeterPosition = inPosition; mRPMMeterSize = inSize; }
+	void						SetRPMMeter(Vec3Arg inPosition, decimal inSize) { mRPMMeterPosition = inPosition; mRPMMeterSize = inSize; }
 #endif // JPH_DEBUG_RENDERER
 
 protected:
@@ -118,10 +118,10 @@ protected:
 
 	// See: VehicleController
 	virtual Wheel *				ConstructWheel(const WheelSettings &inWheel) const override { JPH_ASSERT(IsKindOf(&inWheel, JPH_RTTI(WheelSettingsTV))); return new WheelTV(static_cast<const WheelSettingsTV &>(inWheel)); }
-	virtual bool				AllowSleep() const override					{ return mForwardInput == 0.0f; }
-	virtual void				PreCollide(float inDeltaTime, PhysicsSystem &inPhysicsSystem) override;
-	virtual void				PostCollide(float inDeltaTime, PhysicsSystem &inPhysicsSystem) override;
-	virtual bool				SolveLongitudinalAndLateralConstraints(float inDeltaTime) override;
+	virtual bool				AllowSleep() const override					{ return mForwardInput == decimal(0.0f); }
+	virtual void				PreCollide(decimal inDeltaTime, PhysicsSystem &inPhysicsSystem) override;
+	virtual void				PostCollide(decimal inDeltaTime, PhysicsSystem &inPhysicsSystem) override;
+	virtual bool				SolveLongitudinalAndLateralConstraints(decimal inDeltaTime) override;
 	virtual void				SaveState(StateRecorder &inStream) const override;
 	virtual void				RestoreState(StateRecorder &inStream) override;
 #ifdef JPH_DEBUG_RENDERER
@@ -129,10 +129,10 @@ protected:
 #endif // JPH_DEBUG_RENDERER
 
 	// Control information
-	float						mForwardInput = 0.0f;						///< Value between -1 and 1 for auto transmission and value between 0 and 1 indicating desired driving direction and amount the gas pedal is pressed
-	float						mLeftRatio = 1.0f;							///< Value between -1 and 1 indicating an extra multiplier to the rotation rate of the left track (used for steering)
-	float						mRightRatio = 1.0f;							///< Value between -1 and 1 indicating an extra multiplier to the rotation rate of the right track (used for steering)
-	float						mBrakeInput = 0.0f;							///< Value between 0 and 1 indicating how strong the brake pedal is pressed
+	decimal						mForwardInput = decimal(0.0f);						///< Value between -1 and 1 for auto transmission and value between 0 and 1 indicating desired driving direction and amount the gas pedal is pressed
+	decimal						mLeftRatio = decimal(1.0f);							///< Value between -1 and 1 indicating an extra multiplier to the rotation rate of the left track (used for steering)
+	decimal						mRightRatio = decimal(1.0f);							///< Value between -1 and 1 indicating an extra multiplier to the rotation rate of the right track (used for steering)
+	decimal						mBrakeInput = decimal(0.0f);							///< Value between 0 and 1 indicating how strong the brake pedal is pressed
 
 	// Simluation information
 	VehicleEngine				mEngine;									///< Engine state of the vehicle
@@ -142,7 +142,7 @@ protected:
 #ifdef JPH_DEBUG_RENDERER
 	// Debug settings
 	Vec3						mRPMMeterPosition { 0, 1, 0 };				///< Position (in local space of the body) of the RPM meter when drawing the constraint
-	float						mRPMMeterSize = 0.5f;						///< Size of the RPM meter when drawing the constraint
+	decimal						mRPMMeterSize = decimal(0.5f);						///< Size of the RPM meter when drawing the constraint
 #endif // JPH_DEBUG_RENDERER
 };
 

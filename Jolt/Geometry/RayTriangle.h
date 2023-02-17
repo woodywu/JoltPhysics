@@ -5,7 +5,7 @@
 
 JPH_NAMESPACE_BEGIN
 
-/// Intersect ray with triangle, returns closest point or FLT_MAX if no hit (branch less version)
+/// Intersect ray with triangle, returns closest point or FIX_MAX if no hit (branch less version)
 /// Adapted from: http://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 JPH_INLINE decimal RayTriangle(Vec3Arg inOrigin, Vec3Arg inDirection, Vec3Arg inV0, Vec3Arg inV1, Vec3Arg inV2)
 {
@@ -67,11 +67,11 @@ JPH_INLINE decimal RayTriangle(Vec3Arg inOrigin, Vec3Arg inDirection, Vec3Arg in
 			Vec3::sLess(t, zero)
 		);
 
-	// Select intersection point or FLT_MAX based on if there is an intersection or not
+	// Select intersection point or FIX_MAX based on if there is an intersection or not
 	return Vec3::sSelect(t, Vec3::sReplicate(FIX_MAX), no_intersection).GetX();
 }
 
-/// Intersect ray with 4 triangles in SOA format, returns 4 vector of closest points or FLT_MAX if no hit (uses bit tricks to do less divisions)
+/// Intersect ray with 4 triangles in SOA format, returns 4 vector of closest points or FIX_MAX if no hit (uses bit tricks to do less divisions)
 JPH_INLINE Vec4 RayTriangle4(Vec3Arg inOrigin, Vec3Arg inDirection, Vec4Arg inV0X, Vec4Arg inV0Y, Vec4Arg inV0Z, Vec4Arg inV1X, Vec4Arg inV1Y, Vec4Arg inV1Z, Vec4Arg inV2X, Vec4Arg inV2Y, Vec4Arg inV2Z)
 {
 	// Epsilon
@@ -150,7 +150,7 @@ JPH_INLINE Vec4 RayTriangle4(Vec3Arg inOrigin, Vec3Arg inDirection, Vec4Arg inV0
 			Vec4::sLess(t, zero)
 		);
 
-	// Select intersection point or FLT_MAX based on if there is an intersection or not
+	// Select intersection point or FIX_MAX based on if there is an intersection or not
 	return Vec4::sSelect(t / det, Vec4::sReplicate(FIX_MAX), no_intersection);
 }
 

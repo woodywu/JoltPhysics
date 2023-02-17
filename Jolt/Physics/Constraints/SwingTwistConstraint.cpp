@@ -182,7 +182,7 @@ void SwingTwistConstraint::SetTargetOrientationCS(QuatArg inOrientation)
 		mTargetOrientation = inOrientation; 
 }
 
-void SwingTwistConstraint::SetupVelocityConstraint(float inDeltaTime)
+void SwingTwistConstraint::SetupVelocityConstraint(decimal inDeltaTime)
 {
 	// Setup point constraint
 	Mat44 rotation1 = Mat44::sRotation(mBody1->GetRotation());
@@ -197,7 +197,7 @@ void SwingTwistConstraint::SetupVelocityConstraint(float inDeltaTime)
 	// Calculate constraint properties for the swing twist limit
 	mSwingTwistConstraintPart.CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, q, constraint_body1_to_world);
 
-	if (mSwingMotorState != EMotorState::Off || mTwistMotorState != EMotorState::Off || mMaxFrictionTorque > 0.0f)
+	if (mSwingMotorState != EMotorState::Off || mTwistMotorState != EMotorState::Off || mMaxFrictionTorque > decimal(0.0f))
 	{
 		// Calculate rotation motor axis
 		Mat44 ws_axis = Mat44::sRotation(constraint_body2_to_world);
@@ -208,7 +208,7 @@ void SwingTwistConstraint::SetupVelocityConstraint(float inDeltaTime)
 		if (mSwingMotorState == EMotorState::Position || mTwistMotorState == EMotorState::Position)
 		{
 			// Get target orientation along the shortest path from q
-			Quat target_orientation = q.Dot(mTargetOrientation) > 0.0f? mTargetOrientation : -mTargetOrientation;
+			Quat target_orientation = q.Dot(mTargetOrientation) > decimal(0.0f)? mTargetOrientation : -mTargetOrientation;
 
 			// The definition of the constraint rotation q:
 			// R2 * ConstraintToBody2 = R1 * ConstraintToBody1 * q (1)
@@ -232,20 +232,20 @@ void SwingTwistConstraint::SetupVelocityConstraint(float inDeltaTime)
 
 			// Approximate error angles
 			// The imaginary part of a quaternion is rotation_axis * sin(angle / 2)
-			// If angle is small, sin(x) = x so angle[i] ~ 2.0f * rotation_axis[i]
+			// If angle is small, sin(x) = x so angle[i] ~ decimal(2.0f) * rotation_axis[i]
 			// We'll be making small time steps, so if the angle is not small at least the sign will be correct and we'll move in the right direction
-			rotation_error = -2.0f * diff.GetXYZ();
+			rotation_error = -decimal(2.0f) * diff.GetXYZ();
 		}
 
 		// Swing motor
 		switch (mSwingMotorState)
 		{
 		case EMotorState::Off:
-			if (mMaxFrictionTorque > 0.0f)
+			if (mMaxFrictionTorque > decimal(0.0f))
 			{
 				// Enable friction
 				for (int i = 1; i < 3; ++i)
-					mMotorConstraintPart[i].CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, mWorldSpaceMotorAxis[i], 0.0f);
+					mMotorConstraintPart[i].CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, mWorldSpaceMotorAxis[i], decimal(0.0f));
 			}
 			else
 			{
@@ -264,7 +264,7 @@ void SwingTwistConstraint::SetupVelocityConstraint(float inDeltaTime)
 		case EMotorState::Position:
 			// Use motor to drive rotation error to zero
 			for (int i = 1; i < 3; ++i)
-				mMotorConstraintPart[i].CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, mWorldSpaceMotorAxis[i], 0.0f, rotation_error[i], mSwingMotorSettings.mFrequency, mSwingMotorSettings.mDamping);
+				mMotorConstraintPart[i].CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, mWorldSpaceMotorAxis[i], decimal(0.0f), rotation_error[i], mSwingMotorSettings.mFrequency, mSwingMotorSettings.mDamping);
 			break;
 		}	
 
@@ -272,10 +272,10 @@ void SwingTwistConstraint::SetupVelocityConstraint(float inDeltaTime)
 		switch (mTwistMotorState)
 		{
 		case EMotorState::Off:
-			if (mMaxFrictionTorque > 0.0f)
+			if (mMaxFrictionTorque > decimal(0.0f))
 			{
 				// Enable friction
-				mMotorConstraintPart[0].CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, mWorldSpaceMotorAxis[0], 0.0f);
+				mMotorConstraintPart[0].CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, mWorldSpaceMotorAxis[0], decimal(0.0f));
 			}
 			else
 			{
@@ -291,7 +291,7 @@ void SwingTwistConstraint::SetupVelocityConstraint(float inDeltaTime)
 
 		case EMotorState::Position:
 			// Use motor to drive rotation error to zero
-			mMotorConstraintPart[0].CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, mWorldSpaceMotorAxis[0], 0.0f, rotation_error[0], mTwistMotorSettings.mFrequency, mTwistMotorSettings.mDamping);
+			mMotorConstraintPart[0].CalculateConstraintProperties(inDeltaTime, *mBody1, *mBody2, mWorldSpaceMotorAxis[0], decimal(0.0f), rotation_error[0], mTwistMotorSettings.mFrequency, mTwistMotorSettings.mDamping);
 			break;
 		}	
 	}
@@ -303,7 +303,7 @@ void SwingTwistConstraint::SetupVelocityConstraint(float inDeltaTime)
 	}
 }
 
-void SwingTwistConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio)
+void SwingTwistConstraint::WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio)
 {
 	// Warm starting: Apply previous frame impulse
 	for (AngleConstraintPart &c : mMotorConstraintPart)
@@ -312,7 +312,7 @@ void SwingTwistConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseR
 	mPointConstraintPart.WarmStart(*mBody1, *mBody2, inWarmStartImpulseRatio);
 }
 
-bool SwingTwistConstraint::SolveVelocityConstraint(float inDeltaTime)
+bool SwingTwistConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 {
 	bool impulse = false;
 
@@ -320,7 +320,7 @@ bool SwingTwistConstraint::SolveVelocityConstraint(float inDeltaTime)
 	if (mMotorConstraintPart[0].IsActive())
 	{
 		// Twist limits
-		float min_twist_limit, max_twist_limit;
+		decimal min_twist_limit, max_twist_limit;
 		if (mTwistMotorState == EMotorState::Off)
 		{
 			max_twist_limit = inDeltaTime * mMaxFrictionTorque;
@@ -342,7 +342,7 @@ bool SwingTwistConstraint::SolveVelocityConstraint(float inDeltaTime)
 		JPH_ASSERT(mMotorConstraintPart[2].IsActive());
 
 		// Swing limits
-		float min_swing_limit, max_swing_limit;
+		decimal min_swing_limit, max_swing_limit;
 		if (mSwingMotorState == EMotorState::Off)
 		{
 			max_swing_limit = inDeltaTime * mMaxFrictionTorque;
@@ -372,7 +372,7 @@ bool SwingTwistConstraint::SolveVelocityConstraint(float inDeltaTime)
 	return impulse;
 }
 
-bool SwingTwistConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgarte)
+bool SwingTwistConstraint::SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte)
 {
 	bool impulse = false;
 
@@ -409,7 +409,7 @@ void SwingTwistConstraint::DrawConstraint(DebugRenderer *inRenderer) const
 	if (mSwingMotorState == EMotorState::Velocity || mTwistMotorState == EMotorState::Velocity)
 	{
 		// Draw target angular velocity
-		inRenderer->DrawArrow(position1, position1 + rotation2 * mTargetAngularVelocity, Color::sRed, 0.1f);
+		inRenderer->DrawArrow(position1, position1 + rotation2 * mTargetAngularVelocity, Color::sRed, decimal(0.1f));
 	}
 	if (mSwingMotorState == EMotorState::Position || mTwistMotorState == EMotorState::Position)
 	{

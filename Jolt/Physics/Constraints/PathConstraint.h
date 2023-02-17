@@ -46,10 +46,10 @@ public:
 	Quat							mPathRotation = Quat::sIdentity();
 
 	/// The fraction along the path that corresponds to the initial position of body 2. Usually this is 0, the beginning of the path. But if you want to start an object halfway the path you can calculate this with mPath->GetClosestPoint(point on path to attach body to).
-	float							mPathFraction = 0.0f;
+	decimal							mPathFraction = decimal(0.0f);
 
 	/// Maximum amount of friction force to apply (N) when not driven by a motor.
-	float							mMaxFrictionForce = 0.0f;
+	decimal							mMaxFrictionForce = decimal(0.0f);
 
 	/// In case the constraint is powered, this determines the motor settings along the path
 	MotorSettings					mPositionMotorSettings;
@@ -73,10 +73,10 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType		GetSubType() const override								{ return EConstraintSubType::Path; }
-	virtual void					SetupVelocityConstraint(float inDeltaTime) override;
-	virtual void					WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
-	virtual bool					SolveVelocityConstraint(float inDeltaTime) override;
-	virtual bool					SolvePositionConstraint(float inDeltaTime, float inBaumgarte) override;
+	virtual void					SetupVelocityConstraint(decimal inDeltaTime) override;
+	virtual void					WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio) override;
+	virtual bool					SolveVelocityConstraint(decimal inDeltaTime) override;
+	virtual bool					SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte) override;
 #ifdef JPH_DEBUG_RENDERER
 	virtual void					DrawConstraint(DebugRenderer *inRenderer) const override;
 #endif // JPH_DEBUG_RENDERER
@@ -90,17 +90,17 @@ public:
 	virtual Mat44					GetConstraintToBody2Matrix() const override				{ return mPathToBody2; }
 
 	/// Update the path for this constraint
-	void							SetPath(const PathConstraintPath *inPath, float inPathFraction);
+	void							SetPath(const PathConstraintPath *inPath, decimal inPathFraction);
 
 	/// Access to the current path
 	const PathConstraintPath *		GetPath() const											{ return mPath; }
 
 	/// Access to the current fraction along the path e [0, GetPath()->GetMaxPathFraction()]
-	float							GetPathFraction() const									{ return mPathFraction; }
+	decimal							GetPathFraction() const									{ return mPathFraction; }
 	
 	/// Friction control
-	void							SetMaxFrictionForce(float inFrictionForce)				{ mMaxFrictionForce = inFrictionForce; }
-	float							GetMaxFrictionForce() const								{ return mMaxFrictionForce; }
+	void							SetMaxFrictionForce(decimal inFrictionForce)				{ mMaxFrictionForce = inFrictionForce; }
+	decimal							GetMaxFrictionForce() const								{ return mMaxFrictionForce; }
 
 	/// Position motor settings
 	MotorSettings &					GetPositionMotorSettings()								{ return mPositionMotorSettings; }
@@ -109,21 +109,21 @@ public:
 	// Position motor controls (drives body 2 along the path)
 	void							SetPositionMotorState(EMotorState inState)				{ JPH_ASSERT(inState == EMotorState::Off || mPositionMotorSettings.IsValid()); mPositionMotorState = inState; }
 	EMotorState						GetPositionMotorState() const							{ return mPositionMotorState; }
-	void							SetTargetVelocity(float inVelocity)						{ mTargetVelocity = inVelocity; }
-	float							GetTargetVelocity() const								{ return mTargetVelocity; }
-	void							SetTargetPathFraction(float inFraction)					{ JPH_ASSERT(mPath->IsLooping() || (inFraction >= 0.0f && inFraction <= mPath->GetPathMaxFraction())); mTargetPathFraction = inFraction; }
-	float							GetTargetPathFraction() const							{ return mTargetPathFraction; }
+	void							SetTargetVelocity(decimal inVelocity)						{ mTargetVelocity = inVelocity; }
+	decimal							GetTargetVelocity() const								{ return mTargetVelocity; }
+	void							SetTargetPathFraction(decimal inFraction)					{ JPH_ASSERT(mPath->IsLooping() || (inFraction >= decimal(0.0f) && inFraction <= mPath->GetPathMaxFraction())); mTargetPathFraction = inFraction; }
+	decimal							GetTargetPathFraction() const							{ return mTargetPathFraction; }
 
 	///@name Get Lagrange multiplier from last physics update (relates to how much force/torque was applied to satisfy the constraint)
 	inline Vector<2>				GetTotalLambdaPosition() const							{ return mPositionConstraintPart.GetTotalLambda(); }
-	inline float					GetTotalLambdaPositionLimits() const					{ return mPositionLimitsConstraintPart.GetTotalLambda(); }
-	inline float					GetTotalLambdaMotor() const								{ return mPositionMotorConstraintPart.GetTotalLambda(); }
+	inline decimal					GetTotalLambdaPositionLimits() const					{ return mPositionLimitsConstraintPart.GetTotalLambda(); }
+	inline decimal					GetTotalLambdaMotor() const								{ return mPositionMotorConstraintPart.GetTotalLambda(); }
 	inline Vector<2>				GetTotalLambdaRotationHinge() const						{ return mHingeConstraintPart.GetTotalLambda(); }
 	inline Vec3						GetTotalLambdaRotation() const							{ return mRotationConstraintPart.GetTotalLambda(); }
 
 private:
 	// Internal helper function to calculate the values below
-	void							CalculateConstraintProperties(float inDeltaTime);
+	void							CalculateConstraintProperties(decimal inDeltaTime);
 
 	// CONFIGURATION PROPERTIES FOLLOW
 
@@ -133,13 +133,13 @@ private:
 	EPathRotationConstraintType		mRotationConstraintType;								///< How to constrain the rotation of the path
 
 	// Friction
-	float							mMaxFrictionForce;
+	decimal							mMaxFrictionForce;
 
 	// Motor controls
 	MotorSettings					mPositionMotorSettings;
 	EMotorState						mPositionMotorState = EMotorState::Off;
-	float							mTargetVelocity = 0.0f;
-	float							mTargetPathFraction = 0.0f;
+	decimal							mTargetVelocity = decimal(0.0f);
+	decimal							mTargetPathFraction = decimal(0.0f);
 
 	// RUN TIME PROPERTIES FOLLOW
 
@@ -161,7 +161,7 @@ private:
 	Quat							mInvInitialOrientation;
 
 	// Current fraction along the path where body 2 is attached
-	float							mPathFraction = 0.0f;
+	decimal							mPathFraction = decimal(0.0f);
 
 	// Translation constraint parts
 	DualAxisConstraintPart			mPositionConstraintPart;								///< Constraint part that keeps the movement along the tangent of the path

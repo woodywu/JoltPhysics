@@ -38,7 +38,7 @@ public:
 	/// 
 	/// When you create an instance using Ragdoll::CreateRagdoll pass in a unique GroupID for each ragdoll (e.g. a simple counter), note that this number 
 	/// should be unique throughout the PhysicsSystem, so if you have different types of ragdolls they should not share the same GroupID.
-	void								DisableParentChildCollisions(const Mat44 *inJointMatrices = nullptr, float inMinSeparationDistance = 0.0f);
+	void								DisableParentChildCollisions(const Mat44 *inJointMatrices = nullptr, decimal inMinSeparationDistance = decimal(0.0f));
 
 	/// Saves the state of this object in binary form to inStream.
 	/// @param inStream The stream to save the state to
@@ -142,10 +142,10 @@ public:
 	void								GetPose(RVec3 &outRootOffset, Mat44 *outJointMatrices, bool inLockBodies = true);
 
 	/// Drive the ragdoll to a specific pose by setting velocities on each of the bodies so that it will reach inPose in inDeltaTime
-	void								DriveToPoseUsingKinematics(const SkeletonPose &inPose, float inDeltaTime, bool inLockBodies = true);
+	void								DriveToPoseUsingKinematics(const SkeletonPose &inPose, decimal inDeltaTime, bool inLockBodies = true);
 	
 	/// Lower level version of DriveToPoseUsingKinematics that directly takes the world space joint matrices
-	void								DriveToPoseUsingKinematics(RVec3Arg inRootOffset, const Mat44 *inJointMatrices, float inDeltaTime, bool inLockBodies = true);
+	void								DriveToPoseUsingKinematics(RVec3Arg inRootOffset, const Mat44 *inJointMatrices, decimal inDeltaTime, bool inLockBodies = true);
 
 	/// Drive the ragdoll to a specific pose by activating the motors on each constraint
 	void								DriveToPoseUsingMotors(const SkeletonPose &inPose);

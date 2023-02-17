@@ -15,7 +15,7 @@ Vec8 Vec8::sZero()
 	return _mm256_setzero_ps();
 }
 
-Vec8 Vec8::sReplicate(float inV)
+Vec8 Vec8::sReplicate(decimal inV)
 {
 	return _mm256_set1_ps(inV);
 }
@@ -69,12 +69,12 @@ UVec8 Vec8::sGreater(Vec8Arg inV1, Vec8Arg inV2)
 	return _mm256_castps_si256(_mm256_cmp_ps(inV1.mValue, inV2.mValue, _CMP_GT_OQ));
 }
 
-Vec8 Vec8::sLoadFloat8(const float *inV)
+Vec8 Vec8::sLoadFloat8(const decimal *inV)
 {
 	return _mm256_loadu_ps(inV);
 }
 
-Vec8 Vec8::sLoadFloat8Aligned(const float *inV)
+Vec8 Vec8::sLoadFloat8Aligned(const decimal *inV)
 {
 	return _mm256_load_ps(inV);
 }
@@ -84,7 +84,7 @@ Vec8 Vec8::operator * (Vec8Arg inV2) const
 	return _mm256_mul_ps(mValue, inV2.mValue);
 }
 
-Vec8 Vec8::operator * (float inV2) const
+Vec8 Vec8::operator * (decimal inV2) const
 {
 	return _mm256_mul_ps(mValue, _mm256_set1_ps(inV2));
 }
@@ -139,7 +139,7 @@ Vec4 Vec8::UpperVec4() const
 	return _mm256_extractf128_ps(mValue, 1);
 }
 
-float Vec8::ReduceMin() const
+decimal Vec8::ReduceMin() const
 {
 	return Vec4::sMin(LowerVec4(), UpperVec4()).ReduceMin();
 }

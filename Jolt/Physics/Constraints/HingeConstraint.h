@@ -39,11 +39,11 @@ public:
 	
 	/// Bodies are assumed to be placed so that the hinge angle = 0, movement will be limited between [mLimitsMin, mLimitsMax] where mLimitsMin e [-pi, 0] and mLimitsMax e [0, pi].
 	/// Both angles are in radians.
-	float						mLimitsMin = -JPH_PI;
-	float						mLimitsMax = JPH_PI;
+	decimal						mLimitsMin = -JPH_PI;
+	decimal						mLimitsMax = JPH_PI;
 
 	/// Maximum amount of torque (N m) to apply as friction when the constraint is not powered by a motor
-	float						mMaxFrictionTorque = 0.0f;
+	decimal						mMaxFrictionTorque = decimal(0.0f);
 
 	/// In case the constraint is powered, this determines the motor settings around the hinge axis
 	MotorSettings				mMotorSettings;
@@ -64,10 +64,10 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override								{ return EConstraintSubType::Hinge; }
-	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
-	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
-	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;
-	virtual bool				SolvePositionConstraint(float inDeltaTime, float inBaumgarte) override;
+	virtual void				SetupVelocityConstraint(decimal inDeltaTime) override;
+	virtual void				WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio) override;
+	virtual bool				SolveVelocityConstraint(decimal inDeltaTime) override;
+	virtual bool				SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte) override;
 #ifdef JPH_DEBUG_RENDERER
 	virtual void				DrawConstraint(DebugRenderer *inRenderer) const override;
 	virtual void				DrawConstraintLimits(DebugRenderer *inRenderer) const override;
@@ -81,11 +81,11 @@ public:
 	virtual Mat44				GetConstraintToBody2Matrix() const override;
 
 	/// Get the current rotation angle from the rest position
-	float						GetCurrentAngle() const;
+	decimal						GetCurrentAngle() const;
 
 	// Friction control
-	void						SetMaxFrictionTorque(float inFrictionTorque)			{ mMaxFrictionTorque = inFrictionTorque; }
-	float						GetMaxFrictionTorque() const							{ return mMaxFrictionTorque; }
+	void						SetMaxFrictionTorque(decimal inFrictionTorque)			{ mMaxFrictionTorque = inFrictionTorque; }
+	decimal						GetMaxFrictionTorque() const							{ return mMaxFrictionTorque; }
 
 	// Motor settings
 	MotorSettings &				GetMotorSettings()										{ return mMotorSettings; }
@@ -94,29 +94,29 @@ public:
 	// Motor controls
 	void						SetMotorState(EMotorState inState)						{ JPH_ASSERT(inState == EMotorState::Off || mMotorSettings.IsValid()); mMotorState = inState; }
 	EMotorState					GetMotorState() const									{ return mMotorState; }
-	void						SetTargetAngularVelocity(float inAngularVelocity)		{ mTargetAngularVelocity = inAngularVelocity; } ///< rad/s
-	float						GetTargetAngularVelocity() const						{ return mTargetAngularVelocity; }
-	void						SetTargetAngle(float inAngle)							{ mTargetAngle = mHasLimits? Clamp(inAngle, mLimitsMin, mLimitsMax) : inAngle; } ///< rad
-	float						GetTargetAngle() const									{ return mTargetAngle; }
+	void						SetTargetAngularVelocity(decimal inAngularVelocity)		{ mTargetAngularVelocity = inAngularVelocity; } ///< rad/s
+	decimal						GetTargetAngularVelocity() const						{ return mTargetAngularVelocity; }
+	void						SetTargetAngle(decimal inAngle)							{ mTargetAngle = mHasLimits? Clamp(inAngle, mLimitsMin, mLimitsMax) : inAngle; } ///< rad
+	decimal						GetTargetAngle() const									{ return mTargetAngle; }
 
 	/// Update the rotation limits of the hinge, value in radians (see HingeConstraintSettings)
-	void						SetLimits(float inLimitsMin, float inLimitsMax);
-	float						GetLimitsMin() const									{ return mLimitsMin; }
-	float						GetLimitsMax() const									{ return mLimitsMax; }
+	void						SetLimits(decimal inLimitsMin, decimal inLimitsMax);
+	decimal						GetLimitsMin() const									{ return mLimitsMin; }
+	decimal						GetLimitsMax() const									{ return mLimitsMax; }
 	bool						HasLimits() const										{ return mHasLimits; }
 
 	///@name Get Lagrange multiplier from last physics update (relates to how much force/torque was applied to satisfy the constraint)
 	inline Vec3		 			GetTotalLambdaPosition() const							{ return mPointConstraintPart.GetTotalLambda(); }
 	inline Vector<2>			GetTotalLambdaRotation() const							{ return mRotationConstraintPart.GetTotalLambda(); }
-	inline float				GetTotalLambdaRotationLimits() const					{ return mRotationLimitsConstraintPart.GetTotalLambda(); }
-	inline float				GetTotalLambdaMotor() const								{ return mMotorConstraintPart.GetTotalLambda(); }
+	inline decimal				GetTotalLambdaRotationLimits() const					{ return mRotationLimitsConstraintPart.GetTotalLambda(); }
+	inline decimal				GetTotalLambdaMotor() const								{ return mMotorConstraintPart.GetTotalLambda(); }
 
 private:
 	// Internal helper function to calculate the values below
 	void						CalculateA1AndTheta();
-	void						CalculateRotationLimitsConstraintProperties(float inDeltaTime);
-	void						CalculateMotorConstraintProperties(float inDeltaTime);
-	inline float				GetSmallestAngleToLimit() const;
+	void						CalculateRotationLimitsConstraintProperties(decimal inDeltaTime);
+	void						CalculateMotorConstraintProperties(decimal inDeltaTime);
+	inline decimal				GetSmallestAngleToLimit() const;
 
 	// CONFIGURATION PROPERTIES FOLLOW
 
@@ -137,22 +137,22 @@ private:
 
 	// Hinge limits
 	bool						mHasLimits;
-	float						mLimitsMin;
-	float						mLimitsMax;
+	decimal						mLimitsMin;
+	decimal						mLimitsMax;
 
 	// Friction
-	float						mMaxFrictionTorque;
+	decimal						mMaxFrictionTorque;
 
 	// Motor controls
 	MotorSettings				mMotorSettings;
 	EMotorState					mMotorState = EMotorState::Off;
-	float						mTargetAngularVelocity = 0.0f;
-	float						mTargetAngle = 0.0f;
+	decimal						mTargetAngularVelocity = decimal(0.0f);
+	decimal						mTargetAngle = decimal(0.0f);
 
 	// RUN TIME PROPERTIES FOLLOW
 
 	// Current rotation around the hinge axis
-	float						mTheta = 0.0f;
+	decimal						mTheta = decimal(0.0f);
 	
 	// World space hinge axis for body 1
 	Vec3						mA1;

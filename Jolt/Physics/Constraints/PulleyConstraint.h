@@ -41,13 +41,13 @@ public:
 	RVec3						mFixedPoint2 = RVec3::sZero();
 
 	/// Ratio between the two line segments (see formula above), can be used to create a block and tackle 
-	float						mRatio = 1.0f;
+	decimal						mRatio = decimal(1.0f);
 
 	/// The minimum length of the line segments (see formula above), use -1 to calculate the length based on the positions of the objects when the constraint is created.
-	float						mMinLength = 0.0f;
+	decimal						mMinLength = decimal(0.0f);
 
 	/// The maximum length of the line segments (see formula above), use -1 to calculate the length based on the positions of the objects when the constraint is created.
-	float						mMaxLength = -1.0f;
+	decimal						mMaxLength = -decimal(1.0f);
 
 protected:
 	// See: ConstraintSettings::RestoreBinaryState
@@ -65,10 +65,10 @@ public:
 
 	// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override									{ return EConstraintSubType::Pulley; }
-	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
-	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
-	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;
-	virtual bool				SolvePositionConstraint(float inDeltaTime, float inBaumgarte) override;
+	virtual void				SetupVelocityConstraint(decimal inDeltaTime) override;
+	virtual void				WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio) override;
+	virtual bool				SolveVelocityConstraint(decimal inDeltaTime) override;
+	virtual bool				SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte) override;
 #ifdef JPH_DEBUG_RENDERER
 	virtual void				DrawConstraint(DebugRenderer *inRenderer) const override;
 #endif // JPH_DEBUG_RENDERER
@@ -81,19 +81,19 @@ public:
 	virtual Mat44				GetConstraintToBody2Matrix() const override					{ return Mat44::sTranslation(mLocalSpacePosition2); } // Note: Incorrect rotation as we don't track the original rotation difference, should not matter though as the constraint is not limiting rotation.
 
 	/// Update the minimum and maximum length for the constraint
-	void						SetLength(float inMinLength, float inMaxLength)				{ JPH_ASSERT(inMinLength >= 0.0f && inMinLength <= inMaxLength); mMinLength = inMinLength; mMaxLength = inMaxLength; }
-	float						GetMinLength() const										{ return mMinLength; }
-	float						GetMaxLength() const										{ return mMaxLength; }
+	void						SetLength(decimal inMinLength, decimal inMaxLength)				{ JPH_ASSERT(inMinLength >= decimal(0.0f) && inMinLength <= inMaxLength); mMinLength = inMinLength; mMaxLength = inMaxLength; }
+	decimal						GetMinLength() const										{ return mMinLength; }
+	decimal						GetMaxLength() const										{ return mMaxLength; }
 
 	/// Get the current length of both segments (multiplied by the ratio for segment 2)
-	float						GetCurrentLength() const									{ return Vec3(mWorldSpacePosition1 - mFixedPosition1).Length() + mRatio * Vec3(mWorldSpacePosition2 - mFixedPosition2).Length(); }
+	decimal						GetCurrentLength() const									{ return Vec3(mWorldSpacePosition1 - mFixedPosition1).Length() + mRatio * Vec3(mWorldSpacePosition2 - mFixedPosition2).Length(); }
 
 	///@name Get Lagrange multiplier from last physics update (relates to how much force/torque was applied to satisfy the constraint)
-	inline float	 			GetTotalLambdaPosition() const								{ return mIndependentAxisConstraintPart.GetTotalLambda(); }
+	inline decimal	 			GetTotalLambdaPosition() const								{ return mIndependentAxisConstraintPart.GetTotalLambda(); }
 
 private:
 	// Calculates world positions and normals and returns current length
-	float						CalculatePositionsNormalsAndLength();
+	decimal						CalculatePositionsNormalsAndLength();
 
 	// Internal helper function to calculate the values below
 	void						CalculateConstraintProperties();
@@ -109,11 +109,11 @@ private:
 	RVec3						mFixedPosition2;
 
 	/// Ratio between the two line segments
-	float						mRatio;
+	decimal						mRatio;
 
 	// The minimum/maximum length of the line segments
-	float						mMinLength;
-	float						mMaxLength;
+	decimal						mMinLength;
+	decimal						mMaxLength;
 
 	// RUN TIME PROPERTIES FOLLOW
 
@@ -124,8 +124,8 @@ private:
 	Vec3						mWorldSpaceNormal2;
 
 	// Depending on if the length < min or length > max we can apply forces to prevent further violations
-	float						mMinLambda;
-	float						mMaxLambda;
+	decimal						mMinLambda;
+	decimal						mMaxLambda;
 
 	// The constraint part
 	IndependentAxisConstraintPart mIndependentAxisConstraintPart;

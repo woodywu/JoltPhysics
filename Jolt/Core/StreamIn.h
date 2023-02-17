@@ -21,7 +21,7 @@ public:
 	/// Returns true if there was an IO failure
 	virtual bool		IsFailed() const = 0;
 
-	/// Read a primitive (e.g. float, int, etc.) from the binary stream
+	/// Read a primitive (e.g. decimal, int, etc.) from the binary stream
 	template <class T>
 	void				Read(T &outT)
 	{
@@ -62,7 +62,7 @@ public:
 	/// Read a Vec3 (don't read W)
 	void				Read(Vec3 &outVec)
 	{
-		ReadBytes(&outVec, 3 * sizeof(float));
+		ReadBytes(&outVec, 3 * sizeof(decimal));
 		outVec = Vec3::sFixW(outVec.mValue);
 	}
 };

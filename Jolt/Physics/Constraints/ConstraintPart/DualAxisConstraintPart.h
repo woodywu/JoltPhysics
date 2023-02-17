@@ -98,8 +98,8 @@ public:
 	/// All input vectors are in world space
 	inline void					CalculateConstraintProperties(const Body &inBody1, Mat44Arg inRotation1, Vec3Arg inR1PlusU, const Body &inBody2, Mat44Arg inRotation2, Vec3Arg inR2, Vec3Arg inN1, Vec3Arg inN2)
 	{
-		JPH_ASSERT(inN1.IsNormalized(1.0e-5f));
-		JPH_ASSERT(inN2.IsNormalized(1.0e-5f));
+		JPH_ASSERT(inN1.IsNormalized(decimal(1.0e-5f)));
+		JPH_ASSERT(inN2.IsNormalized(decimal(1.0e-5f)));
 
 		// Calculate properties used during constraint solving
 		mR1PlusUxN1 = inR1PlusU.Cross(inN1);
@@ -169,7 +169,7 @@ public:
 
 	/// Must be called from the WarmStartVelocityConstraint call to apply the previous frame's impulses
 	/// All input vectors are in world space
-	inline void					WarmStart(Body &ioBody1, Body &ioBody2, Vec3Arg inN1, Vec3Arg inN2, float inWarmStartImpulseRatio)
+	inline void					WarmStart(Body &ioBody1, Body &ioBody2, Vec3Arg inN1, Vec3Arg inN2, decimal inWarmStartImpulseRatio)
 	{
 		mTotalLambda *= inWarmStartImpulseRatio;
 		ApplyVelocityStep(ioBody1, ioBody2, inN1, inN2, mTotalLambda);
@@ -190,7 +190,7 @@ public:
 	
 	/// Iteratively update the position constraint. Makes sure C(...) = 0.
 	/// All input vectors are in world space
-	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, Vec3Arg inU, Vec3Arg inN1, Vec3Arg inN2, float inBaumgarte) const
+	inline bool					SolvePositionConstraint(Body &ioBody1, Body &ioBody2, Vec3Arg inU, Vec3Arg inN1, Vec3Arg inN2, decimal inBaumgarte) const
 	{
 		Vec2 c;
 		c[0] = inU.Dot(inN1);

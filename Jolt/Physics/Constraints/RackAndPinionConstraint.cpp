@@ -74,7 +74,7 @@ void RackAndPinionConstraint::CalculateConstraintProperties(Mat44Arg inRotation1
 	mRackAndPinionConstraintPart.CalculateConstraintProperties(*mBody1, mWorldSpaceHingeAxis, *mBody2, mWorldSpaceSliderAxis, mRatio);
 }
 
-void RackAndPinionConstraint::SetupVelocityConstraint(float inDeltaTime)
+void RackAndPinionConstraint::SetupVelocityConstraint(decimal inDeltaTime)
 {
 	// Calculate constraint properties that are constant while bodies don't move
 	Mat44 rotation1 = Mat44::sRotation(mBody1->GetRotation());
@@ -82,23 +82,23 @@ void RackAndPinionConstraint::SetupVelocityConstraint(float inDeltaTime)
 	CalculateConstraintProperties(rotation1, rotation2);
 }
 
-void RackAndPinionConstraint::WarmStartVelocityConstraint(float inWarmStartImpulseRatio)
+void RackAndPinionConstraint::WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio)
 {
 	// Warm starting: Apply previous frame impulse
 	mRackAndPinionConstraintPart.WarmStart(*mBody1, *mBody2, inWarmStartImpulseRatio);
 }
 
-bool RackAndPinionConstraint::SolveVelocityConstraint(float inDeltaTime)
+bool RackAndPinionConstraint::SolveVelocityConstraint(decimal inDeltaTime)
 {
 	return mRackAndPinionConstraintPart.SolveVelocityConstraint(*mBody1, mWorldSpaceHingeAxis, *mBody2, mWorldSpaceSliderAxis, mRatio);
 }
 
-bool RackAndPinionConstraint::SolvePositionConstraint(float inDeltaTime, float inBaumgarte)
+bool RackAndPinionConstraint::SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte)
 {
 	if (mRackConstraint == nullptr || mPinionConstraint == nullptr)
 		return false;
 
-	float rotation;
+	decimal rotation;
 	if (mPinionConstraint->GetSubType() == EConstraintSubType::Hinge)
 	{
 		rotation = static_cast<const HingeConstraint *>(mPinionConstraint.GetPtr())->GetCurrentAngle();
@@ -109,7 +109,7 @@ bool RackAndPinionConstraint::SolvePositionConstraint(float inDeltaTime, float i
 		return false;
 	}
 
-	float translation;
+	decimal translation;
 	if (mRackConstraint->GetSubType() == EConstraintSubType::Slider)
 	{
 		translation = static_cast<const SliderConstraint *>(mRackConstraint.GetPtr())->GetCurrentPosition();
@@ -120,8 +120,8 @@ bool RackAndPinionConstraint::SolvePositionConstraint(float inDeltaTime, float i
 		return false;
 	}
 
-	float error = CenterAngleAroundZero(fmod(rotation - mRatio * translation, 2.0f * JPH_PI));
-	if (error == 0.0f)
+	decimal error = CenterAngleAroundZero(fmod(rotation - mRatio * translation, decimal(2.0f) * JPH_PI));
+	if (error == decimal(0.0f))
 		return false;
 
 	Mat44 rotation1 = Mat44::sRotation(mBody1->GetRotation());
@@ -137,8 +137,8 @@ void RackAndPinionConstraint::DrawConstraint(DebugRenderer *inRenderer) const
 	RMat44 transform2 = mBody2->GetCenterOfMassTransform();
 
 	// Draw constraint axis
-	inRenderer->DrawArrow(transform1.GetTranslation(), transform1 * mLocalSpaceHingeAxis, Color::sGreen, 0.01f);
-	inRenderer->DrawArrow(transform2.GetTranslation(), transform2 * mLocalSpaceSliderAxis, Color::sBlue, 0.01f);
+	inRenderer->DrawArrow(transform1.GetTranslation(), transform1 * mLocalSpaceHingeAxis, Color::sGreen, decimal(0.01f));
+	inRenderer->DrawArrow(transform2.GetTranslation(), transform2 * mLocalSpaceSliderAxis, Color::sBlue, decimal(0.01f));
 }
 
 #endif // JPH_DEBUG_RENDERER

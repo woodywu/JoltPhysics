@@ -55,28 +55,28 @@ public:
 	/// Friction settings.
 	/// For translation: Max friction force in N. 0 = no friction.
 	/// For rotation: Max friction torque in Nm. 0 = no friction.
-	float						mMaxFriction[EAxis::Num] = { 0, 0, 0, 0, 0, 0 };
+	decimal						mMaxFriction[EAxis::Num] = { 0, 0, 0, 0, 0, 0 };
 
 	/// Limits.
 	/// For translation: Min and max linear limits in m (0 is frame of body 1 and 2 coincide). 
 	/// For rotation: Min and max angular limits in rad (0 is frame of body 1 and 2 coincide). See comments at Axis enum for limit ranges.
 	///
-	/// Remove degree of freedom by setting min = FLT_MAX and max = -FLT_MAX. The constraint will be driven to 0 for this axis.
+	/// Remove degree of freedom by setting min = FIX_MAX and max = FIX_MIN. The constraint will be driven to 0 for this axis.
 	///
-	/// Free movement over an axis is allowed when min = -FLT_MAX and max = FLT_MAX.
-	float						mLimitMin[EAxis::Num] = { -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
-	float						mLimitMax[EAxis::Num] = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
+	/// Free movement over an axis is allowed when min = FIX_MIN and max = FIX_MAX.
+	decimal						mLimitMin[EAxis::Num] = { FIX_MIN, FIX_MIN, FIX_MIN, FIX_MIN, FIX_MIN, FIX_MIN };
+	decimal						mLimitMax[EAxis::Num] = { FIX_MAX, FIX_MAX, FIX_MAX, FIX_MAX, FIX_MAX, FIX_MAX };
 
 	/// Make axis free (unconstrained)
-	void						MakeFreeAxis(EAxis inAxis)									{ mLimitMin[inAxis] = -FLT_MAX; mLimitMax[inAxis] = FLT_MAX; }
-	bool						IsFreeAxis(EAxis inAxis) const								{ return mLimitMin[inAxis] == -FLT_MAX && mLimitMax[inAxis] == FLT_MAX; }
+	void						MakeFreeAxis(EAxis inAxis)									{ mLimitMin[inAxis] = FIX_MIN; mLimitMax[inAxis] = FIX_MAX; }
+	bool						IsFreeAxis(EAxis inAxis) const								{ return mLimitMin[inAxis] == FIX_MIN && mLimitMax[inAxis] == FIX_MAX; }
 
 	/// Make axis fixed (fixed at value 0)
-	void						MakeFixedAxis(EAxis inAxis)									{ mLimitMin[inAxis] = FLT_MAX; mLimitMax[inAxis] = -FLT_MAX; }
+	void						MakeFixedAxis(EAxis inAxis)									{ mLimitMin[inAxis] = FIX_MAX; mLimitMax[inAxis] = FIX_MIN; }
 	bool						IsFixedAxis(EAxis inAxis) const								{ return mLimitMin[inAxis] >= mLimitMax[inAxis]; }
 
 	/// Set a valid range for the constraint
-	void						SetLimitedAxis(EAxis inAxis, float inMin, float inMax)		{ JPH_ASSERT(inMin < inMax); JPH_ASSERT(inMin <= 0.0f); JPH_ASSERT(inMax >= 0.0f); mLimitMin[inAxis] = inMin; mLimitMax[inAxis] = inMax; }
+	void						SetLimitedAxis(EAxis inAxis, decimal inMin, decimal inMax)		{ JPH_ASSERT(inMin < inMax); JPH_ASSERT(inMin <= decimal(0.0f)); JPH_ASSERT(inMax >= decimal(0.0f)); mLimitMin[inAxis] = inMin; mLimitMax[inAxis] = inMax; }
 
 	/// Motor settings for each axis
 	MotorSettings				mMotorSettings[EAxis::Num];
@@ -100,10 +100,10 @@ public:
 
 	/// Generic interface of a constraint
 	virtual EConstraintSubType	GetSubType() const override									{ return EConstraintSubType::SixDOF; }
-	virtual void				SetupVelocityConstraint(float inDeltaTime) override;
-	virtual void				WarmStartVelocityConstraint(float inWarmStartImpulseRatio) override;
-	virtual bool				SolveVelocityConstraint(float inDeltaTime) override;
-	virtual bool				SolvePositionConstraint(float inDeltaTime, float inBaumgarte) override;
+	virtual void				SetupVelocityConstraint(decimal inDeltaTime) override;
+	virtual void				WarmStartVelocityConstraint(decimal inWarmStartImpulseRatio) override;
+	virtual bool				SolveVelocityConstraint(decimal inDeltaTime) override;
+	virtual bool				SolvePositionConstraint(decimal inDeltaTime, decimal inBaumgarte) override;
 #ifdef JPH_DEBUG_RENDERER
 	virtual void				DrawConstraint(DebugRenderer *inRenderer) const override;
 	virtual void				DrawConstraintLimits(DebugRenderer *inRenderer) const override;
@@ -123,15 +123,15 @@ public:
 	void						SetRotationLimits(Vec3Arg inLimitMin, Vec3Arg inLimitMax);
 
 	/// Get constraint Limits
-	float						GetLimitsMin(EAxis inAxis) const							{ return mLimitMin[inAxis]; }
-	float						GetLimitsMax(EAxis inAxis) const							{ return mLimitMax[inAxis]; }
+	decimal						GetLimitsMin(EAxis inAxis) const							{ return mLimitMin[inAxis]; }
+	decimal						GetLimitsMax(EAxis inAxis) const							{ return mLimitMax[inAxis]; }
 
 	inline bool					IsFixedAxis(EAxis inAxis) const								{ return (mFixedAxis & (1 << inAxis)) != 0; }
 	inline bool					IsFreeAxis(EAxis inAxis) const								{ return (mFreeAxis & (1 << inAxis)) != 0; }
 
 	/// Set the max friction for each axis
-	void						SetMaxFriction(EAxis inAxis, float inFriction);
-	float						GetMaxFriction(EAxis inAxis) const							{ return mMaxFriction[inAxis]; }
+	void						SetMaxFriction(EAxis inAxis, decimal inFriction);
+	decimal						GetMaxFriction(EAxis inAxis) const							{ return mMaxFriction[inAxis]; }
 
 	/// Get rotation of constraint in constraint space
 	inline Quat					GetRotationInConstraintSpace() const;
@@ -190,7 +190,7 @@ private:
 	inline bool					IsTranslationFullyConstrained() const						{ return (mFixedAxis & 0b111) == 0b111; }
 	inline bool					IsRotationConstrained() const								{ return (mFreeAxis & 0b111000) != 0b111000; }
 	inline bool					IsRotationFullyConstrained() const							{ return (mFixedAxis & 0b111000) == 0b111000; }
-	inline bool					HasFriction(EAxis inAxis) const								{ return !IsFixedAxis(inAxis) && mMaxFriction[inAxis] > 0.0f; }
+	inline bool					HasFriction(EAxis inAxis) const								{ return !IsFixedAxis(inAxis) && mMaxFriction[inAxis] > decimal(0.0f); }
 
 	// CONFIGURATION PROPERTIES FOLLOW
 
@@ -208,14 +208,14 @@ private:
 	bool						mTranslationMotorActive = false;							// If any of the translational frictions / motors are active
 	bool						mRotationMotorActive = false;								// If any of the rotational frictions / motors are active
 	uint8						mRotationPositionMotorActive = 0;							// Bitmask of axis that have position motor active (bit 0 = RotationX)
-	float						mLimitMin[EAxis::Num];
-	float						mLimitMax[EAxis::Num];
+	decimal						mLimitMin[EAxis::Num];
+	decimal						mLimitMax[EAxis::Num];
 
 	// Motor settings for each axis
 	MotorSettings				mMotorSettings[EAxis::Num];
 
 	// Friction settings for each axis
-	float						mMaxFriction[EAxis::Num];
+	decimal						mMaxFriction[EAxis::Num];
 
 	// Motor controls
 	EMotorState					mMotorState[EAxis::Num] = { EMotorState::Off, EMotorState::Off, EMotorState::Off, EMotorState::Off, EMotorState::Off, EMotorState::Off };
@@ -231,7 +231,7 @@ private:
 	Vec3						mRotationAxis[3];
 
 	// Translation displacement (valid when translation axis has a range limit)
-	float						mDisplacement[3];
+	decimal						mDisplacement[3];
 
 	// Individual constraint parts for translation, or a combined point constraint part if all axis are fixed
 	AxisConstraintPart			mTranslationConstraintPart[3];
