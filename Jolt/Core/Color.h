@@ -33,7 +33,7 @@ public:
 	inline uint8 &			operator () (uint inIdx)												{ JPH_ASSERT(inIdx < 4); return (&r)[inIdx]; }
 
 	/// Convert to Vec4 with range [0, 1]
-	inline Vec4				ToVec4() const															{ return Vec4(r, g, b, a) / 255.0f; }
+	inline Vec4				ToVec4() const															{ return Vec4(decimal(r), decimal(g), decimal(b), decimal(a)) / decimal(255.0f); }
 
 	/// Get grayscale intensity of color
 	inline uint8			GetIntensity() const													{ return uint8((uint32(r) * 54 + g * 183 + b * 19) >> 8); }
