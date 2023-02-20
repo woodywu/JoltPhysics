@@ -51,7 +51,7 @@ void MotionProperties::ClampLinearVelocity()
 	decimal len_sq = mLinearVelocity.LengthSq(); 
 	JPH_ASSERT(isfinite(len_sq)); 
 	if (len_sq > Square(mMaxLinearVelocity)) 
-		mLinearVelocity *= mMaxLinearVelocity / sqrt(len_sq); 
+		mLinearVelocity *= mMaxLinearVelocity / fpm::sqrt(len_sq); 
 }
 
 void MotionProperties::ClampAngularVelocity()
@@ -61,7 +61,7 @@ void MotionProperties::ClampAngularVelocity()
 	decimal len_sq = mAngularVelocity.LengthSq(); 
 	JPH_ASSERT(isfinite(len_sq)); 
 	if (len_sq > Square(mMaxAngularVelocity)) 
-		mAngularVelocity *= mMaxAngularVelocity / sqrt(len_sq); 
+		mAngularVelocity *= mMaxAngularVelocity / fpm::sqrt(len_sq);
 }
 
 inline Mat44 MotionProperties::GetLocalSpaceInverseInertiaUnchecked() const

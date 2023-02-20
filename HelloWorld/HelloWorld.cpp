@@ -34,6 +34,8 @@ using namespace JPH::literals;
 // We're also using STL classes in this example
 using namespace std;
 
+using namespace utils;
+
 // Callback for traces, connect this to your own trace function if you have one
 static void TraceImpl(const char *inFMT, ...)
 { 
@@ -209,6 +211,11 @@ public:
 // Program entry point
 int main(int argc, char** argv)
 {
+	cout << "eplsion: " << FIX_EPSILON << endl;
+	cout << "eplsion * 2: " << FIX_EPSILON * 2 << endl;
+	cout << "fix min: " << FIX_MIN << endl;
+	cout << "fix max: " << FIX_MAX << endl;
+
 	// Register allocation hook
 	RegisterDefaultAllocator();
 
@@ -287,7 +294,7 @@ int main(int argc, char** argv)
 	// Next we can create a rigid body to serve as the floor, we make a large box
 	// Create the settings for the collision volume (the shape). 
 	// Note that for simple shapes (like boxes) you can also directly construct a BoxShape.
-	BoxShapeSettings floor_shape_settings(Vec3(100.0f, 1.0f, 100.0f));
+	BoxShapeSettings floor_shape_settings(Vec3(F(100.0f), F(1.0f), F(100.0f)));
 
 	// Create the shape
 	ShapeSettings::ShapeResult floor_shape_result = floor_shape_settings.Create();
@@ -304,12 +311,12 @@ int main(int argc, char** argv)
 
 	// Now create a dynamic body to bounce on the floor
 	// Note that this uses the shorthand version of creating and adding a body to the world
-	BodyCreationSettings sphere_settings(new SphereShape(0.5f), RVec3(0.0_r, 2.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
+	BodyCreationSettings sphere_settings(new SphereShape(F(0.5)), RVec3(0.0_r, 2.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
 	BodyID sphere_id = body_interface.CreateAndAddBody(sphere_settings, EActivation::Activate);
 
 	// Now you can interact with the dynamic body, in this case we're going to give it a velocity.
 	// (note that if we had used CreateBody then we could have set the velocity straight on the body before adding it to the physics system)
-	body_interface.SetLinearVelocity(sphere_id, Vec3(0.0f, -5.0f, 0.0f));
+	body_interface.SetLinearVelocity(sphere_id, Vec3(F(0.0f), F(-5.0f), F(0.0f)));
 
 	// We simulate the physics world in discrete time steps. 60 Hz is a good rate to update the physics system.
 	const float cDeltaTime = 1.0f / 60.0f;
@@ -338,7 +345,7 @@ int main(int argc, char** argv)
 		const int cIntegrationSubSteps = 1;
 
 		// Step the world
-		physics_system.Update(cDeltaTime, cCollisionSteps, cIntegrationSubSteps, &temp_allocator, &job_system);
+		physics_system.Update(F(cDeltaTime), cCollisionSteps, cIntegrationSubSteps, &temp_allocator, &job_system);
 	}
 
 	// Remove the sphere from the physics system. Note that the sphere itself keeps all of its state and can be re-added at any time.
