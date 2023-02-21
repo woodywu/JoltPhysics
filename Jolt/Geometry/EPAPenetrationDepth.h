@@ -151,7 +151,7 @@ public:
 		case 1:
 			{
 				// 1 vertex, which must be at the origin, which is useless for our purpose
-				JPH_ASSERT(support_points.mY[0].IsNearZero(decimal(1.0e-8f)));
+				JPH_ASSERT(support_points.mY[0].IsNearZero(FIX_EPSILON));
 				support_points.mY.pop_back();
 
 				// Add support points in 4 directions to form a tetrahedron around the origin

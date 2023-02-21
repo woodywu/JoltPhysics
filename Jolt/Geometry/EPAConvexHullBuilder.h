@@ -36,8 +36,8 @@ public:
 
 	// Constants
 	static constexpr int cMaxEdgeLength = 128;				///< Max number of edges in FindEdge
-	static constexpr decimal cMinTriangleArea = decimal(1.0e-10f);		///< Minimum area of a triangle before, if smaller than this it will not be added to the priority queue
-	static constexpr decimal cBarycentricEpsilon = decimal(1.0e-3f);	///< Epsilon value used to determine if a point is in the interior of a triangle 
+	static constexpr decimal cMinTriangleArea = FIX_EPSILON;		///< Minimum area of a triangle before, if smaller than this it will not be added to the priority queue
+	static constexpr decimal cBarycentricEpsilon = FIX_EPSILON;	///< Epsilon value used to determine if a point is in the interior of a triangle 
 
 	// Forward declare
 	class Triangle;

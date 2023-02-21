@@ -126,7 +126,7 @@ protected:
 	Plane								mSupportingVolume;
 
 	// Beyond this value there is no max slope
-	static constexpr decimal				cNoMaxSlopeAngle = decimal(0.9999f);
+	const decimal				cNoMaxSlopeAngle = C1 - FIX_EPSILON;
 
 	// Cosine of the maximum angle of slope that character can still walk on
 	decimal								mCosMaxSlopeAngle;

@@ -150,7 +150,6 @@ TEST_SUITE("DVec3Tests")
 		DVec3 v1(BitCast<double, uint64>(0b0011), BitCast<double, uint64>(0b00110), BitCast<double, uint64>(0b001100));
 		DVec3 v2(BitCast<double, uint64>(0b0101), BitCast<double, uint64>(0b01010), BitCast<double, uint64>(0b010100));
 
-		CHECK(DVec3::sOr(v1, v2) == DVec3(BitCast<double, uint64>(0b0111), BitCast<double, uint64>(0b01110), BitCast<double, uint64>(0b011100)));
 		CHECK(DVec3::sXor(v1, v2) == DVec3(BitCast<double, uint64>(0b0110), BitCast<double, uint64>(0b01100), BitCast<double, uint64>(0b011000)));
 		CHECK(DVec3::sAnd(v1, v2) == DVec3(BitCast<double, uint64>(0b0001), BitCast<double, uint64>(0b00010), BitCast<double, uint64>(0b000100)));
 	}

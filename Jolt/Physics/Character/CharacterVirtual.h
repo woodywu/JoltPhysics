@@ -38,7 +38,7 @@ public:
 	decimal								mCollisionTolerance = decimal(1.0e-3f);							///< How far we're willing to penetrate geometry
 	decimal								mCharacterPadding = decimal(0.02f);								///< How far we try to stay away from the geometry, this ensures that the sweep will hit as little as possible lowering the collision cost and reducing the risk of getting stuck
 	uint								mMaxNumHits = 256;										///< Max num hits to collect in order to avoid excess of contact points collection
-	decimal								mHitReductionCosMaxAngle = decimal(0.999f);						///< Cos(angle) where angle is the maximum angle between two hits contact normals that are allowed to be merged during hit reduction. Default is around 2.5 degrees. Set to -1 to turn off.
+	decimal								mHitReductionCosMaxAngle = C1 - FIX_EPSILON;						///< Cos(angle) where angle is the maximum angle between two hits contact normals that are allowed to be merged during hit reduction. Default is around 2.5 degrees. Set to -1 to turn off.
 	decimal								mPenetrationRecoverySpeed = C1;						///< This value governs how fast a penetration will be resolved, 0 = nothing is resolved, 1 = everything in one update
 };
 

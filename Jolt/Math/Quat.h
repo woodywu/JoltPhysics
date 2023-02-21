@@ -54,7 +54,7 @@ public:
 	inline bool					IsClose(QuatArg inRHS, decimal inMaxDistSq = decimal(1.0e-12f)) const { return mValue.IsClose(inRHS.mValue, inMaxDistSq); }
 
 	/// If the length of this quaternion is 1 +/- inTolerance
-	inline bool					IsNormalized(decimal inTolerance = FIX_EPSILON * 2) const { return mValue.IsNormalized(inTolerance); }
+	inline bool					IsNormalized(decimal inTolerance = FIX_EPSILON) const { return mValue.IsNormalized(inTolerance); }
 
 	/// If any component of this quaternion is a NaN (not a number)
 	inline bool					IsNaN() const													{ return mValue.IsNaN(); }
@@ -164,13 +164,13 @@ public:
 	JPH_INLINE decimal			Dot(QuatArg inRHS) const										{ return mValue.Dot(inRHS.mValue); }
 								
 	/// The conjugate [w, -x, -y, -z] is the same as the inverse for unit quaternions
-	JPH_INLINE Quat				Conjugated() const												{ return Quat(Vec4::sXor(mValue, UVec4(0x80000000, 0x80000000, 0x80000000, 0).ReinterpretAsFloat())); }
+	JPH_INLINE Quat				Conjugated() const												{ return Quat(-GetX(), -GetY(), -GetZ(), GetW()); }
 
 	/// Get inverse quaternion
 	JPH_INLINE Quat				Inversed() const												{ return Conjugated() / Length(); }
 
 	/// Ensures that the W component is positive by negating the entire quaternion if it is not. This is useful when you want to store a quaternion as a 3 vector by discarding W and reconstructing it as sqrt(1 - x^2 - y^2 - z^2).
-	JPH_INLINE Quat				EnsureWPositive() const											{ return Quat(Vec4::sXor(mValue, Vec4::sAnd(mValue.SplatW(), UVec4::sReplicate(0x80000000).ReinterpretAsFloat()))); }
+	inline Quat				EnsureWPositive() const;
 
 	/// Get a quaternion that is perpendicular to this quaternion
 	JPH_INLINE Quat				GetPerpendicular() const										{ return Quat(Vec4(C1, -C1, C1, -C1) * mValue.Swizzle<SWIZZLE_Y, SWIZZLE_X, SWIZZLE_W, SWIZZLE_Z>()); }

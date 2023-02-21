@@ -16,10 +16,15 @@ constexpr decimal C1 = decimal(1.0F);
 constexpr decimal C2 = decimal(2.0F);
 constexpr decimal C3 = decimal(3.0F);
 
-constexpr decimal FIX_MIN = std::numeric_limits<decimal>::min();
-constexpr decimal FIX_MAX = std::numeric_limits<decimal>::max();
-constexpr decimal FIX_EPSILON = std::numeric_limits<decimal>::epsilon();
+static constexpr decimal FIX_MIN = std::numeric_limits<decimal>::min();
+static constexpr decimal FIX_MAX = std::numeric_limits<decimal>::max();
+static constexpr decimal FIX_EPSILON = std::numeric_limits<decimal>::epsilon();
 
 namespace utils {
 	using F = fpm::fixed<std::int32_t, std::int64_t, 10>;
+
+	static const decimal COS_179 = fpm::cos(decimal(179));
+	static const decimal COS_5 = fpm::cos(decimal(5));
+	static const decimal SIN_45 = fpm::sin(decimal(45));
 };
+

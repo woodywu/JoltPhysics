@@ -277,4 +277,12 @@ Quat Quat::sLoadFloat3Unsafe(const Float3 &inV)
 	return Quat(Vec4(v, w));
 }
 
+Quat Quat::EnsureWPositive() const
+{
+	if (GetW() < C0)
+		return Quat(-GetX(), -GetY(), -GetZ(), -GetW());
+	else
+		return Quat(*this);
+}
+
 JPH_NAMESPACE_END

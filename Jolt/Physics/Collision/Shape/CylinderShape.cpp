@@ -30,7 +30,7 @@ JPH_IMPLEMENT_SERIALIZABLE_VIRTUAL(CylinderShapeSettings)
 }
 
 // Approximation of top face with 8 vertices
-static const decimal cSin45 = decimal(0.70710678118654752440084436210485f);
+static const decimal cSin45 = utils::SIN_45;
 static const Vec3 cTopFace[] =
 {
 	Vec3(C0,		C1,	C1),

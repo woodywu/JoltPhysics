@@ -94,7 +94,7 @@ public:
 	JPH_INLINE bool				operator != (Mat44Arg inM2) const						{ return !(*this == inM2); }
 
 	/// Test if two matrices are close
-	JPH_INLINE bool				IsClose(Mat44Arg inM2, decimal inMaxDistSq = decimal(1.0e-12f)) const;
+	JPH_INLINE bool				IsClose(Mat44Arg inM2, decimal inMaxDistSq = FIX_EPSILON) const;
 
 	/// Multiply matrix by matrix
 	JPH_INLINE Mat44			operator * (Mat44Arg inM) const;

@@ -437,6 +437,7 @@ decimal Vec4::ReduceMax() const
 
 void Vec4::SinCos(Vec4 &outSin, Vec4 &outCos) const
 {
+#if 0
 	// Implementation based on sinf.c from the cephes library, combines sinf and cosf in a single function, changes octants to quadrants and vectorizes it
 	// Original implementation by Stephen L. Moshier (See: http://www.moshier.net/)
 
@@ -495,10 +496,15 @@ void Vec4::SinCos(Vec4 &outSin, Vec4 &outCos) const
 	// Correct the signs
 	outSin = Vec4::sXor(s, sin_sign.ReinterpretAsFloat());
 	outCos = Vec4::sXor(c, cos_sign.ReinterpretAsFloat());
+#else
+	outSin = { fpm::sin(GetX()), fpm::sin(GetY()), fpm::sin(GetZ()), fpm::sin(GetW()) };
+	outCos = { fpm::cos(GetX()), fpm::cos(GetY()), fpm::cos(GetZ()), fpm::cos(GetW()) };
+#endif
 }
 
 Vec4 Vec4::Tan() const
 {
+#if 0
 	// Implementation based on tanf.c from the cephes library, see Vec4::SinCos for further details
 	// Original implementation by Stephen L. Moshier (See: http://www.moshier.net/)
 
@@ -528,10 +534,14 @@ Vec4 Vec4::Tan() const
 
 	// Put the sign back
 	return Vec4::sXor(tan, tan_sign.ReinterpretAsFloat());
+#else
+	return { fpm::tan(GetX()), fpm::tan(GetY()), fpm::tan(GetZ()), fpm::tan(GetW()) };
+#endif
 }
 
 Vec4 Vec4::ASin() const
 {
+#if 0
 	// Implementation based on asinf.c from the cephes library
 	// Original implementation by Stephen L. Moshier (See: http://www.moshier.net/)
 
@@ -563,6 +573,9 @@ Vec4 Vec4::ASin() const
 
 	// Put the sign back
 	return Vec4::sXor(z, asin_sign.ReinterpretAsFloat());
+#else
+	return { fpm::tan(GetX()), fpm::tan(GetY()), fpm::tan(GetZ()), fpm::tan(GetW()) };
+#endif
 }
 
 Vec4 Vec4::ACos() const
@@ -573,6 +586,7 @@ Vec4 Vec4::ACos() const
 
 Vec4 Vec4::ATan() const
 {
+#if 0
 	// Implementation based on atanf.c from the cephes library
 	// Original implementation by Stephen L. Moshier (See: http://www.moshier.net/)
 
@@ -603,10 +617,14 @@ Vec4 Vec4::ATan() const
 
 	// Put the sign back
 	return Vec4::sXor(y, atan_sign.ReinterpretAsFloat());
+#else
+	return { fpm::atan(GetX()), fpm::atan(GetY()), fpm::atan(GetZ()), fpm::atan(GetW()) };
+#endif
 }
 
 Vec4 Vec4::sATan2(Vec4Arg inY, Vec4Arg inX)
 {
+#if 0
 	UVec4 sign_mask = UVec4::sReplicate(0x80000000U);
 
 	// Determine absolute value and sign of y
@@ -636,6 +654,10 @@ Vec4 Vec4::sATan2(Vec4Arg inY, Vec4Arg inX)
 	atan -= Vec4::sAnd(x_sign.ArithmeticShiftRight<31>().ReinterpretAsFloat(), Vec4::sReplicate(JPH_PI));
 	atan = Vec4::sXor(atan, UVec4::sXor(x_sign, y_sign).ReinterpretAsFloat());
 	return atan;
+#else
+	auto vec = inY / inX;
+	return { fpm::atan(vec.GetX()), fpm::atan(vec.GetY()), fpm::atan(vec.GetZ()), fpm::atan(vec.GetW()) };
+#endif
 }
 
 JPH_NAMESPACE_END
