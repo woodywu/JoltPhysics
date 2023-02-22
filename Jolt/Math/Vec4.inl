@@ -380,7 +380,7 @@ decimal_raw Vec4::LengthSqRaw() const
 {
 	fmedi_t len_sq = 0;
 	for (int i = 0; i < 4; i++)
-		len_sq += static_cast<fmedi_t>(mF32[i].raw_value()) * mF32[i].raw_value();
+		len_sq += std::get<0>(utils::rmul(D2R(mF32[i]), D2R(mF32[i])));
 	return len_sq;
 }
 

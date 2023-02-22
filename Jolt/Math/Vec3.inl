@@ -12,6 +12,8 @@ JPH_SUPPRESS_WARNINGS_STD_END
 // Create a std::hash for Vec3
 JPH_MAKE_HASHABLE(JPH::Vec3, t.GetX(), t.GetY(), t.GetZ())
 
+using namespace utils;
+
 JPH_NAMESPACE_BEGIN
 
 void Vec3::CheckW() const
@@ -396,15 +398,12 @@ decimal_raw Vec3::LengthSqRaw() const
 {
 	fmedi_t len_sq = 0;
 	for (int i = 0; i < 3; i++)
-		len_sq += static_cast<fmedi_t>(mF32[i].raw_value()) * mF32[i].raw_value();
+		len_sq += std::get<0>(utils::rmul(D2R(mF32[i]), D2R(mF32[i])));
 	return len_sq;
 }
 
 decimal Vec3::Length() const
 {
-	fmedi_t len_sq = 0;
-	for (int i = 0; i < 3; i++)
-		len_sq += static_cast<fmedi_t>(mF32[i].raw_value()) * mF32[i].raw_value();
 	return sqrt(LengthSq());
 }
 

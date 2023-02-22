@@ -16,6 +16,8 @@
 	#include <Jolt/Core/StringTools.h>
 #endif
 
+using namespace utils;
+
 JPH_NAMESPACE_BEGIN
 
 /// A convex hull builder specifically made for the EPA penetration depth calculation. It trades accuracy for speed and will simply abort of the hull forms defects due to numerical precision problems.
@@ -287,9 +289,7 @@ public:
 				decimal dot = t->mNormal.Dot(inPosition - t->mCentroid);
 				if (dot > C0)
 				{
-					decimal dist_sq = decimal::from_raw_value(static_cast<fbase_t>(
-						static_cast<fmedi_t>(dot.raw_value()) * dot.raw_value() / std::get<0>(t->mNormal.LengthSqRaw())
-					));
+					decimal dist_sq = R2D(rdiv(rmul(D2R(dot), D2R(dot)), t->mNormal.LengthSqRaw()));
 					if (dist_sq > best_dist_sq)
 					{
 						best = t;
@@ -740,9 +740,7 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 			// Note that this way of calculating the closest point is much more accurate than first calculating barycentric coordinates and then calculating the closest
 			// point based on those coordinates. Note that we preserve the sign of the distance to check on which side the origin is.
 			decimal c_dot_n = mCentroid.Dot(mNormal);
-			mClosestLenSq = decimal::from_raw_value(static_cast<fbase_t>(
-				static_cast<fmedi_t>(abs(c_dot_n).raw_value()) * c_dot_n.raw_value() / std::get<0>(normal_len_sq)
-			));
+			mClosestLenSq = R2D(rdiv(rmul(D2R(abs(c_dot_n)), D2R(c_dot_n)),normal_len_sq));
 
 			// Calculate closest point to origin using barycentric coordinates:
 			//
@@ -760,17 +758,17 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 			// Cramers rule to invert matrix:
 			decimal_raw y10_dot_y10 = y10.LengthSqRaw();
 			decimal y10_dot_y20 = y10.Dot(y20);
-			decimal_raw determinant = std::get<0>(y10_dot_y10) * y20_dot_y20.raw_value() - y10_dot_y20.raw_value() * y10_dot_y20.raw_value();
+			decimal_raw determinant = rsub(rmul(y10_dot_y10, D2R(y20_dot_y20)), rmul(D2R(y10_dot_y20), D2R(y10_dot_y20)));
 			if (std::get<0>(determinant) > C0.raw_value()) // If determinant == 0 then the system is linearly dependent and the triangle is degenerate, since y10.10 * y20.y20 > y10.y20^2 it should also be > 0
 			{
 				decimal y0_dot_y10 = y0.Dot(y10);
 				decimal y0_dot_y20 = y0.Dot(y20);
-				decimal l0 = decimal::from_raw_value(static_cast<fbase_t>(
-					(static_cast<fmedi_t>(y10_dot_y20.raw_value()) * y0_dot_y20.raw_value() - static_cast<fmedi_t>(y20_dot_y20.raw_value()) * y0_dot_y10.raw_value()) / std::get<0>(determinant)
-				));
-				decimal l1 = decimal::from_raw_value(static_cast<fbase_t>(
-					(static_cast<fmedi_t>(y10_dot_y20.raw_value()) * y0_dot_y10.raw_value() - std::get<0>(y10_dot_y10) * y0_dot_y20.raw_value()) / std::get<0>(determinant)
-				));
+				decimal l0 = R2D(
+					rdiv(rsub(rmul(D2R(y10_dot_y20), D2R(y0_dot_y20)), rmul(D2R(y20_dot_y20), D2R(y0_dot_y10))), determinant)
+				);
+				decimal l1 = R2D(
+					rdiv(rsub(rmul(D2R(y10_dot_y20), D2R(y0_dot_y10)), rmul(y10_dot_y10, D2R(y0_dot_y20))), determinant)
+				);
 				mLambda[0] = l0;
 				mLambda[1] = l1;
 				mLambdaRelativeTo0 = true;
@@ -794,9 +792,9 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 		{
 			// Again calculate distance between triangle and origin
 			decimal c_dot_n = mCentroid.Dot(mNormal);
-			mClosestLenSq = decimal::from_raw_value(static_cast<fbase_t>(
-				static_cast<fmedi_t>(abs(c_dot_n).raw_value()) * c_dot_n.raw_value() / std::get<0>(normal_len_sq)
-			));
+			mClosestLenSq = utils::R2D(
+				rdiv(rmul(D2R(abs(c_dot_n)), D2R(c_dot_n)), normal_len_sq)
+			);
 
 			// Calculate closest point to origin using barycentric coordinates but this time using y1 as the reference vertex
 			//
@@ -812,17 +810,17 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 			// Cramers rule to invert matrix:
 			decimal_raw y10_dot_y10 = y10.LengthSqRaw();
 			decimal y10_dot_y21 = y10.Dot(y21);
-			decimal_raw determinant = std::get<0>(y10_dot_y10) * y21_dot_y21.raw_value() - y10_dot_y21.raw_value() * y10_dot_y21.raw_value();
+			decimal_raw determinant = rsub(rmul(y10_dot_y10, D2R(y21_dot_y21)), rmul(D2R(y10_dot_y21), D2R(y10_dot_y21)));
 			if (std::get<0>(determinant) > C0.raw_value())
 			{
 				decimal y1_dot_y10 = y1.Dot(y10);
 				decimal y1_dot_y21 = y1.Dot(y21);
-				decimal l0 = decimal::from_raw_value(static_cast<fbase_t>(
-					(static_cast<fmedi_t>(y21_dot_y21.raw_value()) * y1_dot_y10.raw_value() - static_cast<fmedi_t>(y10_dot_y21.raw_value()) * y1_dot_y21.raw_value()) / std::get<0>(determinant)
-				));
-				decimal l1 = decimal::from_raw_value(static_cast<fbase_t>(
-					(static_cast<fmedi_t>(y10_dot_y21.raw_value()) * y1_dot_y10.raw_value() - std::get<0>(y10_dot_y10) * y1_dot_y21.raw_value()) / std::get<0>(determinant)
-				));
+				decimal l0 = utils::R2D(
+					rdiv(rsub(rmul(D2R(y21_dot_y21), D2R(y1_dot_y10)), rmul(D2R(y10_dot_y21), D2R(y1_dot_y21))), determinant)
+				);
+				decimal l1 = utils::R2D(
+					rdiv(rsub(rmul(D2R(y10_dot_y21), D2R(y1_dot_y10)), rmul(y10_dot_y10, D2R(y1_dot_y21))), determinant)
+				);
 				mLambda[0] = l0;
 				mLambda[1] = l1;
 				mLambdaRelativeTo0 = false;

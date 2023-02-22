@@ -22,6 +22,7 @@ constexpr decimal C3 = decimal(3.0F);
 static constexpr decimal FIX_MIN = std::numeric_limits<decimal>::min();
 static constexpr decimal FIX_MAX = std::numeric_limits<decimal>::max();
 static constexpr decimal FIX_EPSILON = std::numeric_limits<decimal>::epsilon();
+static constexpr fmedi_t FIX_FRACTION_MULT = fmedi_t(1) << 10;
 
 namespace utils {
 	using F = fpm::fixed<std::int32_t, std::int64_t, 10>;
@@ -29,5 +30,32 @@ namespace utils {
 	static const decimal COS_179 = fpm::cos(decimal(179));
 	static const decimal COS_5 = fpm::cos(decimal(5));
 	static const decimal SIN_45 = fpm::sin(decimal(45));
+
+	inline decimal R2D(const decimal_raw& raw) noexcept {
+		fmedi_t val = std::get<0>(raw);
+		assert(val <= std::numeric_limits<fbase_t>::max());
+		assert(val >= std::numeric_limits<fbase_t>::min());
+		return decimal::from_raw_value(static_cast<fbase_t>(val));
+	}
+
+	inline decimal_raw D2R(const decimal& val) noexcept {
+		return val.raw_value();
+	}
+
+	constexpr inline decimal_raw radd(const decimal_raw& x, const decimal_raw& y) noexcept {
+		return (std::get<0>(x) + std::get<0>(y));
+	}
+
+	constexpr inline decimal_raw rsub(const decimal_raw& x, const decimal_raw& y) noexcept {
+		return (std::get<0>(x) - std::get<0>(y));
+	}
+
+	constexpr inline decimal_raw rmul(const decimal_raw& x, const decimal_raw& y) noexcept {
+		return (std::get<0>(x) * std::get<0>(y)) / FIX_FRACTION_MULT;
+	}
+
+	constexpr inline decimal_raw rdiv(const decimal_raw& x, const decimal_raw& y) noexcept {
+		return (std::get<0>(x) * FIX_FRACTION_MULT) / std::get<0>(y);
+	}
 };
 

@@ -101,6 +101,14 @@ private:
 		return y_len_sq;
 	}
 
+	// Get max(|Y_0|^2 .. |Y_n|^2)
+	decimal_raw		GetMaxYLengthSqRaw() const {
+		fmedi_t y_len_sq = std::get<0>(mY[0].LengthSqRaw());
+		for (int i = 1; i < mNumPoints; ++i)
+			y_len_sq = max(y_len_sq, std::get<0>(mY[i].LengthSqRaw()));
+		return y_len_sq;
+	}
+
 	// Remove points that are not in the set, only updates mY
 	void		UpdatePointSetY(uint32 inSet)
 	{
@@ -351,10 +359,10 @@ public:
 #endif
 
 		// Length^2 of v
-		decimal v_len_sq = ioV.LengthSq();
+		decimal_raw v_len_sq = ioV.LengthSqRaw();
 
 		// Previous length^2 of v
-		decimal prev_v_len_sq = FIX_MAX;
+		decimal_raw prev_v_len_sq = FIX_MAX.raw_value();
 
 		for (;;)
 		{
@@ -387,7 +395,7 @@ public:
 #endif
 
 			// Test if we have a separation of more than inMaxDistSq, in which case we terminate early
-			if (dot < C0 && dot * dot > v_len_sq * inMaxDistSq)
+			if (dot < C0 && dot * dot > R2D(v_len_sq) * inMaxDistSq)
 			{
 #ifdef JPH_GJK_DEBUG
 				Trace("Distance bigger than max");
@@ -410,7 +418,7 @@ public:
 #endif
 
 			uint32 set;
-			if (!GetClosest<true>(prev_v_len_sq, ioV, v_len_sq, set))
+			if (!GetClosest<true>(R2D(prev_v_len_sq), ioV, R2D(v_len_sq), set))
 			{
 				--mNumPoints; // Undo add last point
 				break;
@@ -423,7 +431,7 @@ public:
 				Trace("Full simplex");
 #endif
 				ioV = Vec3::sZero();
-				v_len_sq = C0;
+				v_len_sq = C0.raw_value();
 				break;
 			}
 
@@ -431,13 +439,13 @@ public:
 			UpdatePointSetYPQ(set);
 
 			// If v is very close to zero, we consider this a collision
-			if (v_len_sq <= tolerance_sq)
+			if (std::get<0>(v_len_sq) <= tolerance_sq.raw_value())
 			{
 #ifdef JPH_GJK_DEBUG
 				Trace("Distance zero");
 #endif
 				ioV = Vec3::sZero();
-				v_len_sq = C0;
+				v_len_sq = C0.raw_value();
 				break;
 			}
 
@@ -445,13 +453,13 @@ public:
 #ifdef JPH_GJK_DEBUG
 			Trace("Check v small compared to y: %g <= %g", (double)v_len_sq, (double)(FIX_EPSILON * GetMaxYLengthSq()));
 #endif
-			if (v_len_sq <= FIX_EPSILON * GetMaxYLengthSq())
+			if (std::get<0>(v_len_sq) <= std::get<0>(rmul(D2R(FIX_EPSILON), GetMaxYLengthSqRaw())))
 			{
 #ifdef JPH_GJK_DEBUG
 				Trace("Machine precision reached");
 #endif
 				ioV = Vec3::sZero();
-				v_len_sq = C0;
+				v_len_sq = C0.raw_value();
 				break;
 			}
 
@@ -463,8 +471,8 @@ public:
 #ifdef JPH_GJK_DEBUG
 			Trace("Check v not changing enough: %g <= %g", (double)(prev_v_len_sq - v_len_sq), (double)(FIX_EPSILON * prev_v_len_sq));
 #endif
-			JPH_ASSERT(prev_v_len_sq >= v_len_sq);
-			if (prev_v_len_sq - v_len_sq <= FIX_EPSILON * prev_v_len_sq)
+			JPH_ASSERT(std::get<0>(prev_v_len_sq) >= std::get<0>(v_len_sq));
+			if (rsub(prev_v_len_sq, v_len_sq) <= rmul(D2R(FIX_EPSILON), prev_v_len_sq))
 			{
 				// v is a separating axis
 #ifdef JPH_GJK_DEBUG
@@ -492,8 +500,8 @@ public:
 		DrawState();
 #endif
 
-		JPH_ASSERT(ioV.LengthSq() == v_len_sq);
-		return v_len_sq;
+		JPH_ASSERT(std::get<0>(ioV.LengthSqRaw()) == std::get<0>(v_len_sq));
+		return R2D(v_len_sq);
 	}
 
 	/// Get the resulting simplex after the GetClosestPoints algorithm finishes.
