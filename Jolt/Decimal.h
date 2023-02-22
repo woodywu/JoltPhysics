@@ -7,7 +7,10 @@
 #include <3rdParty/fpm/include/fpm/math.hpp>
 #include <3rdParty/fpm/include/fpm/ios.hpp>
 
+using fbase_t = std::int32_t;
+using fmedi_t = std::int64_t;
 using decimal = fpm::fixed<std::int32_t, std::int64_t, 10>;
+using decimal_raw = std::tuple<std::int64_t>;
 
 constexpr decimal C0 = decimal(0.0F);
 constexpr decimal C0P5 = decimal(0.5F);

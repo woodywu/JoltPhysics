@@ -392,8 +392,19 @@ decimal Vec3::LengthSq() const
 	return len_sq;
 }
 
+decimal_raw Vec3::LengthSqRaw() const
+{
+	fmedi_t len_sq = 0;
+	for (int i = 0; i < 3; i++)
+		len_sq += static_cast<fmedi_t>(mF32[i].raw_value()) * mF32[i].raw_value();
+	return len_sq;
+}
+
 decimal Vec3::Length() const
 {
+	fmedi_t len_sq = 0;
+	for (int i = 0; i < 3; i++)
+		len_sq += static_cast<fmedi_t>(mF32[i].raw_value()) * mF32[i].raw_value();
 	return sqrt(LengthSq());
 }
 

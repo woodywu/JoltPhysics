@@ -5,6 +5,8 @@
 
 #include <Jolt/Geometry/AABox.h>
 
+using namespace utils;
+
 JPH_NAMESPACE_BEGIN
 
 /// Clip inPolygonToClip against the positive halfspace of plane defined by inPlaneOrigin and inPlaneNormal.
@@ -109,7 +111,7 @@ void ClipPolyVsEdge(const VERTEX_ARRAY &inPolygonToClip, Vec3Arg inEdgeVertex1, 
 	Vec3 v1 = inEdgeVertex1 + polygon_normal.Dot(inPolygonToClip[0] - inEdgeVertex1) * polygon_normal / polygon_normal_len_sq;
 	Vec3 v2 = inEdgeVertex2 + polygon_normal.Dot(inPolygonToClip[0] - inEdgeVertex2) * polygon_normal / polygon_normal_len_sq;
 	Vec3 v12 = v2 - v1;
-	decimal v12_len_sq = v12.LengthSq();
+	decimal_raw v12_len_sq = v12.LengthSqRaw();
 
 	// Determine state of last point
 	Vec3 e1 = inPolygonToClip[inPolygonToClip.size() - 1];
@@ -136,7 +138,7 @@ void ClipPolyVsEdge(const VERTEX_ARRAY &inPolygonToClip, Vec3Arg inEdgeVertex1, 
 			decimal projection = (clipped_point - v1).Dot(v12);
 			if (projection < C0)
 				outClippedPolygon.push_back(v1);
-			else if (projection > v12_len_sq)
+			else if (projection.raw_value() > std::get<0>(v12_len_sq))
 				outClippedPolygon.push_back(v2);
 			else
 				outClippedPolygon.push_back(clipped_point);

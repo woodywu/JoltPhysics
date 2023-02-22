@@ -376,6 +376,14 @@ decimal Vec4::LengthSq() const
 	return len_sq;
 }
 
+decimal_raw Vec4::LengthSqRaw() const
+{
+	fmedi_t len_sq = 0;
+	for (int i = 0; i < 4; i++)
+		len_sq += static_cast<fmedi_t>(mF32[i].raw_value()) * mF32[i].raw_value();
+	return len_sq;
+}
+
 decimal Vec4::Length() const
 {
 	return sqrt(LengthSq());

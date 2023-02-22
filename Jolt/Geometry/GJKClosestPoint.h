@@ -373,14 +373,14 @@ public:
 
 #ifdef JPH_GJK_DEBUG
 			// Draw -ioV to show the closest point to the origin from the previous simplex
-			DebugRenderer::sInstance->DrawArrow(mOffset, mOffset - ioV, Color::sOrange, 0.05f);
+			DebugRenderer::sInstance->DrawArrow(mOffset, mOffset - ioV, Color::sOrange, decimal(0.05f));
 
 			// Draw ioV to show where we're probing next
-			DebugRenderer::sInstance->DrawArrow(mOffset, mOffset + ioV, Color::sCyan, 0.05f);
+			DebugRenderer::sInstance->DrawArrow(mOffset, mOffset + ioV, Color::sCyan, decimal(0.05f));
 
 			// Draw w, the support point
-			DebugRenderer::sInstance->DrawArrow(mOffset, mOffset + w, Color::sGreen, 0.05f);
-			DebugRenderer::sInstance->DrawMarker(mOffset + w, Color::sGreen, 1.0f);
+			DebugRenderer::sInstance->DrawArrow(mOffset, mOffset + w, Color::sGreen, decimal(0.05f));
+			DebugRenderer::sInstance->DrawMarker(mOffset + w, Color::sGreen, C1);
 
 			// Draw the simplex and the Minkowski difference around it
 			DrawState();
@@ -443,7 +443,7 @@ public:
 
 			// If v is very small compared to the length of y, we also consider this a collision
 #ifdef JPH_GJK_DEBUG
-			Trace("Check v small compared to y: %g <= %g", (double)v_len_sq, (double)(FLT_EPSILON * GetMaxYLengthSq()));
+			Trace("Check v small compared to y: %g <= %g", (double)v_len_sq, (double)(FIX_EPSILON * GetMaxYLengthSq()));
 #endif
 			if (v_len_sq <= FIX_EPSILON * GetMaxYLengthSq())
 			{
@@ -461,7 +461,7 @@ public:
 
 			// If the squared length of v is not changing enough, we've converged and there is no collision
 #ifdef JPH_GJK_DEBUG
-			Trace("Check v not changing enough: %g <= %g", (double)(prev_v_len_sq - v_len_sq), (double)(FLT_EPSILON * prev_v_len_sq));
+			Trace("Check v not changing enough: %g <= %g", (double)(prev_v_len_sq - v_len_sq), (double)(FIX_EPSILON * prev_v_len_sq));
 #endif
 			JPH_ASSERT(prev_v_len_sq >= v_len_sq);
 			if (prev_v_len_sq - v_len_sq <= FIX_EPSILON * prev_v_len_sq)
@@ -482,11 +482,11 @@ public:
 		Trace("Return: v = [%s], |v| = %g", ConvertToString(ioV).c_str(), (double)ioV.Length());
 
 		// Draw -ioV to show the closest point to the origin from the previous simplex
-		DebugRenderer::sInstance->DrawArrow(mOffset, mOffset - ioV, Color::sOrange, 0.05f);
+		DebugRenderer::sInstance->DrawArrow(mOffset, mOffset - ioV, Color::sOrange, decimal(0.05f));
 
 		// Draw the closest points
-		DebugRenderer::sInstance->DrawMarker(mOffset + outPointA, Color::sGreen, 1.0f);
-		DebugRenderer::sInstance->DrawMarker(mOffset + outPointB, Color::sPurple, 1.0f);
+		DebugRenderer::sInstance->DrawMarker(mOffset + outPointA, Color::sGreen, C1);
+		DebugRenderer::sInstance->DrawMarker(mOffset + outPointB, Color::sPurple, C1);
 
 		// Draw the simplex and the Minkowski difference around it
 		DrawState();
@@ -924,7 +924,7 @@ private:
 		RMat44 origin = RMat44::sTranslation(mOffset);
 
 		// Draw origin
-		DebugRenderer::sInstance->DrawCoordinateSystem(origin, 1.0f);
+		DebugRenderer::sInstance->DrawCoordinateSystem(origin, C1);
 
 		// Draw the hull
 		DebugRenderer::sInstance->DrawGeometry(origin, mGeometry->mBounds.Transformed(origin), mGeometry->mBounds.GetExtent().LengthSq(), Color::sYellow, mGeometry);
@@ -934,7 +934,7 @@ private:
 		{
 			// Draw support point
 			RVec3 y_i = origin * mY[i];
-			DebugRenderer::sInstance->DrawMarker(y_i, Color::sRed, 1.0f);
+			DebugRenderer::sInstance->DrawMarker(y_i, Color::sRed, C1);
 			for (int j = i + 1; j < mNumPoints; ++j)
 			{
 				// Draw edge
@@ -955,7 +955,7 @@ private:
 		}
 
 		// Offset to the right
-		mOffset += Vec3(mGeometry->mBounds.GetSize().GetX() + 2.0f, 0, 0);
+		mOffset += Vec3(mGeometry->mBounds.GetSize().GetX() + C2, C0, C0);
 	}
 #endif // JPH_GJK_DEBUG
 

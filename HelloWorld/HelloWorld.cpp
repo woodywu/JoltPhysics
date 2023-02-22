@@ -212,7 +212,6 @@ public:
 int main(int argc, char** argv)
 {
 	cout << "eplsion: " << FIX_EPSILON << endl;
-	cout << "eplsion * 2: " << FIX_EPSILON * 2 << endl;
 	cout << "fix min: " << FIX_MIN << endl;
 	cout << "fix max: " << FIX_MAX << endl;
 

@@ -189,6 +189,8 @@ public:
 	/// Squared length of vector
 	JPH_INLINE decimal			LengthSq() const;
 
+	JPH_INLINE decimal_raw      LengthSqRaw() const;
+
 	/// Length of vector
 	JPH_INLINE decimal			Length() const;
 

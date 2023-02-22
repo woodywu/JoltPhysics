@@ -287,7 +287,9 @@ public:
 				decimal dot = t->mNormal.Dot(inPosition - t->mCentroid);
 				if (dot > C0)
 				{
-					decimal dist_sq = dot * dot / t->mNormal.LengthSq();
+					decimal dist_sq = decimal::from_raw_value(static_cast<fbase_t>(
+						static_cast<fmedi_t>(dot.raw_value()) * dot.raw_value() / std::get<0>(t->mNormal.LengthSqRaw())
+					));
 					if (dist_sq > best_dist_sq)
 					{
 						best = t;
@@ -731,14 +733,16 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 		mNormal = y10.Cross(y20);
 
 		// Check if triangle is degenerate
-		decimal normal_len_sq = mNormal.LengthSq();
-		if (normal_len_sq > cMinTriangleArea)
+		decimal_raw normal_len_sq = mNormal.LengthSqRaw();
+		if (std::get<0>(normal_len_sq) > cMinTriangleArea.raw_value())
 		{
 			// Determine distance between triangle and origin: distance = (centroid - origin) . normal / |normal|
 			// Note that this way of calculating the closest point is much more accurate than first calculating barycentric coordinates and then calculating the closest
 			// point based on those coordinates. Note that we preserve the sign of the distance to check on which side the origin is.
 			decimal c_dot_n = mCentroid.Dot(mNormal);
-			mClosestLenSq = abs(c_dot_n) * c_dot_n / normal_len_sq;
+			mClosestLenSq = decimal::from_raw_value(static_cast<fbase_t>(
+				static_cast<fmedi_t>(abs(c_dot_n).raw_value()) * c_dot_n.raw_value() / std::get<0>(normal_len_sq)
+			));
 
 			// Calculate closest point to origin using barycentric coordinates:
 			//
@@ -754,15 +758,19 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 			// (y10 = y1 - y0 etc.)
 			//
 			// Cramers rule to invert matrix:
-			decimal y10_dot_y10 = y10.LengthSq();
+			decimal_raw y10_dot_y10 = y10.LengthSqRaw();
 			decimal y10_dot_y20 = y10.Dot(y20);
-			decimal determinant = y10_dot_y10 * y20_dot_y20 - y10_dot_y20 * y10_dot_y20;
-			if (determinant > C0) // If determinant == 0 then the system is linearly dependent and the triangle is degenerate, since y10.10 * y20.y20 > y10.y20^2 it should also be > 0
+			decimal_raw determinant = std::get<0>(y10_dot_y10) * y20_dot_y20.raw_value() - y10_dot_y20.raw_value() * y10_dot_y20.raw_value();
+			if (std::get<0>(determinant) > C0.raw_value()) // If determinant == 0 then the system is linearly dependent and the triangle is degenerate, since y10.10 * y20.y20 > y10.y20^2 it should also be > 0
 			{
 				decimal y0_dot_y10 = y0.Dot(y10);
 				decimal y0_dot_y20 = y0.Dot(y20);
-				decimal l0 = (y10_dot_y20 * y0_dot_y20 - y20_dot_y20 * y0_dot_y10) / determinant;
-				decimal l1 = (y10_dot_y20 * y0_dot_y10 - y10_dot_y10 * y0_dot_y20) / determinant;
+				decimal l0 = decimal::from_raw_value(static_cast<fbase_t>(
+					(static_cast<fmedi_t>(y10_dot_y20.raw_value()) * y0_dot_y20.raw_value() - static_cast<fmedi_t>(y20_dot_y20.raw_value()) * y0_dot_y10.raw_value()) / std::get<0>(determinant)
+				));
+				decimal l1 = decimal::from_raw_value(static_cast<fbase_t>(
+					(static_cast<fmedi_t>(y10_dot_y20.raw_value()) * y0_dot_y10.raw_value() - std::get<0>(y10_dot_y10) * y0_dot_y20.raw_value()) / std::get<0>(determinant)
+				));
 				mLambda[0] = l0;
 				mLambda[1] = l1;
 				mLambdaRelativeTo0 = true;
@@ -781,12 +789,14 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 		mNormal = y10.Cross(y21);
 
 		// Check if triangle is degenerate
-		decimal normal_len_sq = mNormal.LengthSq();
-		if (normal_len_sq > cMinTriangleArea)
+		decimal_raw normal_len_sq = mNormal.LengthSqRaw();
+		if (std::get<0>(normal_len_sq) > cMinTriangleArea.raw_value())
 		{
 			// Again calculate distance between triangle and origin
 			decimal c_dot_n = mCentroid.Dot(mNormal);
-			mClosestLenSq = abs(c_dot_n) * c_dot_n / normal_len_sq;
+			mClosestLenSq = decimal::from_raw_value(static_cast<fbase_t>(
+				static_cast<fmedi_t>(abs(c_dot_n).raw_value()) * c_dot_n.raw_value() / std::get<0>(normal_len_sq)
+			));
 
 			// Calculate closest point to origin using barycentric coordinates but this time using y1 as the reference vertex
 			//
@@ -800,15 +810,19 @@ EPAConvexHullBuilder::Triangle::Triangle(int inIdx0, int inIdx1, int inIdx2, con
 			// | -y10.y21  y21.y21 | | l1 |   | -y1.y21 |
 			//
 			// Cramers rule to invert matrix:
-			decimal y10_dot_y10 = y10.LengthSq();
+			decimal_raw y10_dot_y10 = y10.LengthSqRaw();
 			decimal y10_dot_y21 = y10.Dot(y21);
-			decimal determinant = y10_dot_y10 * y21_dot_y21 - y10_dot_y21 * y10_dot_y21;
-			if (determinant > C0)
+			decimal_raw determinant = std::get<0>(y10_dot_y10) * y21_dot_y21.raw_value() - y10_dot_y21.raw_value() * y10_dot_y21.raw_value();
+			if (std::get<0>(determinant) > C0.raw_value())
 			{
 				decimal y1_dot_y10 = y1.Dot(y10);
 				decimal y1_dot_y21 = y1.Dot(y21);
-				decimal l0 = (y21_dot_y21 * y1_dot_y10 - y10_dot_y21 * y1_dot_y21) / determinant;
-				decimal l1 = (y10_dot_y21 * y1_dot_y10 - y10_dot_y10 * y1_dot_y21) / determinant;
+				decimal l0 = decimal::from_raw_value(static_cast<fbase_t>(
+					(static_cast<fmedi_t>(y21_dot_y21.raw_value()) * y1_dot_y10.raw_value() - static_cast<fmedi_t>(y10_dot_y21.raw_value()) * y1_dot_y21.raw_value()) / std::get<0>(determinant)
+				));
+				decimal l1 = decimal::from_raw_value(static_cast<fbase_t>(
+					(static_cast<fmedi_t>(y10_dot_y21.raw_value()) * y1_dot_y10.raw_value() - std::get<0>(y10_dot_y10) * y1_dot_y21.raw_value()) / std::get<0>(determinant)
+				));
 				mLambda[0] = l0;
 				mLambda[1] = l1;
 				mLambdaRelativeTo0 = false;
