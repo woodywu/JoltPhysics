@@ -212,7 +212,6 @@ public:
 int main(int argc, char** argv)
 {
 	cout << "eplsion: " << FIX_EPSILON << endl;
-	cout << "eplsion * 2: " << FIX_EPSILON * 2 << endl;
 	cout << "fix min: " << FIX_MIN << endl;
 	cout << "fix max: " << FIX_MAX << endl;
 
@@ -345,7 +344,7 @@ int main(int argc, char** argv)
 		const int cIntegrationSubSteps = 1;
 
 		// Step the world
-		physics_system.Update(F(cDeltaTime), cCollisionSteps, cIntegrationSubSteps, &temp_allocator, &job_system);
+		physics_system.Update(decimal(cDeltaTime), cCollisionSteps, cIntegrationSubSteps, &temp_allocator, &job_system);
 	}
 
 	// Remove the sphere from the physics system. Note that the sphere itself keeps all of its state and can be re-added at any time.

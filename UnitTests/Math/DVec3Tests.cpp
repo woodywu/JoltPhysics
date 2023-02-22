@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "UnitTestFramework.h"
-#include <Jolt/Math/DVec3.h>
 
 TEST_SUITE("DVec3Tests")
 {
